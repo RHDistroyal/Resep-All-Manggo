@@ -6,6 +6,35 @@
 (function () {
   'use strict';
 
+  // Category mapping helper
+  const CATEGORY_MAP = {
+    'Olahan Simpel & Harian': 'simpel',
+    'Minuman Kekinian & Segar': 'minuman',
+    'Resep Daerah & Nusantara': 'nusantara',
+    'Hidangan Asia': 'asia',
+    'Hidangan Barat & Latin': 'barat',
+    'Pastry & Dessert Internasional': 'pastry',
+    'simpel': 'simpel',
+    'minuman': 'minuman',
+    'nusantara': 'nusantara',
+    'asia': 'asia',
+    'barat': 'barat',
+    'pastry': 'pastry'
+  };
+
+  function getCategoryKey(cat) {
+    if (!cat) return 'simpel';
+    if (CATEGORY_MAP[cat]) return CATEGORY_MAP[cat];
+    const lower = cat.toLowerCase();
+    if (lower.includes('simpel') || lower.includes('harian')) return 'simpel';
+    if (lower.includes('minum')) return 'minuman';
+    if (lower.includes('nusantara') || lower.includes('daerah')) return 'nusantara';
+    if (lower.includes('asia')) return 'asia';
+    if (lower.includes('barat') || lower.includes('latin') || lower.includes('meksiko')) return 'barat';
+    if (lower.includes('pastry') || lower.includes('bakery') || lower.includes('dessert')) return 'pastry';
+    return 'simpel';
+  }
+
   // State Management
   const state = {
     allRecipes: [],
@@ -121,6 +150,9 @@
     openMangoGuideBtn: document.getElementById('openMangoGuideBtn'),
     spotlightGuideBtn: document.getElementById('spotlightGuideBtn'),
     footerMangoGuideLink: document.getElementById('footerMangoGuideLink'),
+    footerRandomLink: document.getElementById('footerRandomLink'),
+    footerShoppingLink: document.getElementById('footerShoppingLink'),
+    footerFavoritesLink: document.getElementById('footerFavoritesLink'),
     randomRecipeBtn: document.getElementById('randomRecipeBtn'),
     heroRandomBtn: document.getElementById('heroRandomBtn'),
     exploreAllBtn: document.getElementById('exploreAllBtn'),
@@ -192,6 +224,11 @@
     toastContainer: document.getElementById('toastContainer')
   };
 
+  // Helper for safe event attachment
+  function on(el, evt, handler) {
+    if (el) el.addEventListener(evt, handler);
+  }
+
   // ===================================================================
   // INITIALIZATION
   // ===================================================================
@@ -205,12 +242,12 @@
 
   function applyTheme(theme) {
     state.theme = theme;
-    DOM.html.setAttribute('data-theme', theme);
+    if (DOM.html) DOM.html.setAttribute('data-theme', theme);
     localStorage.setItem('mango_theme', theme);
   }
 
   function loadRecipeData() {
-    if (window.MANGO_RECIPES && Array.isArray(window.MANGO_RECIPES)) {
+    if (window.MANGO_RECIPES && Array.isArray(window.MANGO_RECIPES) && window.MANGO_RECIPES.length > 0) {
       state.allRecipes = window.MANGO_RECIPES;
       finalizeLoadedRecipes();
     } else {
@@ -244,8 +281,9 @@
     };
 
     state.allRecipes.forEach(r => {
-      if (counts.hasOwnProperty(r.category)) {
-        counts[r.category]++;
+      const key = getCategoryKey(r.category);
+      if (counts.hasOwnProperty(key)) {
+        counts[key]++;
       }
     });
 
@@ -263,7 +301,7 @@
 
     // Category filter
     if (state.currentCategory !== 'all') {
-      result = result.filter(r => r.category === state.currentCategory);
+      result = result.filter(r => getCategoryKey(r.category) === state.currentCategory);
     }
 
     // Search Query
@@ -316,7 +354,6 @@
   }
 
   function updateFilterUI() {
-    // Heading
     const categoryNames = {
       all: 'Semua Resep Olahan Mangga',
       simpel: 'Olahan Simpel & Harian (Praktis)',
@@ -326,25 +363,31 @@
       barat: 'Hidangan Barat, Meksiko & Karibia',
       pastry: 'Pastry, Bakery & Dessert Mewah'
     };
-    DOM.activeCategoryHeading.textContent = categoryNames[state.currentCategory] || 'Koleksi Resep Mangga';
-    DOM.resultsCountText.textContent = `Menampilkan ${state.filteredRecipes.length} dari ${state.allRecipes.length} resep`;
+    if (DOM.activeCategoryHeading) {
+      DOM.activeCategoryHeading.textContent = categoryNames[state.currentCategory] || 'Koleksi Resep Mangga';
+    }
+    if (DOM.resultsCountText) {
+      DOM.resultsCountText.textContent = `Menampilkan ${state.filteredRecipes.length} dari ${state.allRecipes.length} resep`;
+    }
 
     // Clear search buttons
     const hasSearch = state.searchQuery.trim().length > 0;
-    DOM.clearSearchBtn.style.display = hasSearch ? 'flex' : 'none';
-    DOM.mobileClearSearchBtn.style.display = hasSearch ? 'flex' : 'none';
+    if (DOM.clearSearchBtn) DOM.clearSearchBtn.style.display = hasSearch ? 'flex' : 'none';
+    if (DOM.mobileClearSearchBtn) DOM.mobileClearSearchBtn.style.display = hasSearch ? 'flex' : 'none';
 
     // Reset button visibility
     const isFiltered = state.currentCategory !== 'all' || hasSearch || state.difficultyFilter !== 'all' || state.timeFilter !== 'all' || state.sortBy !== 'default';
-    DOM.resetFiltersBtn.style.display = isFiltered ? 'inline-block' : 'none';
+    if (DOM.resetFiltersBtn) DOM.resetFiltersBtn.style.display = isFiltered ? 'inline-block' : 'none';
   }
 
   // Global helper for footer links
   window.filterByCategory = function (category) {
     state.currentCategory = category;
-    DOM.categoryPills.forEach(pill => {
-      pill.classList.toggle('active', pill.getAttribute('data-category') === category);
-    });
+    if (DOM.categoryPills) {
+      DOM.categoryPills.forEach(pill => {
+        pill.classList.toggle('active', pill.getAttribute('data-category') === category);
+      });
+    }
     applyFilters();
   };
 
@@ -352,15 +395,16 @@
   // RECIPE GRID RENDERING
   // ===================================================================
   function renderRecipeGrid() {
+    if (!DOM.recipeGrid) return;
     DOM.recipeGrid.innerHTML = '';
 
     if (state.filteredRecipes.length === 0) {
-      DOM.emptyState.style.display = 'block';
-      DOM.loadMoreContainer.style.display = 'none';
+      if (DOM.emptyState) DOM.emptyState.style.display = 'block';
+      if (DOM.loadMoreContainer) DOM.loadMoreContainer.style.display = 'none';
       return;
     }
 
-    DOM.emptyState.style.display = 'none';
+    if (DOM.emptyState) DOM.emptyState.style.display = 'none';
 
     const slice = state.filteredRecipes.slice(0, state.displayedCount);
 
@@ -373,11 +417,15 @@
     DOM.recipeGrid.appendChild(fragment);
 
     // Show or hide Load More
-    if (state.displayedCount < state.filteredRecipes.length) {
-      DOM.loadMoreContainer.style.display = 'flex';
-      DOM.loadMoreBtn.innerHTML = `<span>Tampilkan Lebih Banyak (${state.filteredRecipes.length - state.displayedCount} tersisa)</span>`;
-    } else {
-      DOM.loadMoreContainer.style.display = 'none';
+    if (DOM.loadMoreContainer) {
+      if (state.displayedCount < state.filteredRecipes.length) {
+        DOM.loadMoreContainer.style.display = 'flex';
+        if (DOM.loadMoreBtn) {
+          DOM.loadMoreBtn.innerHTML = `<span>Tampilkan Lebih Banyak (${state.filteredRecipes.length - state.displayedCount} tersisa)</span>`;
+        }
+      } else {
+        DOM.loadMoreContainer.style.display = 'none';
+      }
     }
   }
 
@@ -390,20 +438,21 @@
     const totalTime = (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0);
 
     const categoryLabels = {
-      simpel: 'Simpel',
-      minuman: 'Minuman',
+      simpel: 'Simpel & Harian',
+      minuman: 'Minuman Segar',
       nusantara: 'Nusantara',
-      asia: 'Asia',
-      barat: 'Barat',
-      pastry: 'Pastry'
+      asia: 'Kuliner Asia',
+      barat: 'Barat & Latin',
+      pastry: 'Pastry & Dessert'
     };
 
+    const catKey = getCategoryKey(recipe.category);
     const diffIcon = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Ahli');
 
     card.innerHTML = `
       <div class="card-banner">
         <div class="card-decor-circle"></div>
-        <span class="card-cat-badge">${categoryLabels[recipe.category] || recipe.category}</span>
+        <span class="card-cat-badge">${categoryLabels[catKey] || recipe.category}</span>
         <button type="button" class="card-fav-btn ${isFav ? 'is-favorite' : ''}" data-id="${recipe.id}" aria-label="Simpan Favorit" title="${isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}">
           ${isFav ? '❤️' : '🤍'}
         </button>
@@ -431,7 +480,6 @@
 
     // Click handler for card
     card.addEventListener('click', (e) => {
-      // If clicked the favorite button specifically
       if (e.target.closest('.card-fav-btn')) {
         e.stopPropagation();
         toggleFavorite(recipe.id);
@@ -465,67 +513,72 @@
       pastry: 'Pastry & Dessert Mewah'
     };
 
-    // Header & Meta
-    DOM.modalCategoryBadge.textContent = categoryTitles[recipe.category] || recipe.category;
-    DOM.modalDifficulty.textContent = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Tingkat Ahli');
-    DOM.modalHeroIcon.textContent = recipe.emoji || '🥭';
-    DOM.modalRecipeTitle.textContent = recipe.name;
-    DOM.modalSummary.textContent = recipe.summary;
+    const catKey = getCategoryKey(recipe.category);
 
-    DOM.modalPrepTime.textContent = `${recipe.prepTimeMinutes} mnt`;
-    DOM.modalCookTime.textContent = `${recipe.cookTimeMinutes} mnt`;
-    DOM.modalCalories.textContent = `${recipe.calories} kkal`;
-    DOM.modalMangoType.textContent = recipe.mangoType || 'Harum Manis';
+    if (DOM.modalCategoryBadge) DOM.modalCategoryBadge.textContent = categoryTitles[catKey] || recipe.category;
+    if (DOM.modalDifficulty) DOM.modalDifficulty.textContent = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Tingkat Ahli');
+    if (DOM.modalHeroIcon) DOM.modalHeroIcon.textContent = recipe.emoji || '🥭';
+    if (DOM.modalRecipeTitle) DOM.modalRecipeTitle.textContent = recipe.name;
+    if (DOM.modalSummary) DOM.modalSummary.textContent = recipe.summary;
+
+    if (DOM.modalPrepTime) DOM.modalPrepTime.textContent = `${recipe.prepTimeMinutes} mnt`;
+    if (DOM.modalCookTime) DOM.modalCookTime.textContent = `${recipe.cookTimeMinutes} mnt`;
+    if (DOM.modalCalories) DOM.modalCalories.textContent = `${recipe.calories} kkal`;
+    if (DOM.modalMangoType) DOM.modalMangoType.textContent = recipe.mangoType || 'Harum Manis';
 
     // Scaler Buttons reset
-    DOM.scalerBtns.forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-multiplier') === '1');
-    });
+    if (DOM.scalerBtns) {
+      DOM.scalerBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-multiplier') === '1');
+      });
+    }
 
     renderModalIngredients();
     renderModalSteps();
 
     // Chef tips & Tags
-    DOM.modalChefTipsText.textContent = recipe.chefTips || 'Pilih mangga berkualitas terbaik untuk kenikmatan maksimal.';
+    if (DOM.modalChefTipsText) DOM.modalChefTipsText.textContent = recipe.chefTips || 'Pilih mangga berkualitas terbaik untuk kenikmatan maksimal.';
     
-    DOM.modalTagsContainer.innerHTML = '';
-    if (recipe.tags && Array.isArray(recipe.tags)) {
-      recipe.tags.forEach(tag => {
-        const tagSpan = document.createElement('span');
-        tagSpan.className = 'tag-pill';
-        tagSpan.textContent = `#${tag}`;
-        DOM.modalTagsContainer.appendChild(tagSpan);
-      });
+    if (DOM.modalTagsContainer) {
+      DOM.modalTagsContainer.innerHTML = '';
+      if (recipe.tags && Array.isArray(recipe.tags)) {
+        recipe.tags.forEach(tag => {
+          const tagSpan = document.createElement('span');
+          tagSpan.className = 'tag-pill';
+          tagSpan.textContent = `#${tag}`;
+          DOM.modalTagsContainer.appendChild(tagSpan);
+        });
+      }
     }
 
-    // Favorite button inside modal
     updateModalFavoriteBtnState();
-
-    // Reset Timer display
     resetKitchenTimer();
 
-    // Open Modal Overlay
-    DOM.recipeModalOverlay.classList.add('is-open');
-    DOM.recipeModalOverlay.setAttribute('aria-hidden', 'false');
+    if (DOM.recipeModalOverlay) {
+      DOM.recipeModalOverlay.classList.add('is-open');
+      DOM.recipeModalOverlay.setAttribute('aria-hidden', 'false');
+    }
     document.body.style.overflow = 'hidden';
   }
 
   function closeRecipeModal() {
-    DOM.recipeModalOverlay.classList.remove('is-open');
-    DOM.recipeModalOverlay.setAttribute('aria-hidden', 'true');
+    if (DOM.recipeModalOverlay) {
+      DOM.recipeModalOverlay.classList.remove('is-open');
+      DOM.recipeModalOverlay.setAttribute('aria-hidden', 'true');
+    }
     document.body.style.overflow = '';
     state.currentRecipe = null;
     resetKitchenTimer();
   }
 
   function renderModalIngredients() {
-    if (!state.currentRecipe) return;
+    if (!state.currentRecipe || !DOM.modalIngredientsList) return;
 
     const recipe = state.currentRecipe;
     const mult = state.portionMultiplier;
     const baseServings = recipe.servings || 2;
     const scaledServings = Math.round(baseServings * mult);
-    DOM.modalServingsDisplay.textContent = `(${scaledServings} Porsi)`;
+    if (DOM.modalServingsDisplay) DOM.modalServingsDisplay.textContent = `(${scaledServings} Porsi)`;
 
     DOM.modalIngredientsList.innerHTML = '';
 
@@ -571,7 +624,7 @@
   }
 
   function renderModalSteps() {
-    if (!state.currentRecipe) return;
+    if (!state.currentRecipe || !DOM.modalStepsList) return;
 
     const steps = state.currentRecipe.steps || [];
     DOM.modalStepsList.innerHTML = '';
@@ -613,7 +666,7 @@
   }
 
   function updateModalFavoriteBtnState() {
-    if (!state.currentRecipe) return;
+    if (!state.currentRecipe || !DOM.modalFavoriteBtn) return;
     const isFav = state.favorites.includes(state.currentRecipe.id);
     DOM.modalFavoriteBtn.classList.toggle('is-active', isFav);
     DOM.modalFavoriteBtn.querySelector('.util-icon').textContent = isFav ? '❤️' : '⭐';
@@ -625,24 +678,25 @@
   // ===================================================================
   function startKitchenTimer() {
     if (state.timer.remainingSeconds <= 0) {
-      // Default to recipe cook time or 5 minutes
       const cookTime = state.currentRecipe ? (state.currentRecipe.cookTimeMinutes || 5) : 5;
       state.timer.remainingSeconds = cookTime * 60;
     }
 
     if (state.timer.isRunning) {
-      // Pause
       clearInterval(state.timer.interval);
       state.timer.isRunning = false;
-      DOM.timerStartBtn.textContent = 'Lanjutkan';
-      DOM.timerStartBtn.classList.remove('btn-secondary');
-      DOM.timerStartBtn.classList.add('btn-primary');
+      if (DOM.timerStartBtn) {
+        DOM.timerStartBtn.textContent = 'Lanjutkan';
+        DOM.timerStartBtn.classList.remove('btn-secondary');
+        DOM.timerStartBtn.classList.add('btn-primary');
+      }
     } else {
-      // Start
       state.timer.isRunning = true;
-      DOM.timerStartBtn.textContent = 'Jeda';
-      DOM.timerStartBtn.classList.remove('btn-primary');
-      DOM.timerStartBtn.classList.add('btn-secondary');
+      if (DOM.timerStartBtn) {
+        DOM.timerStartBtn.textContent = 'Jeda';
+        DOM.timerStartBtn.classList.remove('btn-primary');
+        DOM.timerStartBtn.classList.add('btn-secondary');
+      }
 
       state.timer.interval = setInterval(() => {
         if (state.timer.remainingSeconds > 0) {
@@ -651,7 +705,7 @@
         } else {
           clearInterval(state.timer.interval);
           state.timer.isRunning = false;
-          DOM.timerStartBtn.textContent = 'Mulai';
+          if (DOM.timerStartBtn) DOM.timerStartBtn.textContent = 'Mulai';
           playChimeSound();
           showToast('⏰ Waktu memasak telah selesai!');
         }
@@ -664,13 +718,16 @@
     clearInterval(state.timer.interval);
     state.timer.isRunning = false;
     state.timer.remainingSeconds = 0;
-    DOM.timerStartBtn.textContent = 'Mulai';
-    DOM.timerStartBtn.classList.remove('btn-secondary');
-    DOM.timerStartBtn.classList.add('btn-primary');
+    if (DOM.timerStartBtn) {
+      DOM.timerStartBtn.textContent = 'Mulai';
+      DOM.timerStartBtn.classList.remove('btn-secondary');
+      DOM.timerStartBtn.classList.add('btn-primary');
+    }
     updateTimerDisplay();
   }
 
   function updateTimerDisplay() {
+    if (!DOM.timerDisplay) return;
     const mins = Math.floor(state.timer.remainingSeconds / 60);
     const secs = state.timer.remainingSeconds % 60;
     DOM.timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
@@ -700,7 +757,7 @@
       playTone(739.99, now + 0.2, 0.4); // F#5
       playTone(880.00, now + 0.4, 0.8); // A5
     } catch (e) {
-      console.warn('Web Audio not supported or blocked:', e);
+      console.warn('Web Audio note blocked:', e);
     }
   }
 
@@ -722,15 +779,16 @@
 
   function updateBadges() {
     const favCount = state.favorites.length;
-    DOM.favoritesCountBadge.textContent = favCount;
-    DOM.mobFavBadge.textContent = favCount;
+    if (DOM.favoritesCountBadge) DOM.favoritesCountBadge.textContent = favCount;
+    if (DOM.mobFavBadge) DOM.mobFavBadge.textContent = favCount;
 
     const shopCount = state.shoppingList.length;
-    DOM.shoppingCountBadge.textContent = shopCount;
-    DOM.mobShopBadge.textContent = shopCount;
+    if (DOM.shoppingCountBadge) DOM.shoppingCountBadge.textContent = shopCount;
+    if (DOM.mobShopBadge) DOM.mobShopBadge.textContent = shopCount;
   }
 
   function openFavoritesModal() {
+    if (!DOM.favoritesListContainer) return;
     DOM.favoritesListContainer.innerHTML = '';
 
     if (state.favorites.length === 0) {
@@ -766,8 +824,8 @@
           if (e.target.closest('.shopping-delete-btn')) {
             e.stopPropagation();
             toggleFavorite(recipe.id);
-            openFavoritesModal(); // refresh
-            renderRecipeGrid(); // update card
+            openFavoritesModal();
+            renderRecipeGrid();
             return;
           }
           closeFavoritesModal();
@@ -780,14 +838,18 @@
       DOM.favoritesListContainer.appendChild(grid);
     }
 
-    DOM.favoritesModalOverlay.classList.add('is-open');
-    DOM.favoritesModalOverlay.setAttribute('aria-hidden', 'false');
+    if (DOM.favoritesModalOverlay) {
+      DOM.favoritesModalOverlay.classList.add('is-open');
+      DOM.favoritesModalOverlay.setAttribute('aria-hidden', 'false');
+    }
     document.body.style.overflow = 'hidden';
   }
 
   function closeFavoritesModal() {
-    DOM.favoritesModalOverlay.classList.remove('is-open');
-    DOM.favoritesModalOverlay.setAttribute('aria-hidden', 'true');
+    if (DOM.favoritesModalOverlay) {
+      DOM.favoritesModalOverlay.classList.remove('is-open');
+      DOM.favoritesModalOverlay.setAttribute('aria-hidden', 'true');
+    }
     document.body.style.overflow = '';
   }
 
@@ -812,7 +874,6 @@
 
       const itemText = `${scaledAmount} ${ing.name} (untuk ${state.currentRecipe.name})`.trim();
       
-      // Avoid exact duplicates
       if (!state.shoppingList.some(item => item.text === itemText)) {
         state.shoppingList.push({
           id: 'shop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
@@ -829,6 +890,7 @@
   }
 
   function openShoppingListModal() {
+    if (!DOM.shoppingItemsList) return;
     DOM.shoppingItemsList.innerHTML = '';
 
     if (state.shoppingList.length === 0) {
@@ -868,14 +930,18 @@
       });
     }
 
-    DOM.shoppingModalOverlay.classList.add('is-open');
-    DOM.shoppingModalOverlay.setAttribute('aria-hidden', 'false');
+    if (DOM.shoppingModalOverlay) {
+      DOM.shoppingModalOverlay.classList.add('is-open');
+      DOM.shoppingModalOverlay.setAttribute('aria-hidden', 'false');
+    }
     document.body.style.overflow = 'hidden';
   }
 
   function closeShoppingListModal() {
-    DOM.shoppingModalOverlay.classList.remove('is-open');
-    DOM.shoppingModalOverlay.setAttribute('aria-hidden', 'true');
+    if (DOM.shoppingModalOverlay) {
+      DOM.shoppingModalOverlay.classList.remove('is-open');
+      DOM.shoppingModalOverlay.setAttribute('aria-hidden', 'true');
+    }
     document.body.style.overflow = '';
   }
 
@@ -909,6 +975,7 @@
   // KAMUS MANGGA GUIDE MODAL
   // ===================================================================
   function populateMangoGuide() {
+    if (!DOM.mangoVarietiesGrid) return;
     DOM.mangoVarietiesGrid.innerHTML = '';
     MANGO_VARIETIES.forEach(v => {
       const card = document.createElement('div');
@@ -927,14 +994,18 @@
   }
 
   function openMangoGuideModal() {
-    DOM.mangoGuideModalOverlay.classList.add('is-open');
-    DOM.mangoGuideModalOverlay.setAttribute('aria-hidden', 'false');
+    if (DOM.mangoGuideModalOverlay) {
+      DOM.mangoGuideModalOverlay.classList.add('is-open');
+      DOM.mangoGuideModalOverlay.setAttribute('aria-hidden', 'false');
+    }
     document.body.style.overflow = 'hidden';
   }
 
   function closeMangoGuideModal() {
-    DOM.mangoGuideModalOverlay.classList.remove('is-open');
-    DOM.mangoGuideModalOverlay.setAttribute('aria-hidden', 'true');
+    if (DOM.mangoGuideModalOverlay) {
+      DOM.mangoGuideModalOverlay.classList.remove('is-open');
+      DOM.mangoGuideModalOverlay.setAttribute('aria-hidden', 'true');
+    }
     document.body.style.overflow = '';
   }
 
@@ -944,23 +1015,27 @@
   let randomPickedRecipe = null;
 
   function openRandomRecipeModal() {
-    DOM.randomRecipeModalOverlay.classList.add('is-open');
-    DOM.randomRecipeModalOverlay.setAttribute('aria-hidden', 'false');
+    if (DOM.randomRecipeModalOverlay) {
+      DOM.randomRecipeModalOverlay.classList.add('is-open');
+      DOM.randomRecipeModalOverlay.setAttribute('aria-hidden', 'false');
+    }
     document.body.style.overflow = 'hidden';
     rollRandomRecipe();
   }
 
   function closeRandomRecipeModal() {
-    DOM.randomRecipeModalOverlay.classList.remove('is-open');
-    DOM.randomRecipeModalOverlay.setAttribute('aria-hidden', 'true');
+    if (DOM.randomRecipeModalOverlay) {
+      DOM.randomRecipeModalOverlay.classList.remove('is-open');
+      DOM.randomRecipeModalOverlay.setAttribute('aria-hidden', 'true');
+    }
     document.body.style.overflow = '';
   }
 
   function rollRandomRecipe() {
-    DOM.randomDiceIcon.style.animation = 'roll 0.25s infinite alternate';
-    DOM.randomResultTitle.textContent = 'Mengacak Resep...';
-    DOM.randomResultDesc.textContent = 'Mencari resep mangga paling pas untuk selera Anda hari ini...';
-    DOM.openRandomRecipeDetailBtn.disabled = true;
+    if (DOM.randomDiceIcon) DOM.randomDiceIcon.style.animation = 'roll 0.25s infinite alternate';
+    if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = 'Mengacak Resep...';
+    if (DOM.randomResultDesc) DOM.randomResultDesc.textContent = 'Mencari resep mangga paling pas untuk selera Anda hari ini...';
+    if (DOM.openRandomRecipeDetailBtn) DOM.openRandomRecipeDetailBtn.disabled = true;
 
     setTimeout(() => {
       const pool = state.allRecipes.length > 0 ? state.allRecipes : window.MANGO_RECIPES || [];
@@ -969,11 +1044,13 @@
       const randomIdx = Math.floor(Math.random() * pool.length);
       randomPickedRecipe = pool[randomIdx];
 
-      DOM.randomDiceIcon.textContent = randomPickedRecipe.emoji || '🥭';
-      DOM.randomDiceIcon.style.animation = 'none';
-      DOM.randomResultTitle.textContent = randomPickedRecipe.name;
-      DOM.randomResultDesc.textContent = randomPickedRecipe.summary;
-      DOM.openRandomRecipeDetailBtn.disabled = false;
+      if (DOM.randomDiceIcon) {
+        DOM.randomDiceIcon.textContent = randomPickedRecipe.emoji || '🥭';
+        DOM.randomDiceIcon.style.animation = 'none';
+      }
+      if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = randomPickedRecipe.name;
+      if (DOM.randomResultDesc) DOM.randomResultDesc.textContent = randomPickedRecipe.summary;
+      if (DOM.openRandomRecipeDetailBtn) DOM.openRandomRecipeDetailBtn.disabled = false;
     }, 600);
   }
 
@@ -981,6 +1058,7 @@
   // TOAST NOTIFICATIONS & SHARE
   // ===================================================================
   function showToast(message) {
+    if (!DOM.toastContainer) return;
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `<span>${message}</span>`;
@@ -1026,7 +1104,7 @@
   // ===================================================================
   function setupEventListeners() {
     // Theme Switcher
-    DOM.themeToggleBtn.addEventListener('click', () => {
+    on(DOM.themeToggleBtn, 'click', () => {
       const nextTheme = state.theme === 'light' ? 'dark' : 'light';
       applyTheme(nextTheme);
       showToast(`Mode ${nextTheme === 'light' ? 'Terang ☀️' : 'Gelap 🌙'} diaktifkan`);
@@ -1042,53 +1120,59 @@
       }, 150);
     };
 
-    DOM.searchInput.addEventListener('input', (e) => {
-      DOM.mobileSearchInput.value = e.target.value;
-      handleSearch(e.target.value);
-    });
+    if (DOM.searchInput) {
+      DOM.searchInput.addEventListener('input', (e) => {
+        if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = e.target.value;
+        handleSearch(e.target.value);
+      });
+    }
 
-    DOM.mobileSearchInput.addEventListener('input', (e) => {
-      DOM.searchInput.value = e.target.value;
-      handleSearch(e.target.value);
-    });
+    if (DOM.mobileSearchInput) {
+      DOM.mobileSearchInput.addEventListener('input', (e) => {
+        if (DOM.searchInput) DOM.searchInput.value = e.target.value;
+        handleSearch(e.target.value);
+      });
+    }
 
     // Clear Search Buttons
-    DOM.clearSearchBtn.addEventListener('click', () => {
-      DOM.searchInput.value = '';
-      DOM.mobileSearchInput.value = '';
+    on(DOM.clearSearchBtn, 'click', () => {
+      if (DOM.searchInput) DOM.searchInput.value = '';
+      if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = '';
       state.searchQuery = '';
       applyFilters();
     });
 
-    DOM.mobileClearSearchBtn.addEventListener('click', () => {
-      DOM.searchInput.value = '';
-      DOM.mobileSearchInput.value = '';
+    on(DOM.mobileClearSearchBtn, 'click', () => {
+      if (DOM.searchInput) DOM.searchInput.value = '';
+      if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = '';
       state.searchQuery = '';
       applyFilters();
     });
 
     // Category Nav Pills
-    DOM.categoryPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        DOM.categoryPills.forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        state.currentCategory = pill.getAttribute('data-category');
-        applyFilters();
+    if (DOM.categoryPills) {
+      DOM.categoryPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          DOM.categoryPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.currentCategory = pill.getAttribute('data-category');
+          applyFilters();
+        });
       });
-    });
+    }
 
     // Difficulty & Time Filters & Sort
-    DOM.difficultyFilter.addEventListener('change', (e) => {
+    on(DOM.difficultyFilter, 'change', (e) => {
       state.difficultyFilter = e.target.value;
       applyFilters();
     });
 
-    DOM.timeFilter.addEventListener('change', (e) => {
+    on(DOM.timeFilter, 'change', (e) => {
       state.timeFilter = e.target.value;
       applyFilters();
     });
 
-    DOM.sortSelect.addEventListener('change', (e) => {
+    on(DOM.sortSelect, 'change', (e) => {
       state.sortBy = e.target.value;
       applyFilters();
     });
@@ -1101,109 +1185,116 @@
       state.timeFilter = 'all';
       state.sortBy = 'default';
 
-      DOM.searchInput.value = '';
-      DOM.mobileSearchInput.value = '';
-      DOM.difficultyFilter.value = 'all';
-      DOM.timeFilter.value = 'all';
-      DOM.sortSelect.value = 'default';
+      if (DOM.searchInput) DOM.searchInput.value = '';
+      if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = '';
+      if (DOM.difficultyFilter) DOM.difficultyFilter.value = 'all';
+      if (DOM.timeFilter) DOM.timeFilter.value = 'all';
+      if (DOM.sortSelect) DOM.sortSelect.value = 'default';
 
-      DOM.categoryPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-category') === 'all'));
+      if (DOM.categoryPills) {
+        DOM.categoryPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-category') === 'all'));
+      }
       applyFilters();
     };
 
-    DOM.resetFiltersBtn.addEventListener('click', resetAllFilters);
-    DOM.emptyResetBtn.addEventListener('click', resetAllFilters);
+    on(DOM.resetFiltersBtn, 'click', resetAllFilters);
+    on(DOM.emptyResetBtn, 'click', resetAllFilters);
 
     // Load More
-    DOM.loadMoreBtn.addEventListener('click', () => {
+    on(DOM.loadMoreBtn, 'click', () => {
       state.displayedCount += 24;
       renderRecipeGrid();
     });
 
     // CTA & Header Buttons
-    DOM.exploreAllBtn.addEventListener('click', () => {
-      document.getElementById('kategori').scrollIntoView({ behavior: 'smooth' });
+    on(DOM.exploreAllBtn, 'click', () => {
+      const catEl = document.getElementById('kategori');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
     });
 
-    DOM.heroRandomBtn.addEventListener('click', openRandomRecipeModal);
-    DOM.randomRecipeBtn.addEventListener('click', openRandomRecipeModal);
+    on(DOM.heroRandomBtn, 'click', openRandomRecipeModal);
+    on(DOM.randomRecipeBtn, 'click', openRandomRecipeModal);
 
-    DOM.openFavoritesBtn.addEventListener('click', openFavoritesModal);
-    DOM.openShoppingListBtn.addEventListener('click', openShoppingListModal);
+    on(DOM.openFavoritesBtn, 'click', openFavoritesModal);
+    on(DOM.openShoppingListBtn, 'click', openShoppingListModal);
 
-    DOM.openMangoGuideBtn.addEventListener('click', openMangoGuideModal);
-    DOM.spotlightGuideBtn.addEventListener('click', openMangoGuideModal);
-    DOM.footerMangoGuideLink.addEventListener('click', (e) => { e.preventDefault(); openMangoGuideModal(); });
-    DOM.footerRandomLink.addEventListener('click', (e) => { e.preventDefault(); openRandomRecipeModal(); });
-    DOM.footerShoppingLink.addEventListener('click', (e) => { e.preventDefault(); openShoppingListModal(); });
-    DOM.footerFavoritesLink.addEventListener('click', (e) => { e.preventDefault(); openFavoritesModal(); });
+    on(DOM.openMangoGuideBtn, 'click', openMangoGuideModal);
+    on(DOM.spotlightGuideBtn, 'click', openMangoGuideModal);
+    on(DOM.footerMangoGuideLink, 'click', (e) => { e.preventDefault(); openMangoGuideModal(); });
+    on(DOM.footerRandomLink, 'click', (e) => { e.preventDefault(); openRandomRecipeModal(); });
+    on(DOM.footerShoppingLink, 'click', (e) => { e.preventDefault(); openShoppingListModal(); });
+    on(DOM.footerFavoritesLink, 'click', (e) => { e.preventDefault(); openFavoritesModal(); });
 
     // Recipe Detail Modal Events
-    DOM.modalCloseBtn.addEventListener('click', closeRecipeModal);
-    DOM.recipeModalOverlay.addEventListener('click', (e) => {
+    on(DOM.modalCloseBtn, 'click', closeRecipeModal);
+    on(DOM.recipeModalOverlay, 'click', (e) => {
       if (e.target === DOM.recipeModalOverlay) closeRecipeModal();
     });
 
     // Scaler Buttons
-    DOM.scalerBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        DOM.scalerBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.portionMultiplier = parseFloat(btn.getAttribute('data-multiplier'));
-        renderModalIngredients();
+    if (DOM.scalerBtns) {
+      DOM.scalerBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          DOM.scalerBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.portionMultiplier = parseFloat(btn.getAttribute('data-multiplier'));
+          renderModalIngredients();
+        });
       });
-    });
+    }
 
     // Modal Action Buttons
-    DOM.modalFavoriteBtn.addEventListener('click', () => {
+    on(DOM.modalFavoriteBtn, 'click', () => {
       if (!state.currentRecipe) return;
       toggleFavorite(state.currentRecipe.id);
       updateModalFavoriteBtnState();
       renderRecipeGrid();
     });
 
-    DOM.modalAddShoppingBtn.addEventListener('click', addCurrentRecipeToShoppingList);
-    DOM.modalShareBtn.addEventListener('click', shareRecipe);
-    DOM.modalPrintBtn.addEventListener('click', () => window.print());
+    on(DOM.modalAddShoppingBtn, 'click', addCurrentRecipeToShoppingList);
+    on(DOM.modalShareBtn, 'click', shareRecipe);
+    on(DOM.modalPrintBtn, 'click', () => window.print());
 
     // Timer Widget Events
-    DOM.timerStartBtn.addEventListener('click', startKitchenTimer);
-    DOM.timerResetBtn.addEventListener('click', resetKitchenTimer);
-    DOM.timerPresetBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const sec = parseInt(btn.getAttribute('data-sec'), 10);
-        state.timer.remainingSeconds += sec;
-        updateTimerDisplay();
+    on(DOM.timerStartBtn, 'click', startKitchenTimer);
+    on(DOM.timerResetBtn, 'click', resetKitchenTimer);
+    if (DOM.timerPresetBtns) {
+      DOM.timerPresetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sec = parseInt(btn.getAttribute('data-sec'), 10);
+          state.timer.remainingSeconds += sec;
+          updateTimerDisplay();
+        });
       });
-    });
+    }
 
     // Favorites Drawer Events
-    DOM.closeFavoritesModalBtn.addEventListener('click', closeFavoritesModal);
-    DOM.favoritesModalOverlay.addEventListener('click', (e) => {
+    on(DOM.closeFavoritesModalBtn, 'click', closeFavoritesModal);
+    on(DOM.favoritesModalOverlay, 'click', (e) => {
       if (e.target === DOM.favoritesModalOverlay) closeFavoritesModal();
     });
 
     // Shopping List Drawer Events
-    DOM.closeShoppingModalBtn.addEventListener('click', closeShoppingListModal);
-    DOM.shoppingModalOverlay.addEventListener('click', (e) => {
+    on(DOM.closeShoppingModalBtn, 'click', closeShoppingListModal);
+    on(DOM.shoppingModalOverlay, 'click', (e) => {
       if (e.target === DOM.shoppingModalOverlay) closeShoppingListModal();
     });
-    DOM.shareShoppingWhatsappBtn.addEventListener('click', shareShoppingViaWhatsApp);
-    DOM.clearShoppingListBtn.addEventListener('click', clearShoppingList);
+    on(DOM.shareShoppingWhatsappBtn, 'click', shareShoppingViaWhatsApp);
+    on(DOM.clearShoppingListBtn, 'click', clearShoppingList);
 
     // Kamus Mangga Modal Events
-    DOM.closeMangoGuideModalBtn.addEventListener('click', closeMangoGuideModal);
-    DOM.mangoGuideModalOverlay.addEventListener('click', (e) => {
+    on(DOM.closeMangoGuideModalBtn, 'click', closeMangoGuideModal);
+    on(DOM.mangoGuideModalOverlay, 'click', (e) => {
       if (e.target === DOM.mangoGuideModalOverlay) closeMangoGuideModal();
     });
 
     // Random Modal Events
-    DOM.closeRandomModalBtn.addEventListener('click', closeRandomRecipeModal);
-    DOM.randomRecipeModalOverlay.addEventListener('click', (e) => {
+    on(DOM.closeRandomModalBtn, 'click', closeRandomRecipeModal);
+    on(DOM.randomRecipeModalOverlay, 'click', (e) => {
       if (e.target === DOM.randomRecipeModalOverlay) closeRandomRecipeModal();
     });
-    DOM.rollAgainBtn.addEventListener('click', rollRandomRecipe);
-    DOM.openRandomRecipeDetailBtn.addEventListener('click', () => {
+    on(DOM.rollAgainBtn, 'click', rollRandomRecipe);
+    on(DOM.openRandomRecipeDetailBtn, 'click', () => {
       if (randomPickedRecipe) {
         closeRandomRecipeModal();
         openRecipeModal(randomPickedRecipe);
@@ -1211,17 +1302,18 @@
     });
 
     // Mobile Bottom Navigation Bar Events
-    DOM.mobNavHome.addEventListener('click', (e) => {
+    on(DOM.mobNavHome, 'click', (e) => {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    DOM.mobNavCat.addEventListener('click', (e) => {
+    on(DOM.mobNavCat, 'click', (e) => {
       e.preventDefault();
-      document.getElementById('kategori').scrollIntoView({ behavior: 'smooth' });
+      const catEl = document.getElementById('kategori');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
     });
-    DOM.mobNavRandom.addEventListener('click', openRandomRecipeModal);
-    DOM.mobNavFav.addEventListener('click', openFavoritesModal);
-    DOM.mobNavShop.addEventListener('click', openShoppingListModal);
+    on(DOM.mobNavRandom, 'click', openRandomRecipeModal);
+    on(DOM.mobNavFav, 'click', openFavoritesModal);
+    on(DOM.mobNavShop, 'click', openShoppingListModal);
 
     // Keyboard Shortcuts (Escape to close modals)
     document.addEventListener('keydown', (e) => {
