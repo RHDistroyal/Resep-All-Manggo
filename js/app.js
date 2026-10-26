@@ -35,6 +35,33 @@
     return 'simpel';
   }
 
+  function normalizeRecipe(r) {
+    const catKey = r.categoryKey || getCategoryKey(r.category);
+    return {
+      id: r.id,
+      title: r.title || r.name || 'Resep Mangga',
+      name: r.title || r.name || 'Resep Mangga',
+      desc: r.desc || r.summary || '',
+      summary: r.desc || r.summary || '',
+      category: r.category || 'Olahan Simpel & Harian',
+      categoryKey: catKey,
+      icon: r.icon || r.emoji || '🥭',
+      emoji: r.icon || r.emoji || '🥭',
+      prepTime: r.prepTime || '10 menit',
+      cookTime: r.cookTime || '15 menit',
+      totalMinutes: typeof r.totalMinutes === 'number' ? r.totalMinutes : 15,
+      servings: r.servings || 2,
+      difficulty: r.difficulty || 'Mudah',
+      calories: r.calories || '150 kkal',
+      mangoType: r.mangoType || 'Harum Manis',
+      tips: r.tips || r.chefTips || 'Pilih mangga matang pohon berkualitas untuk cita rasa terbaik.',
+      chefTips: r.tips || r.chefTips || 'Pilih mangga matang pohon berkualitas untuk cita rasa terbaik.',
+      tags: Array.isArray(r.tags) ? r.tags : [],
+      ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
+      steps: Array.isArray(r.steps) ? r.steps : []
+    };
+  }
+
   // State Management
   const state = {
     allRecipes: [],
@@ -224,7 +251,6 @@
     toastContainer: document.getElementById('toastContainer')
   };
 
-  // Helper for safe event attachment
   function on(el, evt, handler) {
     if (el) el.addEventListener(evt, handler);
   }
@@ -248,13 +274,13 @@
 
   function loadRecipeData() {
     if (window.MANGO_RECIPES && Array.isArray(window.MANGO_RECIPES) && window.MANGO_RECIPES.length > 0) {
-      state.allRecipes = window.MANGO_RECIPES;
+      state.allRecipes = window.MANGO_RECIPES.map(normalizeRecipe);
       finalizeLoadedRecipes();
     } else {
       fetch('data/recipes.json')
         .then(res => res.json())
         .then(data => {
-          state.allRecipes = data;
+          state.allRecipes = data.map(normalizeRecipe);
           finalizeLoadedRecipes();
         })
         .catch(err => {
@@ -281,7 +307,7 @@
     };
 
     state.allRecipes.forEach(r => {
-      const key = getCategoryKey(r.category);
+      const key = r.categoryKey;
       if (counts.hasOwnProperty(key)) {
         counts[key]++;
       }
@@ -301,20 +327,19 @@
 
     // Category filter
     if (state.currentCategory !== 'all') {
-      result = result.filter(r => getCategoryKey(r.category) === state.currentCategory);
+      result = result.filter(r => r.categoryKey === state.currentCategory);
     }
 
     // Search Query
     if (state.searchQuery.trim() !== '') {
       const q = state.searchQuery.toLowerCase().trim();
       result = result.filter(r => {
-        const inName = r.name && r.name.toLowerCase().includes(q);
-        const inSummary = r.summary && r.summary.toLowerCase().includes(q);
-        const inOrigin = r.origin && r.origin.toLowerCase().includes(q);
+        const inTitle = r.title && r.title.toLowerCase().includes(q);
+        const inDesc = r.desc && r.desc.toLowerCase().includes(q);
         const inMango = r.mangoType && r.mangoType.toLowerCase().includes(q);
         const inTags = r.tags && r.tags.some(t => t.toLowerCase().includes(q));
         const inIng = r.ingredients && r.ingredients.some(i => i.name.toLowerCase().includes(q));
-        return inName || inSummary || inOrigin || inMango || inTags || inIng;
+        return inTitle || inDesc || inMango || inTags || inIng;
       });
     }
 
@@ -325,25 +350,22 @@
 
     // Time Filter
     if (state.timeFilter === 'quick') {
-      result = result.filter(r => (r.prepTimeMinutes + r.cookTimeMinutes) <= 15);
+      result = result.filter(r => r.totalMinutes <= 15);
     } else if (state.timeFilter === 'medium') {
-      result = result.filter(r => {
-        const total = r.prepTimeMinutes + r.cookTimeMinutes;
-        return total > 15 && total <= 30;
-      });
+      result = result.filter(r => r.totalMinutes > 15 && r.totalMinutes <= 30);
     } else if (state.timeFilter === 'long') {
-      result = result.filter(r => (r.prepTimeMinutes + r.cookTimeMinutes) > 30);
+      result = result.filter(r => r.totalMinutes > 30);
     }
 
     // Sort By
     if (state.sortBy === 'time-asc') {
-      result.sort((a, b) => (a.prepTimeMinutes + a.cookTimeMinutes) - (b.prepTimeMinutes + b.cookTimeMinutes));
+      result.sort((a, b) => a.totalMinutes - b.totalMinutes);
     } else if (state.sortBy === 'name-asc') {
-      result.sort((a, b) => a.name.localeCompare(b.name, 'id'));
+      result.sort((a, b) => a.title.localeCompare(b.title, 'id'));
     } else if (state.sortBy === 'name-desc') {
-      result.sort((a, b) => b.name.localeCompare(a.name, 'id'));
+      result.sort((a, b) => b.title.localeCompare(a.title, 'id'));
     } else if (state.sortBy === 'calories-asc') {
-      result.sort((a, b) => a.calories - b.calories);
+      result.sort((a, b) => parseInt(a.calories, 10) - parseInt(b.calories, 10));
     }
 
     state.filteredRecipes = result;
@@ -435,7 +457,6 @@
     card.setAttribute('data-id', recipe.id);
 
     const isFav = state.favorites.includes(recipe.id);
-    const totalTime = (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0);
 
     const categoryLabels = {
       simpel: 'Simpel & Harian',
@@ -446,24 +467,23 @@
       pastry: 'Pastry & Dessert'
     };
 
-    const catKey = getCategoryKey(recipe.category);
     const diffIcon = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Ahli');
 
     card.innerHTML = `
       <div class="card-banner">
         <div class="card-decor-circle"></div>
-        <span class="card-cat-badge">${categoryLabels[catKey] || recipe.category}</span>
+        <span class="card-cat-badge">${categoryLabels[recipe.categoryKey] || recipe.category}</span>
         <button type="button" class="card-fav-btn ${isFav ? 'is-favorite' : ''}" data-id="${recipe.id}" aria-label="Simpan Favorit" title="${isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}">
           ${isFav ? '❤️' : '🤍'}
         </button>
-        <span class="card-emoji-hero">${recipe.emoji || '🥭'}</span>
+        <span class="card-emoji-hero">${recipe.icon || '🥭'}</span>
       </div>
       <div class="card-content">
-        <h3 class="card-title">${escapeHTML(recipe.name)}</h3>
-        <p class="card-summary">${escapeHTML(recipe.summary)}</p>
+        <h3 class="card-title">${escapeHTML(recipe.title)}</h3>
+        <p class="card-summary">${escapeHTML(recipe.desc)}</p>
         <div class="card-chips-row">
-          <span class="chip-item">⏱️ ${totalTime} mnt</span>
-          <span class="chip-item">🥗 ${recipe.calories} kkal</span>
+          <span class="chip-item">⏱️ ${recipe.totalMinutes} mnt</span>
+          <span class="chip-item">🥗 ${recipe.calories}</span>
           <span class="chip-item">👥 ${recipe.servings} Porsi</span>
         </div>
         <div class="card-footer">
@@ -513,17 +533,15 @@
       pastry: 'Pastry & Dessert Mewah'
     };
 
-    const catKey = getCategoryKey(recipe.category);
-
-    if (DOM.modalCategoryBadge) DOM.modalCategoryBadge.textContent = categoryTitles[catKey] || recipe.category;
+    if (DOM.modalCategoryBadge) DOM.modalCategoryBadge.textContent = categoryTitles[recipe.categoryKey] || recipe.category;
     if (DOM.modalDifficulty) DOM.modalDifficulty.textContent = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Tingkat Ahli');
-    if (DOM.modalHeroIcon) DOM.modalHeroIcon.textContent = recipe.emoji || '🥭';
-    if (DOM.modalRecipeTitle) DOM.modalRecipeTitle.textContent = recipe.name;
-    if (DOM.modalSummary) DOM.modalSummary.textContent = recipe.summary;
+    if (DOM.modalHeroIcon) DOM.modalHeroIcon.textContent = recipe.icon || '🥭';
+    if (DOM.modalRecipeTitle) DOM.modalRecipeTitle.textContent = recipe.title;
+    if (DOM.modalSummary) DOM.modalSummary.textContent = recipe.desc;
 
-    if (DOM.modalPrepTime) DOM.modalPrepTime.textContent = `${recipe.prepTimeMinutes} mnt`;
-    if (DOM.modalCookTime) DOM.modalCookTime.textContent = `${recipe.cookTimeMinutes} mnt`;
-    if (DOM.modalCalories) DOM.modalCalories.textContent = `${recipe.calories} kkal`;
+    if (DOM.modalPrepTime) DOM.modalPrepTime.textContent = recipe.prepTime;
+    if (DOM.modalCookTime) DOM.modalCookTime.textContent = recipe.cookTime;
+    if (DOM.modalCalories) DOM.modalCalories.textContent = recipe.calories;
     if (DOM.modalMangoType) DOM.modalMangoType.textContent = recipe.mangoType || 'Harum Manis';
 
     // Scaler Buttons reset
@@ -537,7 +555,7 @@
     renderModalSteps();
 
     // Chef tips & Tags
-    if (DOM.modalChefTipsText) DOM.modalChefTipsText.textContent = recipe.chefTips || 'Pilih mangga berkualitas terbaik untuk kenikmatan maksimal.';
+    if (DOM.modalChefTipsText) DOM.modalChefTipsText.textContent = recipe.tips || 'Pilih mangga berkualitas terbaik untuk kenikmatan maksimal.';
     
     if (DOM.modalTagsContainer) {
       DOM.modalTagsContainer.innerHTML = '';
@@ -600,10 +618,12 @@
         scaledAmount = (ing.amount || '') + (ing.unit ? ' ' + ing.unit : '');
       }
 
+      const notes = ing.notes ? ` <span style="font-size:0.78rem; opacity:0.8;">(${escapeHTML(ing.notes)})</span>` : '';
+
       li.innerHTML = `
         <span class="custom-checkbox">${state.checkedIngredients.has(index) ? '✓' : ''}</span>
         <span class="ingredient-text">
-          <strong class="ingredient-amount">${scaledAmount}</strong> ${escapeHTML(ing.name)}
+          <strong class="ingredient-amount">${scaledAmount}</strong> ${escapeHTML(ing.name)}${notes}
         </span>
       `;
 
@@ -678,8 +698,8 @@
   // ===================================================================
   function startKitchenTimer() {
     if (state.timer.remainingSeconds <= 0) {
-      const cookTime = state.currentRecipe ? (state.currentRecipe.cookTimeMinutes || 5) : 5;
-      state.timer.remainingSeconds = cookTime * 60;
+      const cookMins = state.currentRecipe ? (state.currentRecipe.totalMinutes || 5) : 5;
+      state.timer.remainingSeconds = cookMins * 60;
     }
 
     if (state.timer.isRunning) {
@@ -757,7 +777,7 @@
       playTone(739.99, now + 0.2, 0.4); // F#5
       playTone(880.00, now + 0.4, 0.8); // A5
     } catch (e) {
-      console.warn('Web Audio note blocked:', e);
+      console.warn('Web Audio chime blocked:', e);
     }
   }
 
@@ -811,10 +831,10 @@
         row.className = 'fav-item-row';
         row.innerHTML = `
           <div class="fav-item-info">
-            <span class="fav-item-emoji">${recipe.emoji || '🥭'}</span>
+            <span class="fav-item-emoji">${recipe.icon || '🥭'}</span>
             <div>
-              <div class="fav-item-title">${escapeHTML(recipe.name)}</div>
-              <div class="fav-item-meta">${recipe.prepTimeMinutes + recipe.cookTimeMinutes} mnt • ${recipe.difficulty}</div>
+              <div class="fav-item-title">${escapeHTML(recipe.title)}</div>
+              <div class="fav-item-meta">${recipe.totalMinutes} mnt • ${recipe.difficulty}</div>
             </div>
           </div>
           <button type="button" class="shopping-delete-btn" title="Hapus dari Favorit">&times;</button>
@@ -872,7 +892,7 @@
         scaledAmount = (ing.amount || '') + (ing.unit ? ' ' + ing.unit : '');
       }
 
-      const itemText = `${scaledAmount} ${ing.name} (untuk ${state.currentRecipe.name})`.trim();
+      const itemText = `${scaledAmount} ${ing.name} (untuk ${state.currentRecipe.title})`.trim();
       
       if (!state.shoppingList.some(item => item.text === itemText)) {
         state.shoppingList.push({
@@ -1038,18 +1058,18 @@
     if (DOM.openRandomRecipeDetailBtn) DOM.openRandomRecipeDetailBtn.disabled = true;
 
     setTimeout(() => {
-      const pool = state.allRecipes.length > 0 ? state.allRecipes : window.MANGO_RECIPES || [];
+      const pool = state.allRecipes.length > 0 ? state.allRecipes : [];
       if (pool.length === 0) return;
 
       const randomIdx = Math.floor(Math.random() * pool.length);
       randomPickedRecipe = pool[randomIdx];
 
       if (DOM.randomDiceIcon) {
-        DOM.randomDiceIcon.textContent = randomPickedRecipe.emoji || '🥭';
+        DOM.randomDiceIcon.textContent = randomPickedRecipe.icon || '🥭';
         DOM.randomDiceIcon.style.animation = 'none';
       }
-      if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = randomPickedRecipe.name;
-      if (DOM.randomResultDesc) DOM.randomResultDesc.textContent = randomPickedRecipe.summary;
+      if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = randomPickedRecipe.title;
+      if (DOM.randomResultDesc) DOM.randomResultDesc.textContent = randomPickedRecipe.desc;
       if (DOM.openRandomRecipeDetailBtn) DOM.openRandomRecipeDetailBtn.disabled = false;
     }, 600);
   }
@@ -1075,8 +1095,8 @@
   function shareRecipe() {
     if (!state.currentRecipe) return;
     const shareData = {
-      title: `${state.currentRecipe.name} - Resep All Manggo`,
-      text: `Cobain resep ${state.currentRecipe.name}! ${state.currentRecipe.summary}`,
+      title: `${state.currentRecipe.title} - Resep All Manggo`,
+      text: `Cobain resep ${state.currentRecipe.title}! ${state.currentRecipe.desc}`,
       url: window.location.href
     };
 
