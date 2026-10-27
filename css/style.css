@@ -107,6 +107,9 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 body {
@@ -116,6 +119,9 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
   transition: background-color var(--transition-normal), color var(--transition-normal);
   padding-bottom: 74px; /* Space for mobile bottom nav */
 }
@@ -3497,99 +3503,157 @@ ul, ol {
     padding-bottom: 68px; /* Room for fixed bottom nav bar */
   }
 
-  /* Header on Mobile */
+  /* Header on Mobile: Clean 2-item row (Brand on Left, Theme Toggle on Right) */
   .header-container {
     height: 56px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .brand-group {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .logo-link {
+    gap: 8px;
+    min-width: 0;
   }
 
   .logo-circle-icon {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
   }
 
   .brand-title {
-    font-size: 1.12rem;
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .brand-tagline {
-    display: none;
+    display: none !important;
   }
 
   .header-actions {
-    gap: 4px;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
-  .action-btn {
-    padding: 6px 8px;
+  /* Hide duplicate action buttons on mobile - they are right in bottom nav bar */
+  .header-actions .action-btn {
+    display: none !important;
   }
 
-  .action-svg {
-    width: 18px;
-    height: 18px;
+  .theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
   }
 
   /* Mobile Search Bar */
   .mobile-search-bar {
-    padding: 8px 14px 4px;
+    padding: 8px 12px 4px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .search-input-box {
     height: 42px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .search-input-box input {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
   }
 
   /* Culinary Hero Section */
   .culinary-hero-section {
-    padding: 20px 0 16px;
+    padding: 18px 0 16px;
+    width: 100%;
+    overflow: hidden;
   }
 
   .culinary-hero-container {
     gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hero-editorial-col {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .hero-season-badge {
     padding: 4px 10px;
     margin-bottom: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
   }
 
   .badge-text {
-    font-size: 0.66rem;
-    letter-spacing: 0.5px;
+    font-size: 0.65rem;
+    letter-spacing: 0.3px;
+    line-height: 1.3;
+    word-break: break-word;
   }
 
   .hero-editorial-headline {
-    font-size: clamp(1.6rem, 6.5vw, 2.1rem);
-    line-height: 1.18;
+    font-size: clamp(1.6rem, 6.8vw, 2.1rem);
+    line-height: 1.16;
     margin-bottom: 10px;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .hero-editorial-sub {
     font-size: 0.86rem;
     line-height: 1.48;
     margin-bottom: 14px;
+    word-break: break-word;
   }
 
   .culinary-search-box {
     margin-bottom: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .search-box-inner {
-    height: 48px;
-    padding: 4px 5px 4px 14px;
+    height: 46px;
+    padding: 3px 4px 3px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .search-box-inner input {
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
+    width: 100%;
+    font-size: 0.82rem;
   }
 
   .search-box-btn {
     height: 38px;
-    padding: 0 15px;
-    font-size: 0.82rem;
+    padding: 0 14px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .hero-popular-row {
     margin-bottom: 14px;
     gap: 5px;
+    width: 100%;
   }
 
   .popular-label {
@@ -3600,11 +3664,13 @@ ul, ol {
 
   .popular-tags-list {
     gap: 5px;
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .trend-tag-btn {
-    padding: 4px 10px;
-    font-size: 0.74rem;
+    padding: 4px 9px;
+    font-size: 0.73rem;
   }
 
   .hero-metrics-grid {
@@ -3613,6 +3679,8 @@ ul, ol {
     gap: 8px 12px;
     padding-top: 10px;
     border-top: 1px solid var(--border-subtle);
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .metric-divider {
