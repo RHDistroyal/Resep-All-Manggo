@@ -316,7 +316,7 @@
     const oldSpread = state.currentSpread;
     const isNext = direction ? (direction === 'next') : (spreadIdx > oldSpread);
 
-    // Case 1: Opening Cover: 0 -> >=1
+    // Case 1: Opening Cover: 0 -> >=1 (Accelerated 0.32s)
     if (oldSpread === 0 && spreadIdx > 0) {
       state.isFlipping = true;
       if (withSound) playPageFlipSound();
@@ -331,17 +331,17 @@
         renderSpreadContent(spreadIdx);
         state.currentSpread = spreadIdx;
         updateDockControls();
-      }, 350);
+      }, 120);
 
       setTimeout(() => {
         DOM.bookCoverView.style.display = 'none';
         DOM.bookCoverView.classList.remove('swing-open');
         state.isFlipping = false;
-      }, 780);
+      }, 320);
       return;
     }
 
-    // Case 2: Closing Book to Cover: >=1 -> 0
+    // Case 2: Closing Book to Cover: >=1 -> 0 (Accelerated 0.28s)
     if (oldSpread > 0 && spreadIdx === 0) {
       state.isFlipping = true;
       if (withSound) playPageFlipSound();
@@ -356,12 +356,12 @@
         DOM.bookSpreadView.style.display = 'none';
         state.currentSpread = 0;
         updateDockControls();
-      }, 350);
+      }, 120);
 
       setTimeout(() => {
         DOM.bookCoverView.classList.remove('swing-close');
         state.isFlipping = false;
-      }, 700);
+      }, 280);
       return;
     }
 
@@ -372,7 +372,7 @@
       DOM.recipeBook.classList.remove('is-book-open');
     }
 
-    // Case 3: Flipping Between Spreads (>=1 -> >=1)
+    // Case 3: Flipping Between Spreads (>=1 -> >=1) (Accelerated 60fps 0.26s)
     state.currentMultiplier = 1;
     state.checkedSteps.clear();
 
@@ -391,50 +391,34 @@
         renderSpreadContent(spreadIdx);
         state.currentSpread = spreadIdx;
         updateDockControls();
-      }, 180);
+      }, 60);
 
       setTimeout(() => {
         DOM.bookSpreadView.classList.remove(curlClass);
         state.isFlipping = false;
-      }, 480);
+      }, 220);
     } else {
-      // Desktop 3D Leaf Flip
-      if (DOM.bookPageFlipper && DOM.flipperFrontFace && DOM.flipperBackFace) {
+      // Desktop 3D Leaf Flip (Hardware-accelerated parchment sweep without heavy DOM cloning)
+      if (DOM.bookPageFlipper) {
         state.isFlipping = true;
         if (withSound) playPageFlipSound();
 
-        if (isNext) {
-          DOM.flipperFrontFace.innerHTML = DOM.pageRightContent.innerHTML;
-          DOM.bookPageFlipper.className = 'book-page-leaf-flipper flip-leaf-next';
-          DOM.bookPageFlipper.style.display = 'block';
+        const flipClass = isNext ? 'flip-leaf-next' : 'flip-leaf-prev';
+        DOM.bookPageFlipper.className = `book-page-leaf-flipper ${flipClass}`;
+        DOM.bookPageFlipper.style.display = 'block';
 
-          // Update underlying page
+        // Update underlying page almost immediately
+        setTimeout(() => {
           renderSpreadContent(spreadIdx);
           state.currentSpread = spreadIdx;
           updateDockControls();
+        }, 50);
 
-          setTimeout(() => {
-            DOM.bookPageFlipper.style.display = 'none';
-            DOM.bookPageFlipper.className = 'book-page-leaf-flipper';
-            DOM.flipperFrontFace.innerHTML = '';
-            state.isFlipping = false;
-          }, 540);
-        } else {
-          DOM.flipperBackFace.innerHTML = DOM.pageLeftContent.innerHTML;
-          DOM.bookPageFlipper.className = 'book-page-leaf-flipper flip-leaf-prev';
-          DOM.bookPageFlipper.style.display = 'block';
-
-          renderSpreadContent(spreadIdx);
-          state.currentSpread = spreadIdx;
-          updateDockControls();
-
-          setTimeout(() => {
-            DOM.bookPageFlipper.style.display = 'none';
-            DOM.bookPageFlipper.className = 'book-page-leaf-flipper';
-            DOM.flipperBackFace.innerHTML = '';
-            state.isFlipping = false;
-          }, 540);
-        }
+        setTimeout(() => {
+          DOM.bookPageFlipper.style.display = 'none';
+          DOM.bookPageFlipper.className = 'book-page-leaf-flipper';
+          state.isFlipping = false;
+        }, 260);
       } else {
         if (withSound) playPageFlipSound();
         renderSpreadContent(spreadIdx);

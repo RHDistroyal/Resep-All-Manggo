@@ -566,26 +566,29 @@ html, body {
   transform: translateY(-4px) rotateX(1deg);
 }
 
-/* 3D Cover Swing Animations */
+/* 3D Snappy Cover Swing Animations (Accelerated 60fps) */
 .book-hardcover.swing-open {
-  animation: coverSwingOpen 0.8s cubic-bezier(0.25, 1, 0.45, 1) forwards;
+  animation: coverSwingOpen 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: left center;
 }
 
 .book-hardcover.swing-close {
-  animation: coverSwingClose 0.7s cubic-bezier(0.25, 1, 0.45, 1) forwards;
+  animation: coverSwingClose 0.28s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: left center;
 }
 
 @keyframes coverSwingOpen {
   0% {
     transform: rotateY(0deg);
     opacity: 1;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
   }
-  50% {
-    box-shadow: -20px 35px 80px rgba(0, 0, 0, 0.85);
+  60% {
+    opacity: 0.9;
   }
   100% {
-    transform: rotateY(-180deg);
+    transform: rotateY(-110deg);
     opacity: 0;
     visibility: hidden;
   }
@@ -593,11 +596,11 @@ html, body {
 
 @keyframes coverSwingClose {
   0% {
-    transform: rotateY(-180deg);
+    transform: rotateY(-110deg);
     opacity: 0;
   }
-  40% {
-    opacity: 1;
+  35% {
+    opacity: 0.8;
   }
   100% {
     transform: rotateY(0deg);
@@ -872,9 +875,12 @@ html, body {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   background-color: var(--page-bg);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
   overflow: hidden;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--page-border);
 }
 
 .flipper-face-front {
@@ -885,43 +891,45 @@ html, body {
   transform: rotateY(180deg);
 }
 
-/* Page Flip Keyframe Animations */
+/* Page Flip Keyframe Animations (Accelerated 60fps 0.26s) */
 .flip-leaf-next {
-  animation: leafFlipNext 0.55s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  animation: leafFlipNext 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
 }
 
 .flip-leaf-prev {
   transform-origin: right center !important;
   right: auto !important;
   left: 0 !important;
-  animation: leafFlipPrev 0.55s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  animation: leafFlipPrev 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
 }
 
 @keyframes leafFlipNext {
   0% {
     transform: rotateY(0deg);
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
   50% {
-    filter: drop-shadow(-15px 20px 25px rgba(0,0,0,0.45));
+    box-shadow: -15px 12px 25px rgba(0,0,0,0.3);
   }
   100% {
     transform: rotateY(-180deg);
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
 }
 
 @keyframes leafFlipPrev {
   0% {
     transform: rotateY(-180deg);
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
   50% {
-    filter: drop-shadow(15px 20px 25px rgba(0,0,0,0.45));
+    box-shadow: 15px 12px 25px rgba(0,0,0,0.3);
   }
   100% {
     transform: rotateY(0deg);
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
 }
 
@@ -2549,48 +2557,46 @@ html, body {
 
   /* Mobile 3D Page Curl Animations */
   .mobile-page-curl-next {
-    animation: mobilePageCurlNext 0.45s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  /* Mobile 3D Page Curl Animations (Fast 0.22s) */
+  .mobile-page-curl-next {
+    animation: mobilePageCurlNext 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     transform-origin: left center;
+    will-change: transform, opacity;
   }
 
   .mobile-page-curl-prev {
-    animation: mobilePageCurlPrev 0.45s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+    animation: mobilePageCurlPrev 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     transform-origin: right center;
+    will-change: transform, opacity;
   }
 }
 
 @keyframes mobilePageCurlNext {
   0% {
-    transform: perspective(1000px) rotateY(0deg);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: perspective(800px) rotateY(0deg);
     opacity: 1;
   }
-  45% {
-    transform: perspective(1000px) rotateY(-45deg) scale(0.96);
-    box-shadow: -15px 15px 30px rgba(0,0,0,0.35);
-    opacity: 0.65;
+  50% {
+    transform: perspective(800px) rotateY(-22deg) scale(0.98);
+    opacity: 0.85;
   }
   100% {
-    transform: perspective(1000px) rotateY(0deg) scale(1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: perspective(800px) rotateY(0deg) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes mobilePageCurlPrev {
   0% {
-    transform: perspective(1000px) rotateY(0deg);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: perspective(800px) rotateY(0deg);
     opacity: 1;
   }
-  45% {
-    transform: perspective(1000px) rotateY(45deg) scale(0.96);
-    box-shadow: 15px 15px 30px rgba(0,0,0,0.35);
-    opacity: 0.65;
+  50% {
+    transform: perspective(800px) rotateY(22deg) scale(0.98);
+    opacity: 0.85;
   }
   100% {
-    transform: perspective(1000px) rotateY(0deg) scale(1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: perspective(800px) rotateY(0deg) scale(1);
     opacity: 1;
   }
 }
