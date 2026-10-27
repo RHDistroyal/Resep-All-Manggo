@@ -506,6 +506,20 @@
     </div>
   </div>
 
+  <!-- Lightbox Fullscreen Food Poster Modal -->
+  <div class="poster-lightbox-overlay" id="posterLightboxOverlay" aria-hidden="true" onclick="window.closePosterLightbox(event)">
+    <div class="poster-lightbox-dialog" onclick="event.stopPropagation()">
+      <button type="button" class="poster-lightbox-close" onclick="window.closePosterLightbox()" title="Tutup">&times;</button>
+      <div class="poster-lightbox-image-wrap">
+        <img id="lightboxPosterImg" src="" alt="Poster Masakan" class="lightbox-poster-photo">
+      </div>
+      <div class="poster-lightbox-caption">
+        <h3 id="lightboxPosterTitle" class="lightbox-title">Judul Masakan</h3>
+        <span class="lightbox-sub">Foto Masakan Asli • Ensiklopedia Olahan Mangga</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 

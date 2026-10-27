@@ -683,41 +683,56 @@
   }
 
   // ===================================================================
-  // SPREAD 3+: RECIPE SPREAD (MICHELIN MENU / LUXURY COOKBOOK STYLE)
+  // SPREAD 3+: RECIPE SPREAD (MICHELIN MENU & FLIPHTML5 GOURMET POSTER STYLE)
   // ===================================================================
   function renderRecipeSpread(recipe) {
     state.cookMode.currentRecipe = recipe;
     const isBookmarked = state.bookmarks.includes(recipe.id);
 
-    // Left Page: Visual Showcase, Specs & Ingredients with Scaler
+    // Left Page: Gastronomy Editorial Showcase (Un-cropped Food Poster + Specs)
     DOM.pageLeftNumber.textContent = String(recipe.pageLeft);
     DOM.pageLeftFooterTitle.textContent = `${recipe.categoryLabel} • Resep Teruji`;
 
-    // Calculate Ingredients based on multiplier
-    const ingredientsHTML = recipe.ingredients.map(ing => {
-      let displayAmount = ing.amount;
-      if (typeof ing.amount === 'number') {
-        const scaled = ing.amount * state.currentMultiplier;
-        displayAmount = (Math.round(scaled * 10) / 10).toString();
-      }
-      return `
-        <div class="ingredient-row">
-          <span class="ing-measure">${displayAmount} ${ing.unit || ''}</span>
-          <span class="ing-name">${escapeHTML(ing.name)} ${ing.notes ? `<span class="ing-notes">(${escapeHTML(ing.notes)})</span>` : ''}</span>
-        </div>
-      `;
-    }).join('');
-
     DOM.pageLeftContent.innerHTML = `
       <div class="recipe-page-left">
-        <span class="recipe-chapter-badge">${recipe.categoryLabel}</span>
-        
-        <div class="recipe-hero-photo-wrap">
-          <img src="${recipe.image}" alt="${escapeHTML(recipe.title)}" class="recipe-hero-photo" onerror="this.src='${CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-minuman.jpg'}'">
-          <span class="photo-overlay-time">${recipe.totalMinutes} Menit • ${recipe.difficulty}</span>
+        <div class="recipe-meta-top">
+          <span class="recipe-chapter-badge">${recipe.categoryLabel}</span>
+          <span class="recipe-leaf-decor">❦</span>
         </div>
 
-        <h2 class="recipe-book-title">${escapeHTML(recipe.title)}</h2>
+        <h2 class="recipe-poster-title">${escapeHTML(recipe.title)}</h2>
+
+        <!-- The Hero Culinary Food Poster (Never Cropped, Ambient Glow Backdrop) -->
+        <div class="recipe-food-poster" onclick="window.openPosterLightbox('${escapeHTML(recipe.image)}', '${escapeHTML(recipe.title)}')" title="Klik untuk melihat poster resolusi penuh">
+          <div class="poster-ambient-backdrop" style="background-image: url('${recipe.image}');"></div>
+          <div class="poster-editorial-overlay"></div>
+          <img src="${recipe.image}" alt="${escapeHTML(recipe.title)}" class="poster-main-photo" onerror="this.src='${CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-minuman.jpg'}'" loading="lazy">
+          
+          <div class="poster-floating-top">
+            <span class="poster-badge-variety">${escapeHTML(recipe.mangoType)}</span>
+            <span class="poster-badge-zoom" title="Perbesar Poster HD">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+              HD
+            </span>
+          </div>
+
+          <div class="poster-floating-bottom">
+            <span class="poster-pill-stat">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              ${recipe.totalMinutes} Menit • ${recipe.difficulty}
+            </span>
+            <span class="poster-pill-verified">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              Resep Teruji
+            </span>
+          </div>
+
+          <div class="poster-corner top-l"></div>
+          <div class="poster-corner top-r"></div>
+          <div class="poster-corner btm-l"></div>
+          <div class="poster-corner btm-r"></div>
+        </div>
+
         <p class="recipe-tasting-quote"><span class="book-drop-cap">${recipe.desc.charAt(0)}</span>${escapeHTML(recipe.desc.slice(1))}</p>
 
         <div class="book-specs-row">
@@ -734,32 +749,33 @@
             <strong class="spec-cell-val">${recipe.calories}</strong>
           </div>
           <div class="book-spec-cell">
-            <span class="spec-cell-label">Varietas</span>
+            <span class="spec-cell-label">Kematangan</span>
             <strong class="spec-cell-val">${recipe.mangoType}</strong>
-          </div>
-        </div>
-
-        <div class="book-ingredients-box">
-          <div class="ingredients-box-header">
-            <h3 class="box-section-title">Bahan & Takaran</h3>
-            <div class="servings-stepper">
-              <span style="font-size: 0.72rem; color: var(--text-ink-muted); margin-right: 4px;">Porsi:</span>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 0.5 ? 'active' : ''}" onclick="window.setScale(0.5)">0.5x</button>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 1 ? 'active' : ''}" onclick="window.setScale(1)">1x</button>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 2 ? 'active' : ''}" onclick="window.setScale(2)">2x</button>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 3 ? 'active' : ''}" onclick="window.setScale(3)">3x</button>
-            </div>
-          </div>
-          <div class="book-ingredients-list">
-            ${ingredientsHTML}
           </div>
         </div>
       </div>
     `;
 
-    // Right Page: Steps, Kitchen Timer, Chef Tips & Actions
+    // Right Page: The Culinary Workshop (Ingredients + Scaler + Steps + Timers + Chef Tips + Actions)
     DOM.pageRightNumber.textContent = String(recipe.pageRight);
-    DOM.pageRightFooterTitle.textContent = `Teknik Memasak & Tips Koki`;
+    DOM.pageRightFooterTitle.textContent = `Panduan Dapur & Eksekusi Resep`;
+
+    // Calculate Ingredients based on multiplier
+    const ingredientsHTML = recipe.ingredients.map(ing => {
+      let displayAmount = ing.amount;
+      if (typeof ing.amount === 'number') {
+        const scaled = ing.amount * state.currentMultiplier;
+        displayAmount = (Math.round(scaled * 10) / 10).toString();
+      }
+      return `
+        <label class="ingredient-row">
+          <input type="checkbox" class="ing-check-input" onchange="window.toggleIngCheck(this)">
+          <span class="ing-measure">${displayAmount} ${ing.unit || ''}</span>
+          <span class="ing-name">${escapeHTML(ing.name)}</span>
+          ${ing.notes ? `<span class="ing-notes">(${escapeHTML(ing.notes)})</span>` : ''}
+        </label>
+      `;
+    }).join('');
 
     // Render Steps with timer buttons
     const stepsHTML = recipe.steps.map((step, idx) => {
@@ -787,15 +803,40 @@
 
     DOM.pageRightContent.innerHTML = `
       <div class="recipe-page-right">
-        <div class="cooking-steps-section">
+        <!-- Section 1: Ingredients with Servings Scaler -->
+        <div class="book-ingredients-box">
           <div class="ingredients-box-header">
-            <h3 class="box-section-title">Langkah-Langkah Pembuatan</h3>
+            <h3 class="box-section-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+              Bahan & Takaran Presisi
+            </h3>
+            <div class="servings-stepper">
+              <span style="font-size: 0.72rem; color: var(--text-ink-muted); margin-right: 4px;">Porsi:</span>
+              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 0.5 ? 'active' : ''}" onclick="window.setScale(0.5)">0.5x</button>
+              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 1 ? 'active' : ''}" onclick="window.setScale(1)">1x</button>
+              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 2 ? 'active' : ''}" onclick="window.setScale(2)">2x</button>
+              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 3 ? 'active' : ''}" onclick="window.setScale(3)">3x</button>
+            </div>
+          </div>
+          <div class="book-ingredients-grid">
+            ${ingredientsHTML}
+          </div>
+        </div>
+
+        <!-- Section 2: Cooking Steps with Timers -->
+        <div class="cooking-steps-section">
+          <div class="cooking-steps-header">
+            <h3 class="box-section-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Langkah-Langkah Pembuatan
+            </h3>
           </div>
           <div class="book-steps-list">
             ${stepsHTML}
           </div>
         </div>
 
+        <!-- Section 3: Chef Secret Tips -->
         <div class="book-chef-tips-box">
           <div class="tips-header-row">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -804,6 +845,7 @@
           <p class="tips-body-text">${escapeHTML(recipe.tips)}</p>
         </div>
 
+        <!-- Section 4: Action Buttons -->
         <div class="book-recipe-actions">
           <button type="button" class="btn-book-action btn-cook-handsfree" onclick="window.launchCookMode()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -833,6 +875,33 @@
     if (recipeIdx >= 0 && state.allRecipes[recipeIdx]) {
       renderRecipeSpread(state.allRecipes[recipeIdx]);
     }
+  };
+
+  window.toggleIngCheck = function (checkbox) {
+    const row = checkbox.closest('.ingredient-row');
+    if (row) {
+      if (checkbox.checked) row.classList.add('is-checked');
+      else row.classList.remove('is-checked');
+    }
+  };
+
+  window.openPosterLightbox = function (imgSrc, title) {
+    const overlay = document.getElementById('posterLightboxOverlay');
+    const img = document.getElementById('lightboxPosterImg');
+    const titleEl = document.getElementById('lightboxPosterTitle');
+    if (overlay && img && titleEl) {
+      img.src = imgSrc;
+      titleEl.textContent = title;
+      overlay.classList.add('is-active');
+    }
+  };
+
+  window.closePosterLightbox = function (e) {
+    if (e && e.target && e.target.classList && !e.target.classList.contains('poster-lightbox-overlay') && !e.target.classList.contains('poster-lightbox-close')) {
+      return;
+    }
+    const overlay = document.getElementById('posterLightboxOverlay');
+    if (overlay) overlay.classList.remove('is-active');
   };
 
   // ===================================================================
