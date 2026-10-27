@@ -708,7 +708,7 @@
         </div>
 
         <h2 class="recipe-book-title">${escapeHTML(recipe.title)}</h2>
-        <p class="recipe-tasting-quote">"${escapeHTML(recipe.desc)}"</p>
+        <p class="recipe-tasting-quote"><span class="book-drop-cap">${recipe.desc.charAt(0)}</span>${escapeHTML(recipe.desc.slice(1))}</p>
 
         <div class="book-specs-row">
           <div class="book-spec-cell">
