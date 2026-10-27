@@ -1,0 +1,13 @@
+{
+  "name": "resep-all-manggo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Ensiklopedia 200 Resep Olahan Mangga Terlengkap bergaya Cookpad",
+  "scripts": {
+    "dev": "npx -y serve . -l 3000",
+    "start": "npx -y serve . -l 3000",
+    "serve": "npx -y serve . -l 3000"
+  },
+  "keywords": ["resep", "mangga", "cookpad", "kuliner"],
+  "author": "Resep All Manggo"
+}

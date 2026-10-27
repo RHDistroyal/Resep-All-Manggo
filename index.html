@@ -6,15 +6,15 @@
   <title>Resep All Manggo | Ensiklopedia 200 Resep Olahan Mangga Terlengkap</title>
   
   <!-- SEO & Social Meta Tags -->
-  <meta name="description" content="Koleksi 200 resep olahan mangga terlengkap dan terlezat di Indonesia. Mulai dari minuman kekinian, masakan Nusantara, kuliner Asia, hingga pastry & dessert internasional. Dilengkapi takaran bahan, langkah detail, dan scaler porsi interaktif.">
-  <meta name="keywords" content="resep mangga, olahan mangga, mango sticky rice, king mango thai, sambal mangga, puding mangga, minuman mangga, dessert mangga, buku resep mangga">
+  <meta name="description" content="Koleksi 200 resep olahan mangga terlengkap bergaya Cookpad di Indonesia. Mulai dari minuman kekinian, masakan Nusantara, kuliner Asia, hingga pastry & dessert internasional. Dilengkapi takaran bahan, langkah detail, timer dapur, dan scaler porsi interaktif.">
+  <meta name="keywords" content="resep mangga, cookpad mangga, olahan mangga, mango sticky rice, king mango thai, sambal mangga, puding mangga, minuman mangga, dessert mangga, buku resep mangga">
   <meta name="author" content="Resep All Manggo">
   <meta name="theme-color" content="#FF9F1C">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Resep All Manggo - 200 Resep Olahan Mangga Terlengkap">
-  <meta property="og:description" content="Ensiklopedia resep mangga terlengkap: Minuman kekinian, sambal daerah, pastry internasional, dan masakan gurih.">
+  <meta property="og:description" content="Ensiklopedia resep mangga terlengkap: Minuman kekinian, sambal daerah, pastry internasional, dan masakan gurih bergaya Cookpad.">
   <meta property="og:image" content="assets/images/mango-banner.jpg">
 
   <!-- Favicon -->
@@ -27,7 +27,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=2.2">
 </head>
 <body>
 
@@ -35,59 +35,61 @@
   <div class="top-announcement">
     <div class="container announcement-inner">
       <span class="announcement-badge">🥭 Ensiklopedia Mangga #1</span>
-      <span class="announcement-text">200 Koleksi Resep Mangga Lengkap & Teruji — Dari Minuman Segar hingga Pastry Mewah!</span>
+      <span class="announcement-text">200 Koleksi Resep Olahan Mangga Terlengkap & Teruji — Dari Minuman Kafe hingga Sambal Nusantara!</span>
     </div>
   </div>
 
-  <!-- Header & Navigation -->
+  <!-- Header & Navigation (Cookpad Signature Style) -->
   <header class="site-header" id="siteHeader">
     <div class="container header-container">
       <div class="brand-group">
         <a href="#home" class="logo-link" id="logoLink">
-          <img src="assets/images/mango-logo.jpg" alt="Logo Resep All Manggo" class="brand-logo" width="46" height="46">
+          <div class="logo-circle-icon">
+            <img src="assets/images/mango-logo.jpg" alt="Logo Resep All Manggo" class="brand-logo" width="44" height="44">
+          </div>
           <div class="brand-text">
             <span class="brand-title">Resep All Manggo</span>
-            <span class="brand-tagline">Buku Resep Mangga Terlengkap</span>
+            <span class="brand-tagline">Dapur Komunitas Resep Tropis</span>
           </div>
         </a>
       </div>
 
-      <!-- Desktop & Tablet Search Bar -->
+      <!-- Desktop & Tablet Cookpad Search Bar -->
       <div class="header-search-wrapper">
         <div class="search-input-box">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="searchInput" placeholder="Cari 200 resep (cth: King Mango, Sambal, Sago, Crepes)..." autocomplete="off" aria-label="Cari resep mangga">
+          <input type="text" id="searchInput" placeholder="Cari 200 resep atau bahan (cth: King Mango, Sambal, Sago, Harum Manis)..." autocomplete="off" aria-label="Cari resep mangga">
           <button type="button" id="clearSearchBtn" class="clear-search-btn" aria-label="Hapus pencarian" style="display: none;">&times;</button>
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Header Action Buttons -->
       <div class="header-actions">
-        <!-- Kamus Mangga Guide Button -->
-        <button type="button" class="action-btn" id="openMangoGuideBtn" title="Kamus Jenis Mangga">
-          <span class="btn-emoji">📚</span>
-          <span class="action-label">Kamus Mangga</span>
-        </button>
-
         <!-- Inspirasi Acak / Random Button -->
         <button type="button" class="action-btn" id="randomRecipeBtn" title="Inspirasi Resep Acak">
           <span class="btn-emoji">🎲</span>
           <span class="action-label">Resep Acak</span>
         </button>
 
+        <!-- Kamus Mangga Guide Button -->
+        <button type="button" class="action-btn" id="openMangoGuideBtn" title="Kamus Jenis Mangga">
+          <span class="btn-emoji">📚</span>
+          <span class="action-label">Kamus Varietas</span>
+        </button>
+
         <!-- Favorites Badge Button -->
         <button type="button" class="action-btn" id="openFavoritesBtn" title="Resep Favorit Saya">
           <span class="btn-emoji">⭐</span>
-          <span class="action-label">Favorit</span>
+          <span class="action-label">Tersimpan</span>
           <span class="badge-count" id="favoritesCountBadge">0</span>
         </button>
 
         <!-- Shopping List Button -->
         <button type="button" class="action-btn" id="openShoppingListBtn" title="Daftar Belanja">
-          <span class="btn-emoji">📋</span>
+          <span class="btn-emoji">🛒</span>
           <span class="action-label">Belanja</span>
           <span class="badge-count" id="shoppingCountBadge">0</span>
         </button>
@@ -101,10 +103,32 @@
     </div>
   </header>
 
-  <!-- Mobile Floating Search (Quick Access) -->
+  <!-- Cookpad Trending Search Tags Bar -->
+  <div class="trending-tags-bar" id="trendingTagsBar">
+    <div class="container trending-tags-container">
+      <span class="trending-tag-label">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 23c6.075 0 11-4.925 11-11 0-4.08-2.22-7.64-5.54-9.52.28 1.48-.12 3.03-1.12 4.03-.97.97-2.38 1.25-3.59.85 1.05 1.55.97 3.65-.25 5.12-1.22 1.47-3.23 1.95-4.94 1.2.78 1.56.45 3.52-.89 4.74-1.34 1.22-3.3 1.34-4.78.3C2.34 18.06 2 17.5 2 17c0 3.31 4.48 6 10 6z"/>
+        </svg>
+        Lagi Populer:
+      </span>
+      <div class="trending-tags-list">
+        <button type="button" class="trend-tag-btn" data-tag="King Mango">🔥 #KingMangoThai</button>
+        <button type="button" class="trend-tag-btn" data-tag="Sticky Rice">🍚 #MangoStickyRice</button>
+        <button type="button" class="trend-tag-btn" data-tag="Sambal">🌶️ #SambalMangga</button>
+        <button type="button" class="trend-tag-btn" data-tag="Sago">🥣 #MangoSago</button>
+        <button type="button" class="trend-tag-btn" data-tag="Puding">🍮 #PudingMangga</button>
+        <button type="button" class="trend-tag-btn" data-tag="Crepes">🥞 #CrepesMangga</button>
+        <button type="button" class="trend-tag-btn" data-tag="Harum Manis">🥭 #HarumManis</button>
+        <button type="button" class="trend-tag-btn" data-tag="Gedong Gincu">🌟 #GedongGincu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Floating Search (Quick Access for Phones) -->
   <div class="mobile-search-bar container">
     <div class="search-input-box">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
@@ -115,22 +139,24 @@
 
   <main id="mainContent">
 
-    <!-- Hero Section -->
+    <!-- Cookpad Hero Hub & Spotlight Section -->
     <section class="hero-section" id="home">
       <div class="container hero-container">
+        
+        <!-- Left: Warm Cookpad Greeting Card -->
         <div class="hero-content">
           <div class="hero-badge-tag">
-            <span class="pulse-dot"></span> 200 Resep Eksklusif Mangga
+            <span class="chef-icon">👩‍🍳</span> Inspirasi Dapur Mangga Cookpad
           </div>
-          <h1 class="hero-headline">Keajaiban Rasa Tropis Dalam Satu Buku Resep</h1>
+          <h1 class="hero-headline">Mau Masak Olahan Mangga Apa Hari Ini?</h1>
           <p class="hero-subline">
-            Temukan rahasia olahan mangga terbaik di dunia: dari minuman segar kekinian, sambal & lauk khas Nusantara, street food Asia legendaris, hingga pastry & dessert bintang lima.
+            Temukan <strong>200 koleksi resep mangga teruji</strong> di Indonesia: dari minuman segar kafe kekinian, sambal & lauk khas Nusantara, street food Asia legendaris, hingga pastry & dessert mewah.
           </p>
           
           <div class="hero-stats">
             <div class="stat-item">
               <span class="stat-number">200</span>
-              <span class="stat-label">Total Resep Rinci</span>
+              <span class="stat-label">Resep Teruji</span>
             </div>
             <div class="stat-item">
               <span class="stat-number">6</span>
@@ -138,13 +164,13 @@
             </div>
             <div class="stat-item">
               <span class="stat-number">100%</span>
-              <span class="stat-label">Teruji & Praktis</span>
+              <span class="stat-label">Langkah Praktis</span>
             </div>
           </div>
 
           <div class="hero-cta-group">
             <button type="button" class="btn btn-primary" id="exploreAllBtn">
-              <span>Jelajahi Semua Resep</span>
+              <span>Jelajahi 200 Resep</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -155,29 +181,72 @@
           </div>
         </div>
 
-        <div class="hero-visual">
-          <div class="hero-image-frame">
-            <img src="assets/images/mango-banner.jpg" alt="Hidangan Lezat Serba Mangga" class="hero-img" width="600" height="340">
-            <div class="hero-floating-card top-float">
-              <span class="floating-icon">🍧</span>
-              <div class="floating-text">
-                <strong>King Mango Thai</strong>
-                <span>Viral & Super Segar</span>
+        <!-- Right: Cookpad "Sedang Hangat Hari Ini" Showcase Grid (4 Star Recipes) -->
+        <div class="hero-featured-showcase">
+          <div class="showcase-header">
+            <span class="showcase-badge">🔥 Pilihan Koki Hari Ini</span>
+            <span class="showcase-note">Klik langsung untuk buka resep:</span>
+          </div>
+
+          <div class="showcase-cards-grid">
+            <!-- Spotlight Card 1: King Mango Thai -->
+            <div class="spotlight-mini-card" data-recipe-id="minuman-01">
+              <div class="mini-card-thumb">
+                <img src="assets/images/cat-minuman.jpg" alt="King Mango Thai" loading="lazy">
+                <span class="mini-cat-chip">🍹 Minuman Kafe</span>
+                <span class="mini-time-chip">⏱️ 10 mnt</span>
+              </div>
+              <div class="mini-card-info">
+                <h4 class="mini-card-title">King Mango Thai Super Segar</h4>
+                <div class="mini-card-author">👩‍🍳 Dapur Mangga • ⭐ Teruji</div>
               </div>
             </div>
-            <div class="hero-floating-card bottom-float">
-              <span class="floating-icon">🥭</span>
-              <div class="floating-text">
-                <strong>Sticky Rice & Tart</strong>
-                <span>Manis Legit Alami</span>
+
+            <!-- Spotlight Card 2: Mango Sticky Rice -->
+            <div class="spotlight-mini-card" data-recipe-id="asia-01">
+              <div class="mini-card-thumb">
+                <img src="assets/images/cat-asia.jpg" alt="Mango Sticky Rice" loading="lazy">
+                <span class="mini-cat-chip">🥢 Kuliner Asia</span>
+                <span class="mini-time-chip">⏱️ 35 mnt</span>
+              </div>
+              <div class="mini-card-info">
+                <h4 class="mini-card-title">Khao Niew Mamuang (Sticky Rice)</h4>
+                <div class="mini-card-author">👩‍🍳 Dapur Mangga • ⭐ Favorit</div>
+              </div>
+            </div>
+
+            <!-- Spotlight Card 3: Sambal Pencit Mangga Muda -->
+            <div class="spotlight-mini-card" data-recipe-id="nusantara-01">
+              <div class="mini-card-thumb">
+                <img src="assets/images/cat-nusantara.jpg" alt="Sambal Pencit Mangga Muda" loading="lazy">
+                <span class="mini-cat-chip">🌶️ Sambal Daerah</span>
+                <span class="mini-time-chip">⏱️ 15 mnt</span>
+              </div>
+              <div class="mini-card-info">
+                <h4 class="mini-card-title">Sambal Pencit Mangga Muda Pedas</h4>
+                <div class="mini-card-author">👩‍🍳 Dapur Mangga • ⭐ Pedas Mantap</div>
+              </div>
+            </div>
+
+            <!-- Spotlight Card 4: French Mango Rose Tart -->
+            <div class="spotlight-mini-card" data-recipe-id="pastry-01">
+              <div class="mini-card-thumb">
+                <img src="assets/images/cat-pastry.jpg" alt="French Mango Tart" loading="lazy">
+                <span class="mini-cat-chip">🍰 Pastry Mewah</span>
+                <span class="mini-time-chip">⏱️ 50 mnt</span>
+              </div>
+              <div class="mini-card-info">
+                <h4 class="mini-card-title">Classic French Mango Rose Tart</h4>
+                <div class="mini-card-author">👩‍🍳 Dapur Mangga • ⭐ Bintang 5</div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </section>
 
-    <!-- Category Filter Bar (Horizontal Sticky Carousel) -->
+    <!-- Category Filter Bar (Horizontal Sticky Cookpad Scrollable Pills) -->
     <section class="category-nav-section" id="kategori">
       <div class="container">
         <div class="category-scroll-container">
@@ -188,27 +257,27 @@
           </button>
           <button type="button" class="cat-pill" data-category="simpel" id="cat-simpel">
             <span class="cat-icon">⚡</span>
-            <span class="cat-name">Simpel & Harian</span>
+            <span class="cat-name">Simpel & Kilat</span>
             <span class="cat-count" id="count-simpel">25</span>
           </button>
           <button type="button" class="cat-pill" data-category="minuman" id="cat-minuman">
             <span class="cat-icon">🍹</span>
-            <span class="cat-name">Minuman Kekinian</span>
+            <span class="cat-name">Minuman Kafe</span>
             <span class="cat-count" id="count-minuman">25</span>
           </button>
           <button type="button" class="cat-pill" data-category="nusantara" id="cat-nusantara">
             <span class="cat-icon">🌶️</span>
-            <span class="cat-name">Daerah & Nusantara</span>
+            <span class="cat-name">Nusantara & Sambal</span>
             <span class="cat-count" id="count-nusantara">50</span>
           </button>
           <button type="button" class="cat-pill" data-category="asia" id="cat-asia">
             <span class="cat-icon">🥢</span>
-            <span class="cat-name">Hidangan Asia</span>
+            <span class="cat-name">Kuliner Asia</span>
             <span class="cat-count" id="count-asia">30</span>
           </button>
           <button type="button" class="cat-pill" data-category="barat" id="cat-barat">
             <span class="cat-icon">🌮</span>
-            <span class="cat-name">Barat & Latin</span>
+            <span class="cat-name">Western & Latin</span>
             <span class="cat-count" id="count-barat">20</span>
           </button>
           <button type="button" class="cat-pill" data-category="pastry" id="cat-pastry">
@@ -220,19 +289,19 @@
       </div>
     </section>
 
-    <!-- Filter & Sort Sub-Bar -->
+    <!-- Filter & Sort Sub-Bar (Cookpad Toolbar) -->
     <section class="filter-controls-section">
       <div class="container filter-container">
         <div class="filter-status-info">
-          <h2 class="active-category-title" id="activeCategoryHeading">Semua Resep Mangga</h2>
-          <span class="results-count-text" id="resultsCountText">Menampilkan 200 resep</span>
+          <h2 class="active-category-title" id="activeCategoryHeading">Semua Resep Olahan Mangga</h2>
+          <span class="results-count-text" id="resultsCountText">Menampilkan 200 resep teruji di Dapur Mangga</span>
         </div>
 
         <div class="filter-options-group">
           <!-- Difficulty Filter -->
           <div class="select-wrapper">
             <select id="difficultyFilter" class="filter-select" aria-label="Filter Tingkat Kesulitan">
-              <option value="all">Semua Tingkat Kesulitan</option>
+              <option value="all">🟢 Semua Kesulitan</option>
               <option value="Mudah">🟢 Mudah</option>
               <option value="Sedang">🟡 Sedang</option>
               <option value="Ahli">🔴 Tingkat Ahli</option>
@@ -242,7 +311,7 @@
           <!-- Time Filter -->
           <div class="select-wrapper">
             <select id="timeFilter" class="filter-select" aria-label="Filter Waktu Memasak">
-              <option value="all">Semua Durasi Waktu</option>
+              <option value="all">⏱️ Semua Durasi Waktu</option>
               <option value="quick">⚡ Kilat (< 15 menit)</option>
               <option value="medium">⏱️ Sedang (15 - 30 menit)</option>
               <option value="long">⌛ Santai (> 30 menit)</option>
@@ -252,7 +321,7 @@
           <!-- Sort Select -->
           <div class="select-wrapper">
             <select id="sortSelect" class="filter-select" aria-label="Urutan Resep">
-              <option value="default">Urutan Standar</option>
+              <option value="default">🌟 Rekomendasi Teratas</option>
               <option value="time-asc">⏱️ Waktu Tercepat</option>
               <option value="name-asc">🔤 Nama A - Z</option>
               <option value="name-desc">🔤 Nama Z - A</option>
@@ -262,51 +331,51 @@
 
           <!-- Reset Filter Button -->
           <button type="button" class="btn-reset-filters" id="resetFiltersBtn" style="display: none;" title="Reset Filter">
-            <span>Reset</span>
+            <span>✕ Reset Filter</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- Recipe Grid Section -->
+    <!-- Cookpad Recipe Grid Section -->
     <section class="recipes-grid-section">
       <div class="container">
         <!-- Recipe Cards Container -->
         <div class="recipe-grid" id="recipeGrid">
-          <!-- Dynamic Recipe Cards injected here by JS -->
+          <!-- Dynamic Cookpad Recipe Cards injected here by JS -->
         </div>
 
         <!-- Empty State (When no results found) -->
         <div class="empty-state" id="emptyState" style="display: none;">
           <div class="empty-icon">🥭🔍</div>
           <h3 class="empty-title">Resep Tidak Ditemukan</h3>
-          <p class="empty-desc">Tidak ada resep yang sesuai dengan kata kunci atau filter yang Anda pilih. Coba gunakan kata kunci lain seperti <em>"Thai"</em>, <em>"Puding"</em>, atau <em>"Sambal"</em>.</p>
+          <p class="empty-desc">Tidak ada resep yang sesuai dengan kata kunci atau filter yang Anda pilih. Coba gunakan kata kunci populer seperti <em>"Thai"</em>, <em>"Puding"</em>, <em>"Sambal"</em>, atau <em>"Sago"</em>.</p>
           <button type="button" class="btn btn-primary" id="emptyResetBtn">Tampilkan Semua 200 Resep</button>
         </div>
 
-        <!-- Pagination or Load More -->
+        <!-- Pagination / Load More -->
         <div class="load-more-container" id="loadMoreContainer" style="display: none;">
-          <button type="button" class="btn btn-outline" id="loadMoreBtn">
+          <button type="button" class="btn btn-load-more" id="loadMoreBtn">
             <span>Muat Lebih Banyak Resep</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- Feature Spotlight Banner -->
+    <!-- Feature Spotlight Banner (Chef's Tips & Variety Guide) -->
     <section class="spotlight-section">
       <div class="container spotlight-container">
         <div class="spotlight-image">
           <img src="assets/images/mango-showcase.jpg" alt="Showcase Dessert Mangga" class="showcase-img" loading="lazy">
         </div>
         <div class="spotlight-content">
-          <span class="spotlight-tag">Tips Dapur Koki</span>
+          <span class="spotlight-tag">💡 Tips Dapur Cookpad</span>
           <h2 class="spotlight-title">Kenali Jenis Mangga Terbaik Untuk Masakan Anda</h2>
           <p class="spotlight-desc">
             Kunci kelezatan olahan mangga terletak pada kecocokan varietas mangga. Gunakan <strong>Harum Manis</strong> untuk jus dan dessert lembut, <strong>Gedong Gincu</strong> untuk aroma wangi minuman tropis, serta <strong>Mangga Mengkal / Indramayu</strong> untuk sambal, rujak, dan asinan yang renyah berderak.
           </p>
           <button type="button" class="btn btn-primary" id="spotlightGuideBtn">
-            <span>Buka Panduan Kamus Mangga</span>
+            <span>Buka Kamus 8 Varietas Mangga</span>
           </button>
         </div>
       </div>
@@ -314,12 +383,15 @@
 
   </main>
 
-  <!-- Recipe Detail Modal -->
+  <!-- Recipe Detail Modal (Cookpad Recipe View) -->
   <div class="modal-overlay" id="recipeModalOverlay" aria-hidden="true" role="dialog" aria-labelledby="modalRecipeTitle">
     <div class="modal-window">
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <div class="modal-header-meta">
+      
+      <!-- Top Cover Image Frame -->
+      <div class="modal-cover-frame">
+        <img src="assets/images/cat-minuman.jpg" alt="Cover Foto Resep" class="modal-cover-img" id="modalCoverImage">
+        <div class="modal-cover-overlay"></div>
+        <div class="modal-cover-badges">
           <span class="modal-badge-cat" id="modalCategoryBadge">Olahan Simpel</span>
           <span class="modal-difficulty" id="modalDifficulty">🟢 Mudah</span>
         </div>
@@ -328,15 +400,31 @@
 
       <!-- Modal Body -->
       <div class="modal-body" id="modalBody">
-        <div class="modal-hero-bar">
-          <div class="modal-hero-icon" id="modalHeroIcon">🥭</div>
-          <div class="modal-hero-info">
-            <h2 class="modal-title" id="modalRecipeTitle">Nama Resep Mangga</h2>
+        
+        <!-- Cookpad Author Profile Bar -->
+        <div class="cookpad-author-row">
+          <div class="cookpad-author-avatar">👩‍🍳</div>
+          <div class="cookpad-author-info">
+            <div class="cookpad-author-name">Dapur Koki Mangga <span class="cookpad-verified-badge">✓ Resep Teruji</span></div>
+            <div class="cookpad-recipe-date">Ensiklopedia 200 Olahan Mangga Indonesia</div>
+          </div>
+          <div class="cookpad-top-actions">
+            <button type="button" class="btn-cookpad-fav" id="modalFavoriteBtn" title="Simpan ke Favorit">
+              <span class="util-icon">❤️</span> <span class="util-text">Simpan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recipe Title & Description -->
+        <div class="modal-title-wrapper">
+          <h2 class="modal-title" id="modalRecipeTitle">Nama Resep Mangga</h2>
+          <div class="modal-story-card">
+            <span class="story-quote-mark">“</span>
             <p class="modal-summary" id="modalSummary">Deskripsi lengkap kelezatan dan karakteristik resep.</p>
           </div>
         </div>
 
-        <!-- Meta Quick Specs -->
+        <!-- Meta Quick Specs (Cookpad 4-Cards Spec) -->
         <div class="recipe-quick-specs">
           <div class="spec-card">
             <span class="spec-icon">⏱️</span>
@@ -368,9 +456,8 @@
           </div>
         </div>
 
-        <!-- Action Bar: Portion Scaler & Bookmarks -->
+        <!-- Action Bar: Portion Scaler & Utility Tools -->
         <div class="modal-action-bar">
-          <!-- Portion Scaler -->
           <div class="portion-scaler-group">
             <span class="scaler-label">Porsi Saji:</span>
             <div class="scaler-controls">
@@ -382,14 +469,9 @@
             <span class="servings-display" id="modalServingsDisplay">(2 Porsi)</span>
           </div>
 
-          <!-- Utility Buttons -->
           <div class="modal-utility-buttons">
-            <button type="button" class="btn-util" id="modalFavoriteBtn" title="Simpan ke Favorit">
-              <span class="util-icon">⭐</span>
-              <span class="util-text">Favorit</span>
-            </button>
             <button type="button" class="btn-util" id="modalAddShoppingBtn" title="Tambah ke Daftar Belanja">
-              <span class="util-icon">📋</span>
+              <span class="util-icon">🛒</span>
               <span class="util-text">Beli Bahan</span>
             </button>
             <button type="button" class="btn-util" id="modalShareBtn" title="Bagikan Resep">
@@ -403,11 +485,16 @@
           </div>
         </div>
 
-        <!-- Ingredients Section with Interactive Checklist -->
+        <!-- Ingredients Section with Cookpad Checklist -->
         <div class="recipe-section-box">
           <div class="section-box-header">
-            <h3 class="section-box-title">🛒 Bahan-Bahan Diperlukan</h3>
-            <span class="checklist-hint">Bisa dicentang saat menyiapkan bahan:</span>
+            <div class="section-title-wrap">
+              <h3 class="section-box-title">🛒 Bahan-Bahan Diperlukan</h3>
+              <span class="checklist-hint">Bisa dicentang saat menyiapkan bahan di meja dapur:</span>
+            </div>
+            <button type="button" class="btn-add-all-ingredients" id="modalAddAllIngBtn" title="Masukkan semua bahan ke daftar belanja">
+              + Masukkan ke Belanja
+            </button>
           </div>
           <ul class="ingredients-list" id="modalIngredientsList">
             <!-- Dynamic Ingredients with Scaled amounts injected here -->
@@ -417,8 +504,10 @@
         <!-- Step-by-Step Cooking Instructions with Checkable Steps & Timer -->
         <div class="recipe-section-box">
           <div class="section-box-header">
-            <h3 class="section-box-title">👩‍🍳 Langkah-Langkah Pembuatan</h3>
-            <span class="checklist-hint">Centang langkah yang sudah selesai:</span>
+            <div class="section-title-wrap">
+              <h3 class="section-box-title">👩‍🍳 Langkah-Langkah Pembuatan</h3>
+              <span class="checklist-hint">Centang langkah yang sudah selesai:</span>
+            </div>
           </div>
           <ol class="cooking-steps-list" id="modalStepsList">
             <!-- Dynamic cooking steps injected here -->
@@ -430,7 +519,7 @@
           <div class="timer-header">
             <div class="timer-title">
               <span class="timer-icon">⏱️</span>
-              <strong>Timer Dapur Pintar</strong>
+              <strong>Timer Dapur Pintar Cookpad</strong>
             </div>
             <div class="timer-quick-preset">
               <button type="button" class="timer-preset-btn" data-sec="180">+3 Menit</button>
@@ -441,7 +530,7 @@
           <div class="timer-display-bar">
             <span class="timer-time" id="timerDisplay">00:00</span>
             <div class="timer-buttons">
-              <button type="button" class="btn btn-sm btn-primary" id="timerStartBtn">Mulai</button>
+              <button type="button" class="btn btn-sm btn-primary" id="timerStartBtn">Mulai Timer</button>
               <button type="button" class="btn btn-sm btn-outline" id="timerResetBtn">Reset</button>
             </div>
           </div>
@@ -456,9 +545,48 @@
           </div>
         </div>
 
+        <!-- Cooksnap Reaction Box (Cookpad signature) -->
+        <div class="cookpad-reaction-box" id="modalReactionBox">
+          <div class="reaction-box-title">
+            <span>🎉</span>
+            <strong>Sudah Mencoba Resep Ini?</strong>
+            <span class="reaction-subtitle">Beri apresiasi rasa untuk resep ini:</span>
+          </div>
+          <div class="reaction-buttons-grid">
+            <button type="button" class="reaction-btn" data-type="enak">
+              <span class="reaction-emoji">😍</span>
+              <span class="reaction-text">Enak Banget</span>
+              <span class="reaction-count">142</span>
+            </button>
+            <button type="button" class="reaction-btn" data-type="nagih">
+              <span class="reaction-emoji">🤤</span>
+              <span class="reaction-text">Bikin Nagih</span>
+              <span class="reaction-count">98</span>
+            </button>
+            <button type="button" class="reaction-btn" data-type="praktis">
+              <span class="reaction-emoji">👌</span>
+              <span class="reaction-text">Super Praktis</span>
+              <span class="reaction-count">76</span>
+            </button>
+            <button type="button" class="reaction-btn" data-type="segar">
+              <span class="reaction-emoji">🥭</span>
+              <span class="reaction-text">Juara Mangga</span>
+              <span class="reaction-count">115</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Tags List -->
         <div class="modal-tags-container" id="modalTagsContainer">
           <!-- Dynamic tags injected here -->
+        </div>
+
+        <!-- Related Recipes / Kamu Mungkin Suka (Cookpad style) -->
+        <div class="modal-related-container" id="modalRelatedContainer">
+          <h4 class="related-heading">✨ Resep Olahan Mangga Terkait:</h4>
+          <div class="related-cards-grid" id="modalRelatedCardsGrid">
+            <!-- Dynamic related cards injected here -->
+          </div>
         </div>
 
       </div>
@@ -469,7 +597,7 @@
   <div class="modal-overlay" id="favoritesModalOverlay" aria-hidden="true" role="dialog">
     <div class="modal-window modal-medium">
       <div class="modal-header">
-        <h2 class="modal-title">⭐ Resep Favorit Saya</h2>
+        <h2 class="modal-title">⭐ Resep Tersimpan Saya</h2>
         <button type="button" class="modal-close-btn" id="closeFavoritesModalBtn">&times;</button>
       </div>
       <div class="modal-body">
@@ -484,7 +612,7 @@
   <div class="modal-overlay" id="shoppingModalOverlay" aria-hidden="true" role="dialog">
     <div class="modal-window modal-medium">
       <div class="modal-header">
-        <h2 class="modal-title">📋 Daftar Belanja Bahan</h2>
+        <h2 class="modal-title">🛒 Daftar Belanja Bahan Dapur</h2>
         <button type="button" class="modal-close-btn" id="closeShoppingModalBtn">&times;</button>
       </div>
       <div class="modal-body">
@@ -507,7 +635,7 @@
   <div class="modal-overlay" id="mangoGuideModalOverlay" aria-hidden="true" role="dialog">
     <div class="modal-window modal-large">
       <div class="modal-header">
-        <h2 class="modal-title">🥭 Kamus & Panduan Varietas Mangga</h2>
+        <h2 class="modal-title">🥭 Kamus & Panduan 8 Varietas Mangga</h2>
         <button type="button" class="modal-close-btn" id="closeMangoGuideModalBtn">&times;</button>
       </div>
       <div class="modal-body">
@@ -540,7 +668,7 @@
     </div>
   </div>
 
-  <!-- Mobile Bottom Navigation Bar -->
+  <!-- Mobile Bottom Navigation Bar (Cookpad App Feel) -->
   <nav class="mobile-bottom-nav" aria-label="Navigasi Bawah Ponsel">
     <a href="#home" class="mobile-nav-item active" id="mobNavHome">
       <span class="mob-icon">🏠</span>
@@ -556,11 +684,11 @@
     </button>
     <button type="button" class="mobile-nav-item" id="mobNavFav">
       <span class="mob-icon">⭐</span>
-      <span class="mob-label">Favorit</span>
+      <span class="mob-label">Tersimpan</span>
       <span class="mob-badge" id="mobFavBadge">0</span>
     </button>
     <button type="button" class="mobile-nav-item" id="mobNavShop">
-      <span class="mob-icon">📋</span>
+      <span class="mob-icon">🛒</span>
       <span class="mob-label">Belanja</span>
       <span class="mob-badge" id="mobShopBadge">0</span>
     </button>
@@ -571,39 +699,39 @@
     <div class="container footer-container">
       <div class="footer-brand">
         <div class="footer-logo-row">
-          <img src="assets/images/mango-logo.jpg" alt="Logo" width="36" height="36" class="footer-logo">
+          <img src="assets/images/mango-logo.jpg" alt="Logo" width="40" height="40" class="footer-logo">
           <span class="footer-brand-title">Resep All Manggo</span>
         </div>
         <p class="footer-text">
-          Ensiklopedia 200 resep mangga terlengkap di Indonesia. Didedikasikan untuk para pecinta kuliner tropis, pembuat kue rumahan, dan barista kafe di seluruh Nusantara.
+          Ensiklopedia 200 resep mangga terlengkap di Indonesia bergaya Cookpad. Didedikasikan untuk para pecinta kuliner tropis, pembuat kue rumahan, dan barista kafe di seluruh Nusantara.
         </p>
       </div>
 
       <div class="footer-links-col">
-        <h4 class="footer-heading">Kategori</h4>
+        <h4 class="footer-heading">Kategori Masakan</h4>
         <ul class="footer-link-list">
-          <li><a href="#kategori" onclick="window.filterByCategory('simpel')">Simpel & Harian (25)</a></li>
-          <li><a href="#kategori" onclick="window.filterByCategory('minuman')">Minuman Kekinian (25)</a></li>
-          <li><a href="#kategori" onclick="window.filterByCategory('nusantara')">Daerah & Nusantara (50)</a></li>
-          <li><a href="#kategori" onclick="window.filterByCategory('asia')">Kuliner Asia (30)</a></li>
-          <li><a href="#kategori" onclick="window.filterByCategory('barat')">Barat & Latin (20)</a></li>
-          <li><a href="#kategori" onclick="window.filterByCategory('pastry')">Pastry & Dessert (50)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('simpel')">⚡ Simpel & Kilat (25)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('minuman')">🍹 Minuman Kafe (25)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('nusantara')">🌶️ Nusantara & Sambal (50)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('asia')">🥢 Kuliner Asia (30)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('barat')">🌮 Western & Latin (20)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('pastry')">🍰 Pastry & Dessert (50)</a></li>
         </ul>
       </div>
 
       <div class="footer-links-col">
-        <h4 class="footer-heading">Fitur Pintar</h4>
+        <h4 class="footer-heading">Fitur Pintar Dapur</h4>
         <ul class="footer-link-list">
-          <li><a href="#" id="footerMangoGuideLink">Kamus Jenis Mangga</a></li>
+          <li><a href="#" id="footerMangoGuideLink">Kamus 8 Varietas Mangga</a></li>
           <li><a href="#" id="footerRandomLink">Inspirasi Resep Acak</a></li>
           <li><a href="#" id="footerShoppingLink">Daftar Belanja Bahan</a></li>
-          <li><a href="#" id="footerFavoritesLink">Koleksi Favorit</a></li>
+          <li><a href="#" id="footerFavoritesLink">Resep Tersimpan Saya</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <span>© 2026 Resep All Manggo. Dibuat dengan cinta rasa mangga tropis.</span>
+        <span>© 2026 Resep All Manggo. Dibuat dengan cinta rasa mangga tropis ala Cookpad.</span>
         <span>200 Resep Teruji & Lengkap</span>
       </div>
     </div>
@@ -613,7 +741,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- JavaScript: First load Recipe Data, then Application Logic -->
-  <script src="js/recipes-data.js?v=2.0"></script>
-  <script src="js/app.js?v=2.0"></script>
+  <script src="js/recipes-data.js?v=2.2"></script>
+  <script src="js/app.js?v=2.2"></script>
 </body>
 </html>

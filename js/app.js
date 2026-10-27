@@ -1,6 +1,6 @@
 /**
- * RESEP ALL MANGGO - Main Application Script
- * Interactive recipe encyclopedia for 200 mango culinary creations.
+ * RESEP ALL MANGGO - Cookpad-Style Application Script
+ * Interactive culinary encyclopedia for 200 mango recipes with Cookpad UX.
  */
 
 (function () {
@@ -22,16 +22,26 @@
     'pastry': 'pastry'
   };
 
+  // High-Resolution Food Photography Category Images
+  const CATEGORY_IMAGES = {
+    'minuman': 'assets/images/cat-minuman.jpg',
+    'nusantara': 'assets/images/cat-nusantara.jpg',
+    'asia': 'assets/images/cat-asia.jpg',
+    'pastry': 'assets/images/cat-pastry.jpg',
+    'simpel': 'assets/images/cat-simpel.jpg',
+    'barat': 'assets/images/cat-barat.jpg'
+  };
+
   function getCategoryKey(cat) {
     if (!cat) return 'simpel';
     if (CATEGORY_MAP[cat]) return CATEGORY_MAP[cat];
     const lower = cat.toLowerCase();
-    if (lower.includes('simpel') || lower.includes('harian')) return 'simpel';
-    if (lower.includes('minum')) return 'minuman';
-    if (lower.includes('nusantara') || lower.includes('daerah')) return 'nusantara';
-    if (lower.includes('asia')) return 'asia';
+    if (lower.includes('simpel') || lower.includes('harian') || lower.includes('kilat')) return 'simpel';
+    if (lower.includes('minum') || lower.includes('jus') || lower.includes('shake')) return 'minuman';
+    if (lower.includes('nusantara') || lower.includes('daerah') || lower.includes('sambal')) return 'nusantara';
+    if (lower.includes('asia') || lower.includes('thai') || lower.includes('filipina')) return 'asia';
     if (lower.includes('barat') || lower.includes('latin') || lower.includes('meksiko')) return 'barat';
-    if (lower.includes('pastry') || lower.includes('bakery') || lower.includes('dessert')) return 'pastry';
+    if (lower.includes('pastry') || lower.includes('bakery') || lower.includes('dessert') || lower.includes('kue')) return 'pastry';
     return 'simpel';
   }
 
@@ -39,8 +49,8 @@
     const catKey = r.categoryKey || getCategoryKey(r.category);
     return {
       id: r.id,
-      title: r.title || r.name || 'Resep Mangga',
-      name: r.title || r.name || 'Resep Mangga',
+      title: r.title || r.name || 'Resep Olahan Mangga',
+      name: r.title || r.name || 'Resep Olahan Mangga',
       desc: r.desc || r.summary || '',
       summary: r.desc || r.summary || '',
       category: r.category || 'Olahan Simpel & Harian',
@@ -52,17 +62,17 @@
       totalMinutes: typeof r.totalMinutes === 'number' ? r.totalMinutes : 15,
       servings: r.servings || 2,
       difficulty: r.difficulty || 'Mudah',
-      calories: r.calories || '150 kkal',
-      mangoType: r.mangoType || 'Harum Manis',
-      tips: r.tips || r.chefTips || 'Pilih mangga matang pohon berkualitas untuk cita rasa terbaik.',
-      chefTips: r.tips || r.chefTips || 'Pilih mangga matang pohon berkualitas untuk cita rasa terbaik.',
+      calories: r.calories || '165 kkal',
+      mangoType: r.mangoType || 'Harum Manis Matang',
+      tips: r.tips || r.chefTips || 'Pilih mangga berkualitas matang pohon untuk hasil rasa terbaik.',
+      chefTips: r.tips || r.chefTips || 'Pilih mangga berkualitas matang pohon untuk hasil rasa terbaik.',
       tags: Array.isArray(r.tags) ? r.tags : [],
       ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
       steps: Array.isArray(r.steps) ? r.steps : []
     };
   }
 
-  // State Management
+  // Application State
   const state = {
     allRecipes: [],
     filteredRecipes: [],
@@ -92,7 +102,7 @@
       name: 'Harum Manis',
       origin: 'Probolinggo, Jawa Timur',
       sweetness: '⭐⭐⭐⭐⭐ (16-18° Brix)',
-      texture: 'Daging tebal, sangat lembut, nyaris tanpa serat, aroma wangi legit.',
+      texture: 'Daging tebal, sangat lembut, nyaris tanpa serat, aroma wangi legit khas tropis.',
       bestFor: 'Jus kental, Panna Cotta, Mango Sticky Rice, Cheesecake, Smoothie Bowl.'
     },
     {
@@ -100,7 +110,7 @@
       origin: 'Cirebon & Majalengka',
       sweetness: '⭐⭐⭐⭐☆ (14-16° Brix)',
       texture: 'Kulit merah keemasan memikat, serat halus kenyal, rasa manis asam segar eksotis.',
-      bestFor: 'Cocktail/Mocktail, Mango Mojito, Saus Asam Manis Gurame, Sorbet, Es Lilin.'
+      bestFor: 'Mocktail kafe, Mango Mojito, Saus Asam Manis Gurame, Sorbet, Es Lilin.'
     },
     {
       name: 'Manalagi',
@@ -127,7 +137,7 @@
       name: 'Nam Dok Mai',
       origin: 'Thailand',
       sweetness: '⭐⭐⭐⭐⭐ (17-19° Brix)',
-      texture: 'Biji sangat tipis, daging kuning emas berkilau, tekstur silky meleleh di mulut.',
+      texture: 'Biji sangat tipis, daging kuning emas berkilau, tekstur silky meleleh di lidah.',
       bestFor: 'Khao Niew Mamuang (Mango Sticky Rice), Mango Pillow Crepes, Mango Tart.'
     },
     {
@@ -184,12 +194,12 @@
     heroRandomBtn: document.getElementById('heroRandomBtn'),
     exploreAllBtn: document.getElementById('exploreAllBtn'),
     
-    // Recipe Detail Modal
+    // Recipe Detail Modal Elements
     recipeModalOverlay: document.getElementById('recipeModalOverlay'),
+    modalCoverImage: document.getElementById('modalCoverImage'),
     modalCloseBtn: document.getElementById('modalCloseBtn'),
     modalCategoryBadge: document.getElementById('modalCategoryBadge'),
     modalDifficulty: document.getElementById('modalDifficulty'),
-    modalHeroIcon: document.getElementById('modalHeroIcon'),
     modalRecipeTitle: document.getElementById('modalRecipeTitle'),
     modalSummary: document.getElementById('modalSummary'),
     modalPrepTime: document.getElementById('modalPrepTime'),
@@ -203,9 +213,11 @@
     modalTagsContainer: document.getElementById('modalTagsContainer'),
     modalFavoriteBtn: document.getElementById('modalFavoriteBtn'),
     modalAddShoppingBtn: document.getElementById('modalAddShoppingBtn'),
+    modalAddAllIngBtn: document.getElementById('modalAddAllIngBtn'),
     modalShareBtn: document.getElementById('modalShareBtn'),
     modalPrintBtn: document.getElementById('modalPrintBtn'),
     scalerBtns: document.querySelectorAll('.scaler-btn'),
+    modalRelatedCardsGrid: document.getElementById('modalRelatedCardsGrid'),
     
     // Timer Widget
     kitchenTimerWidget: document.getElementById('kitchenTimerWidget'),
@@ -320,7 +332,7 @@
   }
 
   // ===================================================================
-  // FILTERING, SEARCHING & SORTING
+  // FILTERING, SEARCHING & SORTING (COOKPAD STYLE)
   // ===================================================================
   function applyFilters() {
     let result = [...state.allRecipes];
@@ -378,18 +390,18 @@
   function updateFilterUI() {
     const categoryNames = {
       all: 'Semua Resep Olahan Mangga',
-      simpel: 'Olahan Simpel & Harian (Praktis)',
-      minuman: 'Minuman Kekinian & Kafe',
-      nusantara: 'Resep Daerah & Nusantara',
-      asia: 'Kuliner Mangga Khas Asia',
-      barat: 'Hidangan Barat, Meksiko & Karibia',
-      pastry: 'Pastry, Bakery & Dessert Mewah'
+      simpel: '⚡ Resep Simpel & Kilat',
+      minuman: '🍹 Minuman Kafe & Segar',
+      nusantara: '🌶️ Resep Daerah & Nusantara',
+      asia: '🥢 Kuliner Khas Asia',
+      barat: '🌮 Western & Latin Mango',
+      pastry: '🍰 Pastry & Dessert Mewah'
     };
     if (DOM.activeCategoryHeading) {
-      DOM.activeCategoryHeading.textContent = categoryNames[state.currentCategory] || 'Koleksi Resep Mangga';
+      DOM.activeCategoryHeading.textContent = categoryNames[state.currentCategory] || 'Koleksi Resep Olahan Mangga';
     }
     if (DOM.resultsCountText) {
-      DOM.resultsCountText.textContent = `Menampilkan ${state.filteredRecipes.length} dari ${state.allRecipes.length} resep`;
+      DOM.resultsCountText.textContent = `Menampilkan ${state.filteredRecipes.length} dari ${state.allRecipes.length} resep teruji`;
     }
 
     // Clear search buttons
@@ -399,7 +411,7 @@
 
     // Reset button visibility
     const isFiltered = state.currentCategory !== 'all' || hasSearch || state.difficultyFilter !== 'all' || state.timeFilter !== 'all' || state.sortBy !== 'default';
-    if (DOM.resetFiltersBtn) DOM.resetFiltersBtn.style.display = isFiltered ? 'inline-block' : 'none';
+    if (DOM.resetFiltersBtn) DOM.resetFiltersBtn.style.display = isFiltered ? 'inline-flex' : 'none';
   }
 
   // Global helper for footer links
@@ -414,7 +426,7 @@
   };
 
   // ===================================================================
-  // RECIPE GRID RENDERING
+  // COOKPAD RECIPE GRID RENDERING
   // ===================================================================
   function renderRecipeGrid() {
     if (!DOM.recipeGrid) return;
@@ -438,12 +450,12 @@
 
     DOM.recipeGrid.appendChild(fragment);
 
-    // Show or hide Load More
+    // Show or hide Load More button
     if (DOM.loadMoreContainer) {
       if (state.displayedCount < state.filteredRecipes.length) {
         DOM.loadMoreContainer.style.display = 'flex';
         if (DOM.loadMoreBtn) {
-          DOM.loadMoreBtn.innerHTML = `<span>Tampilkan Lebih Banyak (${state.filteredRecipes.length - state.displayedCount} tersisa)</span>`;
+          DOM.loadMoreBtn.innerHTML = `<span>Muat Lebih Banyak (${state.filteredRecipes.length - state.displayedCount} resep tersisa)</span>`;
         }
       } else {
         DOM.loadMoreContainer.style.display = 'none';
@@ -451,6 +463,7 @@
     }
   }
 
+  // Create Authentic Cookpad Recipe Card
   function createRecipeCardElement(recipe) {
     const card = document.createElement('article');
     card.className = 'recipe-card';
@@ -459,38 +472,55 @@
     const isFav = state.favorites.includes(recipe.id);
 
     const categoryLabels = {
-      simpel: 'Simpel & Harian',
-      minuman: 'Minuman Segar',
-      nusantara: 'Nusantara',
-      asia: 'Kuliner Asia',
-      barat: 'Barat & Latin',
-      pastry: 'Pastry & Dessert'
+      simpel: '⚡ Simpel & Kilat',
+      minuman: '🍹 Minuman Kafe',
+      nusantara: '🌶️ Nusantara',
+      asia: '🥢 Kuliner Asia',
+      barat: '🌮 Western & Latin',
+      pastry: '🍰 Pastry & Dessert'
     };
 
-    const diffIcon = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Ahli');
+    const diffBadge = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Ahli');
+    const photoUrl = CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-simpel.jpg';
+
+    // Extract top 3 ingredients for Cookpad's signature ingredients snippet
+    let ingPreview = '';
+    if (recipe.ingredients && recipe.ingredients.length > 0) {
+      ingPreview = recipe.ingredients.slice(0, 3).map(i => i.name).join(' • ');
+    } else {
+      ingPreview = 'Mangga manis • Susu / Santan • Topping lezat';
+    }
 
     card.innerHTML = `
-      <div class="card-banner">
-        <div class="card-decor-circle"></div>
+      <div class="card-thumb-frame">
+        <img src="${photoUrl}" alt="${escapeHTML(recipe.title)}" class="card-thumb-img" loading="lazy">
         <span class="card-cat-badge">${categoryLabels[recipe.categoryKey] || recipe.category}</span>
-        <button type="button" class="card-fav-btn ${isFav ? 'is-favorite' : ''}" data-id="${recipe.id}" aria-label="Simpan Favorit" title="${isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit'}">
+        <button type="button" class="card-fav-btn ${isFav ? 'is-favorite' : ''}" data-id="${recipe.id}" aria-label="Simpan Favorit" title="${isFav ? 'Hapus dari Tersimpan' : 'Simpan Resep'}">
           ${isFav ? '❤️' : '🤍'}
         </button>
-        <span class="card-emoji-hero">${recipe.icon || '🥭'}</span>
+        <span class="card-time-badge">⏱️ ${recipe.totalMinutes} mnt</span>
       </div>
       <div class="card-content">
-        <h3 class="card-title">${escapeHTML(recipe.title)}</h3>
-        <p class="card-summary">${escapeHTML(recipe.desc)}</p>
-        <div class="card-chips-row">
-          <span class="chip-item">⏱️ ${recipe.totalMinutes} mnt</span>
-          <span class="chip-item">🥗 ${recipe.calories}</span>
-          <span class="chip-item">👥 ${recipe.servings} Porsi</span>
+        <div class="card-author-header">
+          <span class="card-avatar">👩‍🍳</span>
+          <span class="card-author-name">Dapur Mangga</span>
+          <span class="card-author-dot">•</span>
+          <span class="card-tested-tag">✓ Teruji</span>
         </div>
+        <h3 class="card-title">${escapeHTML(recipe.title)}</h3>
+        <div class="card-ing-snippet" title="${escapeHTML(ingPreview)}">
+          <span class="ing-snippet-icon">🛒</span>
+          <span class="ing-snippet-text">${escapeHTML(ingPreview)}</span>
+        </div>
+        <p class="card-summary">${escapeHTML(recipe.desc)}</p>
         <div class="card-footer">
-          <span class="card-difficulty">${diffIcon}</span>
-          <span class="btn-card-action">
+          <div class="card-footer-tags">
+            <span class="card-diff-tag">${diffBadge}</span>
+            <span class="card-cal-tag">🥗 ${recipe.calories}</span>
+          </div>
+          <span class="card-action-link">
             <span>Lihat Resep</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </span>
@@ -516,7 +546,7 @@
   }
 
   // ===================================================================
-  // RECIPE DETAIL MODAL
+  // COOKPAD RECIPE DETAIL MODAL
   // ===================================================================
   function openRecipeModal(recipe) {
     state.currentRecipe = recipe;
@@ -525,24 +555,27 @@
     state.checkedSteps.clear();
 
     const categoryTitles = {
-      simpel: 'Olahan Simpel & Harian',
-      minuman: 'Minuman Kekinian',
-      nusantara: 'Resep Daerah & Nusantara',
-      asia: 'Hidangan Khas Asia',
-      barat: 'Hidangan Barat & Latin',
-      pastry: 'Pastry & Dessert Mewah'
+      simpel: '⚡ Olahan Simpel & Kilat',
+      minuman: '🍹 Minuman Kafe & Segar',
+      nusantara: '🌶️ Resep Daerah & Nusantara',
+      asia: '🥢 Kuliner Khas Asia',
+      barat: '🌮 Hidangan Western & Latin',
+      pastry: '🍰 Pastry & Dessert Mewah'
     };
 
+    if (DOM.modalCoverImage) {
+      DOM.modalCoverImage.src = CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-simpel.jpg';
+      DOM.modalCoverImage.alt = recipe.title;
+    }
     if (DOM.modalCategoryBadge) DOM.modalCategoryBadge.textContent = categoryTitles[recipe.categoryKey] || recipe.category;
     if (DOM.modalDifficulty) DOM.modalDifficulty.textContent = recipe.difficulty === 'Mudah' ? '🟢 Mudah' : (recipe.difficulty === 'Sedang' ? '🟡 Sedang' : '🔴 Tingkat Ahli');
-    if (DOM.modalHeroIcon) DOM.modalHeroIcon.textContent = recipe.icon || '🥭';
     if (DOM.modalRecipeTitle) DOM.modalRecipeTitle.textContent = recipe.title;
     if (DOM.modalSummary) DOM.modalSummary.textContent = recipe.desc;
 
     if (DOM.modalPrepTime) DOM.modalPrepTime.textContent = recipe.prepTime;
     if (DOM.modalCookTime) DOM.modalCookTime.textContent = recipe.cookTime;
     if (DOM.modalCalories) DOM.modalCalories.textContent = recipe.calories;
-    if (DOM.modalMangoType) DOM.modalMangoType.textContent = recipe.mangoType || 'Harum Manis';
+    if (DOM.modalMangoType) DOM.modalMangoType.textContent = recipe.mangoType || 'Harum Manis Matang';
 
     // Scaler Buttons reset
     if (DOM.scalerBtns) {
@@ -555,7 +588,7 @@
     renderModalSteps();
 
     // Chef tips & Tags
-    if (DOM.modalChefTipsText) DOM.modalChefTipsText.textContent = recipe.tips || 'Pilih mangga berkualitas terbaik untuk kenikmatan maksimal.';
+    if (DOM.modalChefTipsText) DOM.modalChefTipsText.textContent = recipe.tips || 'Pilih mangga berkualitas matang pohon untuk hasil rasa terbaik.';
     
     if (DOM.modalTagsContainer) {
       DOM.modalTagsContainer.innerHTML = '';
@@ -569,6 +602,7 @@
       }
     }
 
+    renderRelatedRecipes(recipe);
     updateModalFavoriteBtnState();
     resetKitchenTimer();
 
@@ -577,6 +611,10 @@
       DOM.recipeModalOverlay.setAttribute('aria-hidden', 'false');
     }
     document.body.style.overflow = 'hidden';
+
+    // Reset scroll of modal body to top
+    const modalBody = document.getElementById('modalBody');
+    if (modalBody) modalBody.scrollTop = 0;
   }
 
   function closeRecipeModal() {
@@ -618,7 +656,7 @@
         scaledAmount = (ing.amount || '') + (ing.unit ? ' ' + ing.unit : '');
       }
 
-      const notes = ing.notes ? ` <span style="font-size:0.78rem; opacity:0.8;">(${escapeHTML(ing.notes)})</span>` : '';
+      const notes = ing.notes ? ` <span class="ing-notes">(${escapeHTML(ing.notes)})</span>` : '';
 
       li.innerHTML = `
         <span class="custom-checkbox">${state.checkedIngredients.has(index) ? '✓' : ''}</span>
@@ -656,24 +694,91 @@
         li.classList.add('is-checked');
       }
 
+      // Check if step mentions minutes
+      const match = step.match(/(\d+)\s*(?:-|–)?\s*(\d+)?\s*menit/i);
+      let timerBtnHTML = '';
+      if (match) {
+        const mins = parseInt(match[1], 10);
+        if (mins > 0 && mins <= 120) {
+          timerBtnHTML = `
+            <button type="button" class="btn-step-timer" data-sec="${mins * 60}" title="Mulai timer otomatis">
+              ⏱️ Pasang Timer ${mins} Menit
+            </button>
+          `;
+        }
+      }
+
       li.innerHTML = `
         <span class="step-number">${state.checkedSteps.has(index) ? '✓' : (index + 1)}</span>
-        <p class="step-text">${escapeHTML(step)}</p>
+        <div class="step-content-wrap">
+          <p class="step-text">${escapeHTML(step)}</p>
+          ${timerBtnHTML}
+        </div>
       `;
 
-      li.addEventListener('click', () => {
+      // Step text click toggles completion
+      const stepText = li.querySelector('.step-text');
+      const stepNumber = li.querySelector('.step-number');
+
+      const toggleCheck = () => {
         if (state.checkedSteps.has(index)) {
           state.checkedSteps.delete(index);
           li.classList.remove('is-checked');
-          li.querySelector('.step-number').textContent = index + 1;
+          stepNumber.textContent = index + 1;
         } else {
           state.checkedSteps.add(index);
           li.classList.add('is-checked');
-          li.querySelector('.step-number').textContent = '✓';
+          stepNumber.textContent = '✓';
         }
-      });
+      };
+
+      stepText.addEventListener('click', toggleCheck);
+      stepNumber.addEventListener('click', toggleCheck);
+
+      // Step timer button trigger
+      const stepTimerBtn = li.querySelector('.btn-step-timer');
+      if (stepTimerBtn) {
+        stepTimerBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sec = parseInt(stepTimerBtn.getAttribute('data-sec'), 10);
+          state.timer.remainingSeconds = sec;
+          startKitchenTimer();
+          showToast(`⏱️ Timer dapur ${Math.round(sec / 60)} menit dimulai!`);
+          const timerEl = document.getElementById('kitchenTimerWidget');
+          if (timerEl) timerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      }
 
       DOM.modalStepsList.appendChild(li);
+    });
+  }
+
+  // Render Cookpad Related Recipes
+  function renderRelatedRecipes(currentRecipe) {
+    if (!DOM.modalRelatedCardsGrid) return;
+    DOM.modalRelatedCardsGrid.innerHTML = '';
+
+    const sameCat = state.allRecipes.filter(r => r.id !== currentRecipe.id && r.categoryKey === currentRecipe.categoryKey);
+    const relatedList = (sameCat.length >= 3 ? sameCat : state.allRecipes.filter(r => r.id !== currentRecipe.id)).slice(0, 3);
+
+    relatedList.forEach(rel => {
+      const card = document.createElement('div');
+      card.className = 'modal-related-card';
+      const photo = CATEGORY_IMAGES[rel.categoryKey] || 'assets/images/cat-simpel.jpg';
+      card.innerHTML = `
+        <div class="rel-thumb">
+          <img src="${photo}" alt="${escapeHTML(rel.title)}" loading="lazy">
+          <span class="rel-time">⏱️ ${rel.totalMinutes} mnt</span>
+        </div>
+        <div class="rel-info">
+          <div class="rel-title">${escapeHTML(rel.title)}</div>
+          <div class="rel-meta">🟢 ${rel.difficulty} • 🥗 ${rel.calories}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        openRecipeModal(rel);
+      });
+      DOM.modalRelatedCardsGrid.appendChild(card);
     });
   }
 
@@ -689,8 +794,8 @@
     if (!state.currentRecipe || !DOM.modalFavoriteBtn) return;
     const isFav = state.favorites.includes(state.currentRecipe.id);
     DOM.modalFavoriteBtn.classList.toggle('is-active', isFav);
-    DOM.modalFavoriteBtn.querySelector('.util-icon').textContent = isFav ? '❤️' : '⭐';
-    DOM.modalFavoriteBtn.querySelector('.util-text').textContent = isFav ? 'Tersimpan' : 'Favorit';
+    DOM.modalFavoriteBtn.querySelector('.util-icon').textContent = isFav ? '❤️' : '🤍';
+    DOM.modalFavoriteBtn.querySelector('.util-text').textContent = isFav ? 'Tersimpan' : 'Simpan';
   }
 
   // ===================================================================
@@ -725,9 +830,9 @@
         } else {
           clearInterval(state.timer.interval);
           state.timer.isRunning = false;
-          if (DOM.timerStartBtn) DOM.timerStartBtn.textContent = 'Mulai';
+          if (DOM.timerStartBtn) DOM.timerStartBtn.textContent = 'Mulai Timer';
           playChimeSound();
-          showToast('⏰ Waktu memasak telah selesai!');
+          showToast('⏰ Waktu memasak telah selesai! Hidangan siap disajikan.');
         }
       }, 1000);
     }
@@ -739,7 +844,7 @@
     state.timer.isRunning = false;
     state.timer.remainingSeconds = 0;
     if (DOM.timerStartBtn) {
-      DOM.timerStartBtn.textContent = 'Mulai';
+      DOM.timerStartBtn.textContent = 'Mulai Timer';
       DOM.timerStartBtn.classList.remove('btn-secondary');
       DOM.timerStartBtn.classList.add('btn-primary');
     }
@@ -782,16 +887,16 @@
   }
 
   // ===================================================================
-  // FAVORITES SYSTEM
+  // FAVORITES SYSTEM (COOKPAD BOOKMARKS)
   // ===================================================================
   function toggleFavorite(recipeId) {
     const idx = state.favorites.indexOf(recipeId);
     if (idx > -1) {
       state.favorites.splice(idx, 1);
-      showToast('Dihapus dari Favorit');
+      showToast('Dihapus dari Resep Tersimpan');
     } else {
       state.favorites.push(recipeId);
-      showToast('⭐ Ditambahkan ke Favorit!');
+      showToast('⭐ Disimpan ke Resep Favorit Anda!');
     }
     localStorage.setItem('mango_favorites', JSON.stringify(state.favorites));
     updateBadges();
@@ -815,8 +920,8 @@
       DOM.favoritesListContainer.innerHTML = `
         <div class="empty-state" style="padding: 30px 10px;">
           <div class="empty-icon">⭐</div>
-          <h4 class="empty-title">Belum Ada Resep Favorit</h4>
-          <p class="empty-desc">Klik ikon bintang/hati pada resep apa pun untuk menyimpannya ke daftar ini.</p>
+          <h4 class="empty-title">Belum Ada Resep Tersimpan</h4>
+          <p class="empty-desc">Klik tombol hati / simpan pada resep olahan mangga apa pun untuk menyimpannya ke daftar ini.</p>
         </div>
       `;
     } else {
@@ -829,12 +934,13 @@
 
         const row = document.createElement('div');
         row.className = 'fav-item-row';
+        const photo = CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-simpel.jpg';
         row.innerHTML = `
           <div class="fav-item-info">
-            <span class="fav-item-emoji">${recipe.icon || '🥭'}</span>
+            <img src="${photo}" alt="${escapeHTML(recipe.title)}" class="fav-item-thumb">
             <div>
               <div class="fav-item-title">${escapeHTML(recipe.title)}</div>
-              <div class="fav-item-meta">${recipe.totalMinutes} mnt • ${recipe.difficulty}</div>
+              <div class="fav-item-meta">⏱️ ${recipe.totalMinutes} mnt • 🟢 ${recipe.difficulty}</div>
             </div>
           </div>
           <button type="button" class="shopping-delete-btn" title="Hapus dari Favorit">&times;</button>
@@ -906,7 +1012,7 @@
 
     localStorage.setItem('mango_shopping_list', JSON.stringify(state.shoppingList));
     updateBadges();
-    showToast(`🛒 ${addedCount} bahan berhasil ditambahkan ke Daftar Belanja!`);
+    showToast(`🛒 ${addedCount} bahan berhasil dimasukkan ke Daftar Belanja!`);
   }
 
   function openShoppingListModal() {
@@ -916,9 +1022,9 @@
     if (state.shoppingList.length === 0) {
       DOM.shoppingItemsList.innerHTML = `
         <div class="empty-state" style="padding: 30px 10px;">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon">🛒</div>
           <h4 class="empty-title">Daftar Belanja Masih Kosong</h4>
-          <p class="empty-desc">Buka resep pilihan Anda lalu klik tombol "Beli Bahan" untuk memasukkannya ke sini secara otomatis.</p>
+          <p class="empty-desc">Buka resep pilihan Anda lalu klik tombol "+ Masukkan ke Belanja" untuk mencatat kebutuhan bahan masakan secara otomatis.</p>
         </div>
       `;
     } else {
@@ -971,7 +1077,7 @@
       return;
     }
 
-    let text = '*📋 DAFTAR BELANJA RESEP ALL MANGGO*\n\n';
+    let text = '*🛒 DAFTAR BELANJA RESEP ALL MANGGO*\n\n';
     state.shoppingList.forEach((item, idx) => {
       text += `${idx + 1}. ${item.checked ? '[v] ' : '[ ] '} ${item.text}\n`;
     });
@@ -1007,7 +1113,7 @@
         </div>
         <div class="variety-sweetness">Tingkat Manis: ${v.sweetness}</div>
         <p class="variety-desc">${v.texture}</p>
-        <div class="variety-pairing">✨ Cocok untuk: ${v.bestFor}</div>
+        <div class="variety-pairing">✨ Rekomendasi Olahan: ${v.bestFor}</div>
       `;
       DOM.mangoVarietiesGrid.appendChild(card);
     });
@@ -1169,6 +1275,50 @@
       applyFilters();
     });
 
+    // Trending Search Tag Buttons Click
+    const trendTagBtns = document.querySelectorAll('.trend-tag-btn');
+    trendTagBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tag = btn.getAttribute('data-tag');
+        if (DOM.searchInput) DOM.searchInput.value = tag;
+        if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = tag;
+        state.searchQuery = tag;
+        applyFilters();
+        const catEl = document.getElementById('kategori');
+        if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Spotlight Mini-Cards in Hero
+    const spotlightCards = document.querySelectorAll('.spotlight-mini-card');
+    spotlightCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-recipe-id');
+        let target = state.allRecipes.find(r => r.id === id);
+        if (!target) {
+          const title = card.querySelector('.mini-card-title')?.textContent || '';
+          target = state.allRecipes.find(r => r.title.toLowerCase().includes(title.toLowerCase().slice(0, 8)));
+        }
+        if (target) {
+          openRecipeModal(target);
+        }
+      });
+    });
+
+    // Cooksnap Reaction Buttons
+    const reactionBtns = document.querySelectorAll('.reaction-btn');
+    reactionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const countSpan = btn.querySelector('.reaction-count');
+        if (countSpan && !btn.classList.contains('reacted')) {
+          let count = parseInt(countSpan.textContent, 10) || 0;
+          countSpan.textContent = count + 1;
+          btn.classList.add('reacted');
+          showToast('💖 Terima kasih atas apresiasi Anda!');
+        }
+      });
+    });
+
     // Category Nav Pills
     if (DOM.categoryPills) {
       DOM.categoryPills.forEach(pill => {
@@ -1272,6 +1422,7 @@
     });
 
     on(DOM.modalAddShoppingBtn, 'click', addCurrentRecipeToShoppingList);
+    on(DOM.modalAddAllIngBtn, 'click', addCurrentRecipeToShoppingList);
     on(DOM.modalShareBtn, 'click', shareRecipe);
     on(DOM.modalPrintBtn, 'click', () => window.print());
 
