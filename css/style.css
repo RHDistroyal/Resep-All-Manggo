@@ -803,7 +803,8 @@ html, body {
   display: none;
   grid-template-columns: 1fr 14px 1fr;
   width: 100%;
-  min-height: 720px;
+  height: min(780px, calc(100vh - 135px));
+  min-height: 580px;
   background: var(--page-bg);
   border-radius: 6px 14px 14px 6px;
   box-shadow: var(--shadow-book-spread);
@@ -927,13 +928,13 @@ html, body {
 /* The Book Pages */
 .book-page {
   position: relative;
-  padding: 28px 36px 36px;
+  padding: 24px 34px 28px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   background-color: var(--page-bg);
   overflow-y: auto;
-  max-height: 820px;
+  height: 100%;
 }
 
 .page-left {
@@ -1303,11 +1304,11 @@ html, body {
 .recipe-food-poster {
   position: relative;
   width: 100%;
-  height: 315px;
+  height: clamp(200px, 29vh, 280px);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.12);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   border: 1.5px solid rgba(212, 175, 55, 0.4);
   background: #18110B;
   cursor: zoom-in;
@@ -1511,8 +1512,8 @@ html, body {
   background: var(--page-bg-accent);
   border: 1px solid var(--page-border);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
-  margin-top: auto;
+  padding: 8px 10px;
+  margin-top: 10px;
 }
 
 .book-spec-cell {
