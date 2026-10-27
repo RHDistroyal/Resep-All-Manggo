@@ -935,115 +935,6 @@ ul, ol {
   color: var(--mango-300);
 }
 
-/* ===================================================================
-   GASTRONOMIC FLAVOR MATRIX SECTION (MOOD & PALATE FILTERS)
-   =================================================================== */
-.flavor-matrix-section {
-  padding: 16px 0 6px;
-}
-
-.flavor-matrix-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  padding: 16px 20px;
-  box-shadow: var(--shadow-xs);
-}
-
-[data-theme="dark"] .flavor-matrix-card {
-  background: var(--bg-surface);
-  border-color: var(--border-card);
-}
-
-.flavor-matrix-header {
-  margin-bottom: 12px;
-}
-
-.matrix-label {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.flavor-mood-pills {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-@media (max-width: 768px) {
-  .flavor-mood-pills {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-  .flavor-mood-pills::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.mood-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 10px 14px;
-  background: var(--bg-page-subtle);
-  border: 1.5px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  text-align: left;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.mood-pill .mood-icon {
-  font-size: 1.35rem;
-  margin-bottom: 4px;
-}
-
-.mood-pill .mood-name {
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--text-main);
-  line-height: 1.25;
-}
-
-.mood-pill .mood-desc {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
-.mood-pill:hover {
-  background: var(--mango-50);
-  border-color: var(--mango-300);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-[data-theme="dark"] .mood-pill:hover {
-  background: #2E2014;
-  border-color: var(--mango-500);
-}
-
-.mood-pill.active {
-  background: linear-gradient(135deg, var(--mango-500) 0%, var(--mango-700) 100%);
-  border-color: var(--mango-600);
-  box-shadow: 0 4px 14px rgba(245, 124, 0, 0.35);
-}
-
-.mood-pill.active .mood-name {
-  color: #FFFFFF;
-}
-
-.mood-pill.active .mood-desc {
-  color: rgba(255, 255, 255, 0.88);
-}
-
 [data-theme="dark"] .popular-tags-list .trend-tag-btn:hover {
   background: #332314;
   color: var(--mango-300);
@@ -3597,27 +3488,552 @@ ul, ol {
   gap: 8px;
 }
 
+/* ===================================================================
+   COMPREHENSIVE MOBILE RESPONSIVENESS SUITE (SMARTPHONES & TABLETS)
+   =================================================================== */
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 68px; /* Room for fixed bottom nav bar */
+  }
+
+  /* Header on Mobile */
+  .header-container {
+    height: 56px;
+  }
+
+  .logo-circle-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-title {
+    font-size: 1.12rem;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  .action-btn {
+    padding: 6px 8px;
+  }
+
+  .action-svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Mobile Search Bar */
+  .mobile-search-bar {
+    padding: 8px 14px 4px;
+  }
+
+  .search-input-box {
+    height: 42px;
+  }
+
+  .search-input-box input {
+    font-size: 0.88rem;
+  }
+
+  /* Culinary Hero Section */
+  .culinary-hero-section {
+    padding: 20px 0 16px;
+  }
+
+  .culinary-hero-container {
+    gap: 20px;
+  }
+
+  .hero-season-badge {
+    padding: 4px 10px;
+    margin-bottom: 10px;
+  }
+
+  .badge-text {
+    font-size: 0.66rem;
+    letter-spacing: 0.5px;
+  }
+
+  .hero-editorial-headline {
+    font-size: clamp(1.6rem, 6.5vw, 2.1rem);
+    line-height: 1.18;
+    margin-bottom: 10px;
+  }
+
+  .hero-editorial-sub {
+    font-size: 0.86rem;
+    line-height: 1.48;
+    margin-bottom: 14px;
+  }
+
+  .culinary-search-box {
+    margin-bottom: 12px;
+  }
+
+  .search-box-inner {
+    height: 48px;
+    padding: 4px 5px 4px 14px;
+  }
+
+  .search-box-btn {
+    height: 38px;
+    padding: 0 15px;
+    font-size: 0.82rem;
+  }
+
+  .hero-popular-row {
+    margin-bottom: 14px;
+    gap: 5px;
+  }
+
+  .popular-label {
+    font-size: 0.74rem;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .popular-tags-list {
+    gap: 5px;
+  }
+
+  .trend-tag-btn {
+    padding: 4px 10px;
+    font-size: 0.74rem;
+  }
+
+  .hero-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .metric-divider {
+    display: none;
+  }
+
+  .metric-val {
+    font-size: 1.05rem;
+  }
+
+  .metric-sub {
+    font-size: 0.7rem;
+  }
+
+  /* Dish of the Day Card */
+  .dish-of-the-day-card {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
+  .dish-media-wrap {
+    height: 165px;
+  }
+
+  .dish-info-content {
+    padding: 14px 16px;
+  }
+
+  .dish-title {
+    font-size: 1.12rem;
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .dish-quote {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    margin-bottom: 12px;
+    padding-left: 8px;
+  }
+
+  .btn-cook-now {
+    padding: 9px 14px;
+    font-size: 0.84rem;
+  }
+
+  .btn-dish-save {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* App View Switcher */
+  .app-view-switcher {
+    padding: 16px 12px 0;
+  }
+
+  .view-switcher-track {
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .view-switch-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+
+  /* Mobile Bottom Navigation Bar */
+  .mobile-bottom-nav {
+    height: 58px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mobile-nav-item {
+    padding: 4px 8px;
+  }
+
+  .mob-svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mob-label {
+    font-size: 0.68rem;
+  }
+}
+
 @media (max-width: 640px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Curated Shelves */
+  .shelf-section {
+    margin: 20px auto 0;
+  }
+
+  .shelf-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+  }
+
+  .shelf-title {
+    font-size: 1.05rem;
+  }
+
+  .shelf-subtitle {
+    display: none;
+  }
+
+  .shelf-action-link {
+    padding: 4px 9px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .shelf-cards-scroll {
+    gap: 12px;
+    padding: 4px 2px 14px 2px;
+  }
+
+  .shelf-cards-scroll .recipe-card {
+    flex: 0 0 195px;
+    width: 195px;
+    border-radius: 14px;
+  }
+
+  .shelf-cards-scroll .card-thumb-frame {
+    height: 125px;
+  }
+
+  .shelf-cards-scroll .card-content {
+    padding: 10px 12px;
+  }
+
+  .shelf-cards-scroll .card-title {
+    font-size: 0.86rem;
+    line-height: 1.25;
+  }
+
+  .shelf-cards-scroll .card-desc {
+    display: none;
+  }
+
+  /* Category Carousel Nav & Filter Toolbar */
+  .category-nav-section {
+    top: 56px;
+    padding: 6px 0;
+  }
+
+  .category-scroll-container {
+    gap: 6px;
+    padding: 2px 2px;
+  }
+
+  .cat-pill {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+
+  .cat-count {
+    padding: 1px 5px;
+    font-size: 0.68rem;
+  }
+
+  .filter-controls-section {
+    padding: 10px 0 6px;
+  }
+
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .active-category-title {
+    font-size: 1.1rem;
+  }
+
+  .results-count-text {
+    font-size: 0.76rem;
+  }
+
+  .filter-options-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .filter-options-group .select-wrapper:nth-child(3) {
+    grid-column: span 2;
+  }
+
+  .filter-select {
+    height: 38px;
+    font-size: 0.82rem;
+    padding: 0 10px;
+  }
+
+  .btn-reset-filters {
+    grid-column: span 2;
+    height: 36px;
+    justify-content: center;
+  }
+
+  /* Recipe Grid */
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .recipe-card {
+    border-radius: 14px;
+  }
+
+  .recipe-card .card-thumb-frame {
+    height: 165px;
+  }
+
+  .recipe-card .card-content {
+    padding: 12px 14px;
+  }
+
+  .recipe-card .card-title {
+    font-size: 1.02rem;
+    margin-bottom: 4px;
+  }
+
+  /* Modals as App Sheets */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-window {
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  .modal-medium, .modal-large {
+    max-height: 88vh;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+  }
+
+  .modal-cover-frame {
+    height: 170px;
+  }
+
+  .modal-body {
+    padding: 16px 14px 28px;
+  }
+
+  .cookpad-author-row {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cookpad-top-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-cook-mode-launch {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 0.84rem;
+  }
+
+  .btn-cookpad-fav {
+    padding: 8px 12px;
+    font-size: 0.84rem;
+  }
+
+  .modal-title {
+    font-size: 1.22rem;
+    line-height: 1.25;
+  }
+
+  .modal-story-card {
+    padding: 10px 12px;
+  }
+
+  .modal-summary {
+    font-size: 0.85rem;
+  }
+
+  .recipe-quick-specs {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .spec-card {
+    padding: 8px 10px;
+  }
+
+  .spec-info strong {
+    font-size: 0.85rem;
+  }
+
+  .section-box-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .servings-scaler-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .kitchen-timer-widget {
+    padding: 14px 12px;
+  }
+
+  .timer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .timer-quick-preset {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+  }
+
+  .timer-preset-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Cook Mode on Mobile */
   .cook-mode-header {
-    padding: 12px 16px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
+
+  .cook-mode-dish-title {
+    font-size: 1.05rem;
+  }
+
+  .cook-mode-badge {
+    font-size: 0.65rem;
+  }
+
   .cook-step-card {
-    padding: 24px 20px;
+    padding: 18px 14px;
+    border-radius: 16px;
   }
+
+  .cook-step-instruction-text {
+    font-size: 1.18rem;
+    line-height: 1.5;
+  }
+
   .cook-mode-bottom-bar {
-    padding: 12px 16px 18px;
+    padding: 10px 14px 20px;
+    gap: 8px;
     flex-wrap: wrap;
   }
+
   .cook-nav-btn {
-    padding: 10px 18px;
-    font-size: 0.88rem;
+    padding: 10px 14px;
+    font-size: 0.84rem;
     flex: 1;
+    justify-content: center;
   }
+
   .cook-ingredients-drawer-toggle {
     width: 100%;
     order: -1;
-    display: flex;
-    justify-content: center;
     margin-bottom: 4px;
   }
+
+  .btn-check-ingredients {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .step-active-timer-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .active-timer-controls {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .active-timer-controls button {
+    flex: 1;
+  }
+
+  /* Guide and Varieties */
+  .mango-varieties-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .variety-card {
+    padding: 14px 16px;
+  }
 }
+

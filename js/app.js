@@ -90,7 +90,6 @@
     favorites: JSON.parse(localStorage.getItem('mango_favorites') || '[]'),
     shoppingList: JSON.parse(localStorage.getItem('mango_shopping_list') || '[]'),
     theme: localStorage.getItem('mango_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
-    currentMood: 'all',
     timer: {
       interval: null,
       remainingSeconds: 0,
@@ -211,12 +210,11 @@
     heroRandomBtn: document.getElementById('heroRandomBtn'),
     exploreAllBtn: document.getElementById('exploreAllBtn'),
     
-    // Hero Spotlight & Flavor Moods
+    // Hero Spotlight
     heroCookNowBtn: document.getElementById('heroCookNowBtn'),
     heroSaveDishBtn: document.getElementById('heroSaveDishBtn'),
     heroDishTitle: document.getElementById('heroDishTitle'),
     heroDishImg: document.getElementById('heroDishImg'),
-    moodPills: document.querySelectorAll('.mood-pill'),
     
     // Recipe Detail Modal Elements
     recipeModalOverlay: document.getElementById('recipeModalOverlay'),
@@ -345,7 +343,7 @@
         })
         .catch(err => {
           console.error('Gagal memuat recipes.json:', err);
-          showToast('⚠️ Gagal memuat data resep. Pastikan koneksi atau file lokal aktif.');
+          showToast('Gagal memuat data resep. Pastikan koneksi atau file lokal aktif.');
         });
     }
   }
@@ -448,21 +446,6 @@
       result = result.filter(r => r.categoryKey === state.currentCategory);
     }
 
-    // Gastronomic Palate & Mood Filter
-    if (state.currentMood && state.currentMood !== 'all') {
-      const mood = state.currentMood;
-      if (mood === 'segar') {
-        result = result.filter(r => r.categoryKey === 'minuman' || /jus|yakult|es |mocktail|smoothie|segar|lemon|mojito/i.test(r.title + ' ' + (r.tags || []).join(' ')));
-      } else if (mood === 'pedas') {
-        result = result.filter(r => r.categoryKey === 'nusantara' || /sambal|rujak|asinan|gulai|pedas|cabai|bakar/i.test(r.title + ' ' + (r.tags || []).join(' ')));
-      } else if (mood === 'santan') {
-        result = result.filter(r => /santan|ketan|sago|sticky rice|lodeh|kuah santan|gurih/i.test(r.title + ' ' + (r.desc || '') + ' ' + (r.ingredients || []).map(i => i.name).join(' ')));
-      } else if (mood === 'mewah') {
-        result = result.filter(r => r.categoryKey === 'pastry' || /cheesecake|crepes|tart|pie|panna cotta|mousse|parfait|sorbet/i.test(r.title + ' ' + (r.tags || []).join(' ')));
-      } else if (mood === 'kilat') {
-        result = result.filter(r => r.totalMinutes <= 15 || r.categoryKey === 'simpel');
-      }
-    }
 
     // Search Query
     if (state.searchQuery.trim() !== '') {
@@ -813,7 +796,7 @@
         if (mins > 0 && mins <= 120) {
           timerBtnHTML = `
             <button type="button" class="btn-step-timer" data-sec="${mins * 60}" title="Mulai timer otomatis">
-              ⏱️ Pasang Timer ${mins} Menit
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Pasang Timer ${mins} Menit
             </button>
           `;
         }
@@ -854,7 +837,7 @@
           const sec = parseInt(stepTimerBtn.getAttribute('data-sec'), 10);
           state.timer.remainingSeconds = sec;
           startKitchenTimer();
-          showToast(`⏱️ Timer dapur ${Math.round(sec / 60)} menit dimulai!`);
+          showToast(`Timer dapur ${Math.round(sec / 60)} menit dimulai!`);
           const timerEl = document.getElementById('kitchenTimerWidget');
           if (timerEl) timerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
@@ -998,7 +981,7 @@
 
     if (DOM.cookNextStepBtn) {
       if (idx === totalSteps - 1) {
-        DOM.cookNextStepBtn.innerHTML = `<span>Selesai Memasak 🎉</span>`;
+        DOM.cookNextStepBtn.innerHTML = `<span>Selesai Memasak</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
       } else {
         DOM.cookNextStepBtn.innerHTML = `<span>Langkah Berikutnya</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
       }
@@ -1029,7 +1012,7 @@
       state.cookMode.currentStepIdx++;
       renderCurrentCookStep();
     } else {
-      showToast('🎉 Selamat! Hidangan mangga Anda telah selesai dimasak dengan sempurna!');
+      showToast('Selamat! Hidangan mangga Anda telah selesai dimasak dengan sempurna.');
       closeCookMode();
     }
   }
@@ -1043,7 +1026,7 @@
 
   function speakCurrentStep() {
     if (!('speechSynthesis' in window)) {
-      showToast('⚠️ Browser Anda belum mendukung fitur suara bacakan.');
+      showToast('Fitur suara bacakan belum didukung browser ini.');
       return;
     }
     const recipe = state.currentRecipe;
@@ -1080,7 +1063,7 @@
         updateStepTimerDisplay();
       } else {
         resetStepTimer();
-        showToast('⏰ Waktu memasak langkah ini telah habis!');
+        showToast('Waktu memasak langkah ini telah habis!');
         if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
       }
     }, 1000);
@@ -1108,7 +1091,7 @@
           updateStepTimerDisplay();
         } else {
           resetStepTimer();
-          showToast('⏰ Waktu memasak telah habis!');
+          showToast('Waktu memasak telah habis!');
         }
       }, 1000);
     }
@@ -1174,7 +1157,7 @@
           state.timer.isRunning = false;
           if (DOM.timerStartBtn) DOM.timerStartBtn.textContent = 'Mulai Timer';
           playChimeSound();
-          showToast('⏰ Waktu memasak telah selesai! Hidangan siap disajikan.');
+          showToast('Waktu memasak telah selesai! Hidangan siap disajikan.');
         }
       }, 1000);
     }
@@ -1238,7 +1221,7 @@
       showToast('Dihapus dari Resep Tersimpan');
     } else {
       state.favorites.push(recipeId);
-      showToast('⭐ Disimpan ke Resep Favorit Anda!');
+      showToast('Disimpan ke Resep Tersimpan');
     }
     localStorage.setItem('mango_favorites', JSON.stringify(state.favorites));
     updateBadges();
@@ -1261,9 +1244,13 @@
     if (state.favorites.length === 0) {
       DOM.favoritesListContainer.innerHTML = `
         <div class="empty-state" style="padding: 30px 10px;">
-          <div class="empty-icon">⭐</div>
+          <div class="empty-icon-clean">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
           <h4 class="empty-title">Belum Ada Resep Tersimpan</h4>
-          <p class="empty-desc">Klik tombol hati / simpan pada resep olahan mangga apa pun untuk menyimpannya ke daftar ini.</p>
+          <p class="empty-desc">Klik tombol simpan pada resep olahan mangga apa pun untuk menyimpannya ke daftar ini.</p>
         </div>
       `;
     } else {
@@ -1282,7 +1269,7 @@
             <img src="${photo}" alt="${escapeHTML(recipe.title)}" class="fav-item-thumb">
             <div>
               <div class="fav-item-title">${escapeHTML(recipe.title)}</div>
-              <div class="fav-item-meta">⏱️ ${recipe.totalMinutes} mnt • 🟢 ${recipe.difficulty}</div>
+              <div class="fav-item-meta">${recipe.totalMinutes} mnt • ${recipe.difficulty}</div>
             </div>
           </div>
           <button type="button" class="shopping-delete-btn" title="Hapus dari Favorit">&times;</button>
@@ -1419,11 +1406,11 @@
       return;
     }
 
-    let text = '*🛒 DAFTAR BELANJA RESEP ALL MANGGO*\n\n';
+    let text = '*DAFTAR BELANJA RESEP ALL MANGGO*\n\n';
     state.shoppingList.forEach((item, idx) => {
       text += `${idx + 1}. ${item.checked ? '[v] ' : '[ ] '} ${item.text}\n`;
     });
-    text += '\n_Dibuat dengan web Resep All Manggo_ 🥭';
+    text += '\n_Dibuat dengan web Resep All Manggo_';
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -1513,7 +1500,6 @@
       randomPickedRecipe = pool[randomIdx];
 
       if (DOM.randomDiceIcon) {
-        DOM.randomDiceIcon.textContent = randomPickedRecipe.icon || '🥭';
         DOM.randomDiceIcon.style.animation = 'none';
       }
       if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = randomPickedRecipe.title;
@@ -1552,8 +1538,8 @@
       navigator.share(shareData).catch(() => {});
     } else {
       navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`)
-        .then(() => showToast('🔗 Tautan resep disalin ke clipboard!'))
-        .catch(() => showToast('🔗 Tautan siap dibagikan!'));
+        .then(() => showToast('Tautan resep disalin ke clipboard!'))
+        .catch(() => showToast('Tautan siap dibagikan!'));
     }
   }
 
@@ -1575,7 +1561,7 @@
     on(DOM.themeToggleBtn, 'click', () => {
       const nextTheme = state.theme === 'light' ? 'dark' : 'light';
       applyTheme(nextTheme);
-      showToast(`Mode ${nextTheme === 'light' ? 'Terang ☀️' : 'Gelap 🌙'} diaktifkan`);
+      showToast(`Mode ${nextTheme === 'light' ? 'Terang' : 'Gelap'} diaktifkan`);
     });
 
     // App View Switcher Buttons (Beranda Rekomendasi vs Katalog 200 Resep)
@@ -1710,7 +1696,6 @@
     // Reset Filters
     const resetAllFilters = () => {
       state.currentCategory = 'all';
-      state.currentMood = 'all';
       state.searchQuery = '';
       state.difficultyFilter = 'all';
       state.timeFilter = 'all';
@@ -1725,9 +1710,6 @@
 
       if (DOM.categoryPills) {
         DOM.categoryPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-category') === 'all'));
-      }
-      if (DOM.moodPills) {
-        DOM.moodPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-mood') === 'all'));
       }
       applyFilters();
     };
@@ -1861,7 +1843,7 @@
     on(DOM.btnStepTimer, 'click', () => {
       const min = parseInt(DOM.btnStepTimer.getAttribute('data-min') || '5', 10);
       startStepTimer(min);
-      showToast(`⏱️ Timer langkah ${min} menit dimulai!`);
+      showToast(`Timer langkah ${min} menit dimulai!`);
     });
     on(DOM.btnStepTimerPause, 'click', pauseStepTimer);
     on(DOM.btnStepTimerReset, 'click', resetStepTimer);
@@ -1891,21 +1873,6 @@
         if (svg) svg.setAttribute('fill', isFav ? 'currentColor' : 'none');
       }
     });
-
-    // Gastronomic Mood & Flavor Profile Pills
-    if (DOM.moodPills) {
-      DOM.moodPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-          DOM.moodPills.forEach(p => p.classList.remove('active'));
-          pill.classList.add('active');
-          state.currentMood = pill.getAttribute('data-mood');
-          switchAppView('catalog');
-          applyFilters();
-          const catEl = document.getElementById('kategori');
-          if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
-        });
-      });
-    }
 
     // Keyboard Shortcuts (Ctrl+K to search, Cook mode navigation, Escape)
     document.addEventListener('keydown', (e) => {
