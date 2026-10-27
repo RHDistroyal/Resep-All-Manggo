@@ -145,27 +145,32 @@
   <!-- ===================================================================
        THE MASTER INTERACTIVE DIGITAL RECIPE BOOK (BOOK STAGE)
        =================================================================== -->
+  <!-- ===================================================================
+       THE MASTER INTERACTIVE DIGITAL RECIPE BOOK (BOOK STAGE)
+       =================================================================== -->
   <main class="book-viewport-stage" id="bookStage">
-    
-    <!-- Floating Flip Navigation Buttons (Desktop & Tablet) -->
-    <button type="button" class="side-nav-btn prev-side-btn" id="sideNavPrev" title="Halaman Sebelumnya (Panah Kiri)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-    </button>
-    
-    <button type="button" class="side-nav-btn next-side-btn" id="sideNavNext" title="Halaman Berikutnya (Panah Kanan)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-    </button>
 
     <!-- The Realistic Physical Book Container -->
     <div class="recipe-book-object" id="recipeBook">
       
-      <!-- Book Binding Shadow & Thickness Layers -->
-      <div class="book-base-depth"></div>
+      <!-- Outer Leather Binding Overhang & 3D Shadow -->
+      <div class="book-outer-binding"></div>
+
+      <!-- Physical 3D Stacked Paper Edge Details (Thickness of 200 Pages) -->
+      <div class="book-side-paper-stack stack-left" id="stackLeft" aria-hidden="true"></div>
+      <div class="book-side-paper-stack stack-right" id="stackRight" aria-hidden="true"></div>
+      <div class="book-bottom-paper-stack" id="stackBottom" aria-hidden="true"></div>
+
+      <!-- Red/Gold Satin Ribbon Bookmark Dangling from Spine -->
+      <div class="book-silk-ribbon" aria-hidden="true">
+        <span class="ribbon-tail"></span>
+      </div>
       
       <!-- ==============================================================
            STATE A: SAMPUL DEPAN BUKU (HARDCOVER VIEW)
            ============================================================== -->
       <div class="book-hardcover" id="bookCoverView">
+        <div class="cover-leather-hinge" aria-hidden="true"></div>
         <div class="cover-inner-emboss">
           <div class="cover-gold-filigree">
             
@@ -239,7 +244,7 @@
           <div class="page-content-wrapper" id="pageLeftContent">
             <!-- Dynamically injected left page content -->
           </div>
-          <div class="page-corner-fold prev-corner" id="prevCornerClick" title="Halaman Sebelumnya"></div>
+          <div class="page-corner-fold prev-corner" id="prevCornerClick" title="Balik ke Halaman Sebelumnya"></div>
           <footer class="page-footer">
             <span class="page-footer-title" id="pageLeftFooterTitle">Buku Resep All Manggo</span>
             <span class="page-number" id="pageLeftNumber">1</span>
@@ -249,6 +254,7 @@
         <!-- Center Book Spine Crease & Shadow -->
         <div class="book-center-spine">
           <div class="spine-line"></div>
+          <div class="spine-stitches" aria-hidden="true"></div>
           <div class="spine-highlight"></div>
         </div>
 
@@ -257,7 +263,7 @@
           <div class="page-content-wrapper" id="pageRightContent">
             <!-- Dynamically injected right page content -->
           </div>
-          <div class="page-corner-fold next-corner" id="nextCornerClick" title="Halaman Berikutnya"></div>
+          <div class="page-corner-fold next-corner" id="nextCornerClick" title="Balik ke Halaman Berikutnya"></div>
           <footer class="page-footer">
             <span class="page-number" id="pageRightNumber">2</span>
             <span class="page-footer-title" id="pageRightFooterTitle">Ensiklopedia Olahan Mangga</span>
@@ -266,43 +272,44 @@
 
       </div>
 
+      <!-- 3D Turning Paper Leaf Layer (Animated during Page Flip) -->
+      <div class="book-page-leaf-flipper" id="bookPageFlipper" style="display: none;" aria-hidden="true">
+        <div class="flipper-face flipper-face-front" id="flipperFrontFace"></div>
+        <div class="flipper-face flipper-face-back" id="flipperBackFace"></div>
+      </div>
+
     </div>
   </main>
 
   <!-- ===================================================================
-       BOOK BOTTOM FLOATING DOCK (PAGE SCRUBBER & NAVIGATION)
+       BOOK BOTTOM FLOATING DOCK (SINGLE CLEAN NAVIGATOR, NO SLIDER/BLOAT)
        =================================================================== -->
   <nav class="book-bottom-dock" id="bookBottomDock" aria-label="Navigasi Buku">
     <div class="dock-inner container">
       
       <!-- Prev Page Button -->
-      <button type="button" class="dock-nav-btn" id="dockPrevBtn" title="Halaman Sebelumnya">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <button type="button" class="dock-nav-btn prev-book-btn" id="dockPrevBtn" title="Halaman Sebelumnya">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
         <span class="dock-btn-label">Sebelumnya</span>
       </button>
 
-      <!-- Center Scrubber & Page Selector -->
-      <div class="dock-scrubber-center">
-        <div class="dock-page-info">
-          <span class="dock-label-spread" id="dockSpreadLabel">Sampul Depan</span>
-        </div>
-        <div class="dock-slider-row">
-          <input type="range" id="bookPageSlider" min="0" max="204" value="0" step="1" aria-label="Geser Halaman Buku">
-        </div>
+      <!-- Center Active Page Badge (Elegant Classic Book Indicator) -->
+      <div class="dock-page-badge" id="dockPageBadge">
+        <span class="dock-ornament-leaf">❦</span>
+        <span class="dock-label-spread" id="dockSpreadLabel">Sampul Depan</span>
+        <span class="dock-ornament-leaf">❦</span>
       </div>
 
-      <!-- Quick Section Jump Tabs in Dock -->
-      <div class="dock-quick-tabs">
-        <button type="button" class="dock-tab-btn" id="tabCoverBtn" title="Sampul Depan">Sampul</button>
-        <button type="button" class="dock-tab-btn" id="tabGuideBtn" title="Panduan Kematangan Mangga">Panduan</button>
-        <button type="button" class="dock-tab-btn" id="tabTocBtn" title="Daftar Isi 200 Resep">Daftar Isi</button>
-        <button type="button" class="dock-tab-btn" id="tabRandomBtn" title="Buka Resep Acak">Resep Acak</button>
-      </div>
+      <!-- Quick Jump Button: Daftar Isi -->
+      <button type="button" class="dock-quick-pill" id="dockQuickTocBtn" title="Buka Daftar Isi">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        <span>Daftar Isi</span>
+      </button>
 
       <!-- Next Page Button -->
-      <button type="button" class="dock-nav-btn" id="dockNextBtn" title="Halaman Berikutnya">
+      <button type="button" class="dock-nav-btn next-book-btn" id="dockNextBtn" title="Halaman Berikutnya">
         <span class="dock-btn-label">Berikutnya</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
 
     </div>

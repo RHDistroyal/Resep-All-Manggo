@@ -120,26 +120,24 @@
     DOM.pageLeftFooterTitle = document.getElementById('pageLeftFooterTitle');
     DOM.pageRightFooterTitle = document.getElementById('pageRightFooterTitle');
 
+    // 3D Paper Leaf Flipper
+    DOM.bookPageFlipper = document.getElementById('bookPageFlipper');
+    DOM.flipperFrontFace = document.getElementById('flipperFrontFace');
+    DOM.flipperBackFace = document.getElementById('flipperBackFace');
+
     // Controls
     DOM.btnOpenCover = document.getElementById('btnOpenCover');
     DOM.brandCoverBtn = document.getElementById('brandCoverBtn');
     DOM.coverJumpTocBtn = document.getElementById('coverJumpTocBtn');
     DOM.coverRandomBtn = document.getElementById('coverRandomBtn');
 
-    DOM.sideNavPrev = document.getElementById('sideNavPrev');
-    DOM.sideNavNext = document.getElementById('sideNavNext');
     DOM.prevCornerClick = document.getElementById('prevCornerClick');
     DOM.nextCornerClick = document.getElementById('nextCornerClick');
 
     DOM.dockPrevBtn = document.getElementById('dockPrevBtn');
     DOM.dockNextBtn = document.getElementById('dockNextBtn');
     DOM.dockSpreadLabel = document.getElementById('dockSpreadLabel');
-    DOM.bookPageSlider = document.getElementById('bookPageSlider');
-
-    DOM.tabCoverBtn = document.getElementById('tabCoverBtn');
-    DOM.tabGuideBtn = document.getElementById('tabGuideBtn');
-    DOM.tabTocBtn = document.getElementById('tabTocBtn');
-    DOM.tabRandomBtn = document.getElementById('tabRandomBtn');
+    DOM.dockQuickTocBtn = document.getElementById('dockQuickTocBtn');
 
     // Search
     DOM.globalBookSearch = document.getElementById('globalBookSearch');
@@ -300,54 +298,149 @@
 
   function finalizeSetup() {
     state.totalSpreads = state.allRecipes.length + 3; // Cover(0) + Guide(1) + TOC(2) + 200 Recipes
-    if (DOM.bookPageSlider) {
-      DOM.bookPageSlider.max = state.totalSpreads - 1;
-    }
     populateTableOfContentsDrawer();
     setupEventListeners();
     goToSpread(0, false); // Start at Cover
   }
 
   // ===================================================================
-  // SPREAD NAVIGATION & BOOK ENGINE
+  // 3D SPREAD NAVIGATION & BOOK FLIP ENGINE
   // ===================================================================
-  function goToSpread(spreadIdx, withSound = true) {
+  function goToSpread(spreadIdx, withSound = true, direction = null) {
     if (spreadIdx < 0) spreadIdx = 0;
     if (spreadIdx >= state.totalSpreads) spreadIdx = state.totalSpreads - 1;
+    if (spreadIdx === state.currentSpread && DOM.bookSpreadView.classList.contains('is-open')) return;
+    if (state.isFlipping) return;
 
-    state.currentSpread = spreadIdx;
-    state.currentMultiplier = 1;
-    state.checkedSteps.clear();
+    const oldSpread = state.currentSpread;
+    const isNext = direction ? (direction === 'next') : (spreadIdx > oldSpread);
 
-    if (withSound) {
-      playPageFlipSound();
-    }
+    // Case 1: Opening Cover: 0 -> >=1
+    if (oldSpread === 0 && spreadIdx > 0) {
+      state.isFlipping = true;
+      if (withSound) playPageFlipSound();
+      
+      DOM.bookCoverView.classList.remove('swing-close');
+      DOM.bookCoverView.classList.add('swing-open');
 
-    // Update Slider & Scrubber
-    if (DOM.bookPageSlider) {
-      DOM.bookPageSlider.value = spreadIdx;
-    }
+      setTimeout(() => {
+        DOM.bookSpreadView.classList.add('is-open');
+        DOM.bookSpreadView.style.display = '';
+        renderSpreadContent(spreadIdx);
+        state.currentSpread = spreadIdx;
+        updateDockControls();
+      }, 350);
 
-    // Update Nav buttons disabled states
-    if (DOM.dockPrevBtn) DOM.dockPrevBtn.disabled = spreadIdx === 0;
-    if (DOM.sideNavPrev) DOM.sideNavPrev.disabled = spreadIdx === 0;
-    if (DOM.dockNextBtn) DOM.dockNextBtn.disabled = spreadIdx === state.totalSpreads - 1;
-    if (DOM.sideNavNext) DOM.sideNavNext.disabled = spreadIdx === state.totalSpreads - 1;
-
-    // View Switch between Cover (0) vs Open Spread (>=1)
-    if (spreadIdx === 0) {
-      DOM.bookCoverView.style.display = 'flex';
-      DOM.bookSpreadView.classList.remove('is-open');
-      DOM.bookSpreadView.style.display = 'none';
-      if (DOM.dockSpreadLabel) DOM.dockSpreadLabel.textContent = 'Sampul Depan Buku';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        DOM.bookCoverView.style.display = 'none';
+        DOM.bookCoverView.classList.remove('swing-open');
+        state.isFlipping = false;
+      }, 780);
       return;
     }
 
-    DOM.bookCoverView.style.display = 'none';
-    DOM.bookSpreadView.classList.add('is-open');
-    DOM.bookSpreadView.style.display = '';
+    // Case 2: Closing Book to Cover: >=1 -> 0
+    if (oldSpread > 0 && spreadIdx === 0) {
+      state.isFlipping = true;
+      if (withSound) playPageFlipSound();
 
+      DOM.bookCoverView.style.display = 'flex';
+      DOM.bookCoverView.classList.remove('swing-open');
+      DOM.bookCoverView.classList.add('swing-close');
+
+      setTimeout(() => {
+        DOM.bookSpreadView.classList.remove('is-open');
+        DOM.bookSpreadView.style.display = 'none';
+        state.currentSpread = 0;
+        updateDockControls();
+      }, 350);
+
+      setTimeout(() => {
+        DOM.bookCoverView.classList.remove('swing-close');
+        state.isFlipping = false;
+      }, 700);
+      return;
+    }
+
+    // Case 3: Flipping Between Spreads (>=1 -> >=1)
+    state.currentMultiplier = 1;
+    state.checkedSteps.clear();
+
+    const isMobile = window.innerWidth <= 860;
+
+    if (isMobile) {
+      state.isFlipping = true;
+      if (withSound) playPageFlipSound();
+
+      const curlClass = isNext ? 'mobile-page-curl-next' : 'mobile-page-curl-prev';
+      DOM.bookSpreadView.classList.remove('mobile-page-curl-next', 'mobile-page-curl-prev');
+      void DOM.bookSpreadView.offsetWidth; // trigger reflow
+      DOM.bookSpreadView.classList.add(curlClass);
+
+      setTimeout(() => {
+        renderSpreadContent(spreadIdx);
+        state.currentSpread = spreadIdx;
+        updateDockControls();
+      }, 180);
+
+      setTimeout(() => {
+        DOM.bookSpreadView.classList.remove(curlClass);
+        state.isFlipping = false;
+      }, 480);
+    } else {
+      // Desktop 3D Leaf Flip
+      if (DOM.bookPageFlipper && DOM.flipperFrontFace && DOM.flipperBackFace) {
+        state.isFlipping = true;
+        if (withSound) playPageFlipSound();
+
+        if (isNext) {
+          DOM.flipperFrontFace.innerHTML = DOM.pageRightContent.innerHTML;
+          DOM.bookPageFlipper.className = 'book-page-leaf-flipper flip-leaf-next';
+          DOM.bookPageFlipper.style.display = 'block';
+
+          // Update underlying page
+          renderSpreadContent(spreadIdx);
+          state.currentSpread = spreadIdx;
+          updateDockControls();
+
+          setTimeout(() => {
+            DOM.bookPageFlipper.style.display = 'none';
+            DOM.bookPageFlipper.className = 'book-page-leaf-flipper';
+            DOM.flipperFrontFace.innerHTML = '';
+            state.isFlipping = false;
+          }, 540);
+        } else {
+          DOM.flipperBackFace.innerHTML = DOM.pageLeftContent.innerHTML;
+          DOM.bookPageFlipper.className = 'book-page-leaf-flipper flip-leaf-prev';
+          DOM.bookPageFlipper.style.display = 'block';
+
+          renderSpreadContent(spreadIdx);
+          state.currentSpread = spreadIdx;
+          updateDockControls();
+
+          setTimeout(() => {
+            DOM.bookPageFlipper.style.display = 'none';
+            DOM.bookPageFlipper.className = 'book-page-leaf-flipper';
+            DOM.flipperBackFace.innerHTML = '';
+            state.isFlipping = false;
+          }, 540);
+        }
+      } else {
+        if (withSound) playPageFlipSound();
+        renderSpreadContent(spreadIdx);
+        state.currentSpread = spreadIdx;
+        updateDockControls();
+      }
+    }
+
+    // Scroll book into view smoothly if needed
+    const bookStage = document.getElementById('bookStage');
+    if (bookStage && window.scrollY > 150) {
+      bookStage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function renderSpreadContent(spreadIdx) {
     if (spreadIdx === 1) {
       renderMaturityGuideSpread();
       if (DOM.dockSpreadLabel) DOM.dockSpreadLabel.textContent = 'Halaman 1 - 2: Panduan Kematangan & Prolog';
@@ -364,23 +457,25 @@
         }
       }
     }
+  }
 
-    // Scroll book viewport into smooth view
-    const bookStage = document.getElementById('bookStage');
-    if (bookStage && window.scrollY > 150) {
-      bookStage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  function updateDockControls() {
+    if (DOM.dockPrevBtn) DOM.dockPrevBtn.disabled = state.currentSpread === 0;
+    if (DOM.dockNextBtn) DOM.dockNextBtn.disabled = state.currentSpread === state.totalSpreads - 1;
+    if (state.currentSpread === 0 && DOM.dockSpreadLabel) {
+      DOM.dockSpreadLabel.textContent = 'Sampul Depan Buku';
     }
   }
 
   function nextSpread() {
     if (state.currentSpread < state.totalSpreads - 1) {
-      goToSpread(state.currentSpread + 1);
+      goToSpread(state.currentSpread + 1, true, 'next');
     }
   }
 
   function prevSpread() {
     if (state.currentSpread > 0) {
-      goToSpread(state.currentSpread - 1);
+      goToSpread(state.currentSpread - 1, true, 'prev');
     }
   }
 
@@ -393,7 +488,7 @@
     }
     if (recipe) {
       closeAllDrawers();
-      goToSpread(recipe.spreadIndex);
+      goToSpread(recipe.spreadIndex, true, recipe.spreadIndex > state.currentSpread ? 'next' : 'prev');
     }
   }
 
@@ -1169,31 +1264,14 @@
       goToSpread(randIdx + 3);
     });
 
-    // Flip Corners & Side Arrows
-    if (DOM.sideNavPrev) DOM.sideNavPrev.addEventListener('click', prevSpread);
-    if (DOM.sideNavNext) DOM.sideNavNext.addEventListener('click', nextSpread);
+    // Flip Corners & Dock Navigation
     if (DOM.prevCornerClick) DOM.prevCornerClick.addEventListener('click', prevSpread);
     if (DOM.nextCornerClick) DOM.nextCornerClick.addEventListener('click', nextSpread);
 
-    // Dock Nav
+    // Dock Nav Buttons
     if (DOM.dockPrevBtn) DOM.dockPrevBtn.addEventListener('click', prevSpread);
     if (DOM.dockNextBtn) DOM.dockNextBtn.addEventListener('click', nextSpread);
-
-    // Dock Scrubber Slider
-    if (DOM.bookPageSlider) {
-      DOM.bookPageSlider.addEventListener('input', (e) => {
-        goToSpread(parseInt(e.target.value, 10));
-      });
-    }
-
-    // Quick dock section tabs
-    if (DOM.tabCoverBtn) DOM.tabCoverBtn.addEventListener('click', () => goToSpread(0));
-    if (DOM.tabGuideBtn) DOM.tabGuideBtn.addEventListener('click', () => goToSpread(1));
-    if (DOM.tabTocBtn) DOM.tabTocBtn.addEventListener('click', () => goToSpread(2));
-    if (DOM.tabRandomBtn) DOM.tabRandomBtn.addEventListener('click', () => {
-      const randIdx = Math.floor(Math.random() * state.allRecipes.length);
-      goToSpread(randIdx + 3);
-    });
+    if (DOM.dockQuickTocBtn) DOM.dockQuickTocBtn.addEventListener('click', openTocDrawer);
 
     // Drawers
     if (DOM.btnToggleToc) DOM.btnToggleToc.addEventListener('click', openTocDrawer);
@@ -1230,7 +1308,7 @@
       DOM.btnToggleTheme.addEventListener('click', () => {
         const next = state.theme === 'light' ? 'dark' : 'light';
         applyTheme(next);
-        showToast(`Mode baca ${next === 'light' ? 'Parchment' : 'Malam'} diaktifkan.`);
+        showToast(`Mode baca ${next === 'light' ? 'Ruang Baca Terang' : 'Suasana Malam'} diaktifkan.`);
       });
     }
 
