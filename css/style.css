@@ -410,11 +410,11 @@ html, body {
    =================================================================== */
 .book-viewport-stage {
   position: relative;
-  min-height: calc(100vh - 130px);
+  min-height: calc(100vh - 60px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 36px 20px 96px;
+  padding: 10px 16px 70px;
   perspective: 2600px;
 }
 
@@ -423,9 +423,9 @@ html, body {
    =================================================================== */
 .recipe-book-object {
   position: relative;
-  width: 100%;
-  max-width: 1240px;
-  min-height: 730px;
+  width: 98%;
+  max-width: 1440px;
+  min-height: calc(100vh - 140px);
   transform-style: preserve-3d;
   perspective: 2600px;
   margin: 0 auto;
@@ -806,8 +806,9 @@ html, body {
   display: none;
   grid-template-columns: 1fr 14px 1fr;
   width: 100%;
-  height: min(780px, calc(100vh - 135px));
-  min-height: 580px;
+  height: calc(100vh - 146px);
+  min-height: 640px;
+  max-height: 960px;
   background: var(--page-bg);
   border-radius: 6px 14px 14px 6px;
   box-shadow: var(--shadow-book-spread);
@@ -1312,59 +1313,53 @@ html, body {
 .recipe-food-poster {
   position: relative;
   width: 100%;
-  height: clamp(200px, 29vh, 280px);
-  border-radius: var(--radius-lg);
+  aspect-ratio: 600 / 440;
+  height: auto;
+  max-height: 380px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.12);
-  margin-bottom: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.26);
+  margin-bottom: 12px;
   border: 1.5px solid rgba(212, 175, 55, 0.4);
   background: #18110B;
   cursor: zoom-in;
-  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   user-select: none;
 }
 
 .recipe-food-poster:hover {
   transform: translateY(-2px);
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.38), 0 0 0 2px var(--book-gold-bright);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35), 0 0 0 2px var(--book-gold-bright);
   border-color: var(--book-gold-bright);
 }
 
-/* Layer 1: Ambient Blurred Backdrop with Dish Colors */
+/* Layer 1: Ambient Blurred Backdrop hidden as photo fills the whole box cleanly */
 .poster-ambient-backdrop {
-  position: absolute;
-  inset: -20px;
-  background-size: cover;
-  background-position: center;
-  filter: blur(28px) saturate(1.45) brightness(0.65);
-  transform: scale(1.15);
-  opacity: 0.95;
-  pointer-events: none;
+  display: none !important;
 }
 
 /* Layer 2: Editorial Vignette & Warm Gradient Overlay */
 .poster-editorial-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.05) 0%, rgba(20,12,6,0.55) 100%),
-              linear-gradient(180deg, rgba(20,12,6,0.48) 0%, transparent 22%, transparent 72%, rgba(15,9,4,0.78) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.32) 0%, transparent 22%, transparent 74%, rgba(0,0,0,0.48) 100%);
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* Layer 3: Un-Cropped Food Photo (Zero pixels clipped) */
+/* Layer 3: Full Authentic Food Photo (Fills 100% of Box, 600x440 Uncropped) */
 .poster-main-photo {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   width: 100%;
   height: 100%;
-  object-fit: contain !important; /* CRITICAL: Never crop dishes, glasses, or plates */
-  filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.6));
+  object-fit: cover !important;
+  display: block;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .recipe-food-poster:hover .poster-main-photo {
-  transform: scale(1.035);
+  transform: scale(1.03);
 }
 
 /* Layer 4: Floating Poster Badges & Elements */
@@ -2444,120 +2439,160 @@ html, body {
    =================================================================== */
 
 @media (max-width: 860px) {
+  body {
+    background: var(--page-bg);
+  }
+
   .book-viewport-stage {
-    padding: 16px 10px 84px;
-    min-height: auto;
+    padding: 0 0 74px 0 !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+    display: block !important;
+    perspective: none !important;
   }
 
   .recipe-book-object {
-    max-width: 580px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    perspective: none !important;
+    transform: none !important;
   }
 
   .book-outer-binding,
   .book-side-paper-stack,
   .book-bottom-paper-stack,
   .book-silk-ribbon,
-  .book-page-leaf-flipper {
+  .book-page-leaf-flipper,
+  .book-center-spine,
+  .page-corner-fold {
     display: none !important;
   }
 
-  /* Transform Dual Spread to Single Responsive Book Page */
-  .book-open-spread {
+  /* Full Bleed Mobile Cover */
+  .book-hardcover {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: calc(100vh - 74px) !important;
+    margin: 0 !important;
+    padding: 24px 16px 84px !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
     display: flex !important;
     flex-direction: column !important;
-    grid-template-columns: 1fr !important;
-    border-radius: 14px;
-    overflow: hidden;
+    justify-content: center !important;
+    transform: none !important;
   }
 
-  .book-center-spine {
+  .cover-leather-hinge {
     display: none !important;
-  }
-
-  .book-page {
-    padding: 24px 18px 34px;
-    max-height: none;
-    overflow-y: visible;
-  }
-
-  .page-left {
-    border-bottom: 2px dashed var(--page-border);
-  }
-
-  .recipe-food-poster {
-    height: 310px;
-    border-radius: var(--radius-md);
-  }
-
-  .book-ingredients-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .recipe-book-title {
-    font-size: 1.35rem;
-  }
-
-  .book-specs-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .book-hardcover {
-    padding: 16px;
-    min-height: auto;
   }
 
   .cover-inner-emboss {
-    padding: 24px 16px;
+    width: 100% !important;
+    padding: 24px 16px !important;
+    border-radius: 12px !important;
   }
 
   .cover-main-title {
-    font-size: 1.8rem;
+    font-size: 1.85rem !important;
   }
 
   .cover-specs-row {
-    gap: 8px;
-    padding: 8px 4px;
+    gap: 8px !important;
+    padding: 8px 4px !important;
+  }
+
+  /* Full Bleed Mobile Dual Spread to Single Responsive Book Page */
+  .book-open-spread {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: var(--page-bg) !important;
+    overflow: visible !important;
+  }
+
+  .book-page {
+    width: 100% !important;
+    padding: 18px 16px 28px !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background-image: none !important;
+  }
+
+  .page-left {
+    border-bottom: 2px dashed var(--page-border) !important;
+  }
+
+  /* Food Photo on Mobile: 100% edge-to-edge, exact 600:440 aspect ratio, uncropped */
+  .recipe-food-poster {
+    width: 100% !important;
+    aspect-ratio: 600 / 440 !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: var(--radius-md) !important;
+    margin: 10px 0 14px 0 !important;
+  }
+
+  .recipe-poster-title {
+    font-size: 1.38rem !important;
+  }
+
+  .book-ingredients-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .book-specs-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
   }
 
   /* Bottom Dock on Mobile */
   .book-bottom-dock {
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .dock-btn-label {
-    display: none;
+    display: none !important;
   }
 
   .dock-nav-btn {
-    padding: 8px 12px;
+    padding: 8px 12px !important;
   }
 
   .dock-page-badge {
-    padding: 5px 10px;
-    font-size: 0.74rem;
-    max-width: 220px;
+    padding: 5px 10px !important;
+    font-size: 0.74rem !important;
+    max-width: 200px !important;
   }
 
   .dock-ornament-leaf {
-    display: none;
+    display: none !important;
   }
 
   /* Drawer on Mobile */
   .book-drawer-window {
-    max-height: 92vh;
-    border-radius: 20px 20px 0 0;
-    margin-top: auto;
+    max-height: 92vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin-top: auto !important;
   }
 
   .book-drawer-overlay {
-    align-items: flex-end;
-    padding: 0;
+    align-items: flex-end !important;
+    padding: 0 !important;
   }
 
-  /* Mobile 3D Page Curl Animations */
-  .mobile-page-curl-next {
-  /* Mobile 3D Page Curl Animations (Fast 0.22s) */
+  /* Mobile 3D Page Curl Animations (0.22s) */
   .mobile-page-curl-next {
     animation: mobilePageCurlNext 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     transform-origin: left center;
