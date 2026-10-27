@@ -337,6 +337,7 @@
     // View Switch between Cover (0) vs Open Spread (>=1)
     if (spreadIdx === 0) {
       DOM.bookCoverView.style.display = 'flex';
+      DOM.bookSpreadView.classList.remove('is-open');
       DOM.bookSpreadView.style.display = 'none';
       if (DOM.dockSpreadLabel) DOM.dockSpreadLabel.textContent = 'Sampul Depan Buku';
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -344,7 +345,8 @@
     }
 
     DOM.bookCoverView.style.display = 'none';
-    DOM.bookSpreadView.style.display = 'grid';
+    DOM.bookSpreadView.classList.add('is-open');
+    DOM.bookSpreadView.style.display = '';
 
     if (spreadIdx === 1) {
       renderMaturityGuideSpread();
