@@ -449,6 +449,14 @@ html, body {
   transition: all 0.4s ease;
 }
 
+/* Only Show Open-Book Outer Binding & Ribbon when Book is Actually Open */
+.recipe-book-object:not(.is-book-open) .book-outer-binding,
+.recipe-book-object:not(.is-book-open) .book-side-paper-stack,
+.recipe-book-object:not(.is-book-open) .book-bottom-paper-stack,
+.recipe-book-object:not(.is-book-open) .book-silk-ribbon {
+  display: none !important;
+}
+
 /* 3D Stacked Paper Edges (Visible Physical Thickness of 200 Pages) */
 .book-side-paper-stack {
   position: absolute;
@@ -489,17 +497,17 @@ html, body {
   pointer-events: none;
 }
 
-/* Luxurious Silk Bookmark Ribbon (Dangles down across spine) */
+/* Luxurious Silk Bookmark Ribbon (Dangles neatly down across center spine) */
 .book-silk-ribbon {
   position: absolute;
   top: -14px;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
+  width: 13px;
   height: 104%;
   max-height: 770px;
   background: linear-gradient(90deg, #991B1B 0%, #DC2626 40%, #B91C1C 75%, #7F1D1D 100%);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), inset 0 0 4px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 0 3px rgba(255, 255, 255, 0.3);
   z-index: 25;
   pointer-events: none;
   border-radius: 0 0 1px 1px;
@@ -507,13 +515,13 @@ html, body {
 
 .ribbon-tail {
   position: absolute;
-  bottom: -14px;
+  bottom: -11px;
   left: 0;
   width: 0;
   height: 0;
-  border-left: 10px solid #991B1B;
-  border-right: 10px solid #7F1D1D;
-  border-bottom: 14px solid transparent;
+  border-left: 6.5px solid #991B1B;
+  border-right: 6.5px solid #7F1D1D;
+  border-bottom: 11px solid transparent;
 }
 
 /* ===================================================================

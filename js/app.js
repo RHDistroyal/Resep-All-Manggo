@@ -111,6 +111,7 @@
   const DOM = {};
 
   function initDOMElements() {
+    DOM.recipeBook = document.getElementById('recipeBook');
     DOM.bookCoverView = document.getElementById('bookCoverView');
     DOM.bookSpreadView = document.getElementById('bookSpreadView');
     DOM.pageLeftContent = document.getElementById('pageLeftContent');
@@ -324,6 +325,7 @@
       DOM.bookCoverView.classList.add('swing-open');
 
       setTimeout(() => {
+        if (DOM.recipeBook) DOM.recipeBook.classList.add('is-book-open');
         DOM.bookSpreadView.classList.add('is-open');
         DOM.bookSpreadView.style.display = '';
         renderSpreadContent(spreadIdx);
@@ -349,6 +351,7 @@
       DOM.bookCoverView.classList.add('swing-close');
 
       setTimeout(() => {
+        if (DOM.recipeBook) DOM.recipeBook.classList.remove('is-book-open');
         DOM.bookSpreadView.classList.remove('is-open');
         DOM.bookSpreadView.style.display = 'none';
         state.currentSpread = 0;
@@ -360,6 +363,13 @@
         state.isFlipping = false;
       }, 700);
       return;
+    }
+
+    // Ensure is-book-open is on if spreadIdx >= 1
+    if (spreadIdx > 0 && DOM.recipeBook) {
+      DOM.recipeBook.classList.add('is-book-open');
+    } else if (spreadIdx === 0 && DOM.recipeBook) {
+      DOM.recipeBook.classList.remove('is-book-open');
     }
 
     // Case 3: Flipping Between Spreads (>=1 -> >=1)
