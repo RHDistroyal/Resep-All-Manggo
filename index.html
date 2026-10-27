@@ -3,114 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>Buku Resep All Manggo | Ensiklopedia 200 Olahan Mangga Interaktif</title>
+  <title>Resep All Manggo | Ensiklopedia 200 Resep Olahan Mangga Terlengkap</title>
   
   <!-- SEO & Social Meta Tags -->
-  <meta name="description" content="Buku Resep Digital Interaktif 200 Olahan Mangga Terlengkap bergaya buku fisik dan menu restoran mewah. Dilengkapi panduan kematangan, daftar isi interaktif, takaran presisi, timer dapur, dan animasi buka halaman realistis.">
-  <meta name="keywords" content="buku resep mangga, resep mangga digital, interactive recipe book, olahan mangga, cookpad mangga, menu mangga, flipbook resep mangga">
+  <meta name="description" content="Koleksi 200 resep olahan mangga terlengkap bergaya Cookpad di Indonesia. Mulai dari minuman kekinian, masakan Nusantara, kuliner Asia, hingga pastry & dessert internasional. Dilengkapi takaran bahan, langkah detail, timer dapur, dan scaler porsi interaktif.">
+  <meta name="keywords" content="resep mangga, cookpad mangga, olahan mangga, mango sticky rice, king mango thai, sambal mangga, puding mangga, minuman mangga, dessert mangga, buku resep mangga">
   <meta name="author" content="Resep All Manggo">
   <meta name="theme-color" content="#FF9F1C">
 
-  <!-- Open Graph / Social Media -->
-  <meta property="og:type" content="book">
-  <meta property="og:title" content="Buku Resep All Manggo - 200 Olahan Mangga Interaktif">
-  <meta property="og:description" content="Sensasi membaca buku resep fisik interaktif: 200 resep mangga lengkap dengan panduan kematangan buah, bahan presisi, dan timer koki.">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Resep All Manggo - 200 Resep Olahan Mangga Terlengkap">
+  <meta property="og:description" content="Ensiklopedia 200 resep mangga rumahan teruji bergaya Cookpad: Minuman kafe, sambal Nusantara, kuliner Asia, dan dessert.">
   <meta property="og:image" content="assets/images/mango-logo.svg">
 
-  <!-- Favicon -->
+  <!-- Favicon (Crisp Modern Mango Vector) -->
   <link rel="icon" type="image/svg+xml" href="assets/images/mango-logo.svg">
   <link rel="apple-touch-icon" href="assets/images/mango-logo.svg">
 
-  <!-- Google Fonts: DM Serif Display (Classic Editorial Book) + Outfit + Plus Jakarta Sans -->
+  <!-- Google Fonts: DM Serif Display (Editorial Gastronomy) + Outfit (Modern Headings) + Plus Jakarta Sans (Clean UI) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=4.2">
+  <link rel="stylesheet" href="css/style.css?v=3.5">
 </head>
-<body class="book-theme-parchment">
+<body>
 
-  <!-- Top Ambient App Bar (Single Clean Header, No Bloat) -->
-  <header class="book-top-bar" id="bookTopBar">
-    <div class="top-bar-inner">
-      
-      <!-- Brand & Book Title -->
-      <a href="#cover" class="book-brand" id="brandCoverBtn" title="Kembali ke Sampul Depan">
-        <div class="brand-crest">
-          <img src="assets/images/mango-logo.svg" alt="Logo Buku Resep Mangga" class="brand-logo-img" width="34" height="34">
-        </div>
-        <div class="brand-info">
-          <span class="brand-name">Resep All Manggo</span>
-          <span class="brand-edition">Buku Resep Digital • 200 Resep</span>
-        </div>
-      </a>
+  <!-- Site Header (Clean Cookpad Top App Bar) -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-container">
+      <div class="brand-group">
+        <a href="#home" class="logo-link" id="logoLink">
+          <div class="logo-circle-icon">
+            <img src="assets/images/mango-logo.svg" alt="Logo Resep All Manggo" class="brand-logo" width="40" height="40">
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Resep All Manggo</span>
+            <span class="brand-tagline">Komunitas Resep Mangga Cookpad</span>
+          </div>
+        </a>
+      </div>
 
-      <!-- Single Unified Fast Search Bar -->
-      <div class="book-search-box">
-        <div class="search-field-wrap">
-          <svg class="search-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <!-- Desktop Cookpad Search Bar in Header -->
+      <div class="header-search-wrapper">
+        <div class="search-input-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="globalBookSearch" placeholder="Cari 200 resep di dalam buku (cth: Sticky Rice, Sambal, Sago)..." autocomplete="off" aria-label="Cari resep dalam buku">
-          <button type="button" id="clearSearchBtn" class="clear-btn" style="display: none;" aria-label="Hapus">&times;</button>
+          <input type="text" id="searchInput" placeholder="Cari 200 resep mangga (cth: King Mango, Sambal, Sago, Ketan)..." autocomplete="off" aria-label="Cari resep mangga">
+          <button type="button" id="clearSearchBtn" class="clear-search-btn" aria-label="Hapus pencarian" style="display: none;">&times;</button>
         </div>
-        <!-- Search Results Dropdown -->
-        <div class="search-quick-results" id="searchQuickResults" style="display: none;"></div>
       </div>
 
-      <!-- Quick Action Controls -->
-      <div class="book-top-actions">
-        <!-- Buka Daftar Isi -->
-        <button type="button" class="top-action-btn" id="btnToggleToc" title="Buka Daftar Isi">
-          <svg class="top-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      <!-- Header Action Buttons (Clean Minimal SVGs) -->
+      <div class="header-actions">
+        <!-- Resep Acak -->
+        <button type="button" class="action-btn" id="randomRecipeBtn" title="Inspirasi Resep Acak">
+          <svg class="action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+            <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+            <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"></circle>
+            <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"></circle>
           </svg>
-          <span class="action-text">Daftar Isi</span>
+          <span class="action-label">Resep Acak</span>
         </button>
 
-        <!-- Resep Ditandai (Bookmarks) -->
-        <button type="button" class="top-action-btn" id="btnToggleBookmarks" title="Resep Ditandai">
-          <svg class="top-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- Kamus Varietas -->
+        <button type="button" class="action-btn" id="openMangoGuideBtn" title="Kamus Jenis Mangga">
+          <svg class="action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span class="action-label">Kamus Varietas</span>
+        </button>
+
+        <!-- Tersimpan -->
+        <button type="button" class="action-btn" id="openFavoritesBtn" title="Resep Tersimpan Saya">
+          <svg class="action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
           </svg>
-          <span class="action-text">Tandai</span>
-          <span class="action-badge" id="bookmarkCountBadge">0</span>
+          <span class="action-label">Tersimpan</span>
+          <span class="badge-count" id="favoritesCountBadge">0</span>
         </button>
 
         <!-- Daftar Belanja -->
-        <button type="button" class="top-action-btn" id="btnToggleShopping" title="Daftar Belanja">
-          <svg class="top-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button type="button" class="action-btn" id="openShoppingListBtn" title="Daftar Belanja">
+          <svg class="action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <span class="action-text">Belanja</span>
-          <span class="action-badge" id="shoppingCountBadge">0</span>
+          <span class="action-label">Belanja</span>
+          <span class="badge-count" id="shoppingCountBadge">0</span>
         </button>
 
-        <!-- Suara Lembaran Kertas Toggle -->
-        <button type="button" class="top-action-btn btn-icon-only" id="btnToggleSound" title="Suara Lembaran Kertas (Aktif)">
-          <svg class="top-svg sound-on-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-          <svg class="top-svg sound-off-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-        </button>
-
-        <!-- Mode Lampu Baca (Theme Toggle) -->
-        <button type="button" class="top-action-btn btn-icon-only" id="btnToggleTheme" title="Ganti Suasana Baca (Parchment / Malam)">
-          <svg class="top-svg sun-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- Theme Toggle -->
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti Tema" title="Ganti Mode Tampilan">
+          <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -121,274 +115,634 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <svg class="top-svg moon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+          <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
-
       </div>
     </div>
   </header>
 
-  <!-- Mobile Compact Search Bar -->
-  <div class="mobile-book-search-bar" id="mobileSearchBar">
-    <div class="search-field-wrap">
-      <svg class="search-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Mobile Search Input Bar -->
+  <div class="mobile-search-bar container">
+    <div class="search-input-box">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" id="mobileBookSearch" placeholder="Cari 200 resep mangga..." autocomplete="off">
-      <button type="button" id="mobileClearSearchBtn" class="clear-btn" style="display: none;">&times;</button>
+      <input type="text" id="mobileSearchInput" placeholder="Cari resep olahan mangga..." autocomplete="off" aria-label="Cari resep mobile">
+      <button type="button" id="mobileClearSearchBtn" class="clear-search-btn" aria-label="Hapus pencarian" style="display: none;">&times;</button>
     </div>
   </div>
 
-  <!-- ===================================================================
-       THE MASTER INTERACTIVE DIGITAL RECIPE BOOK (BOOK STAGE)
-       =================================================================== -->
-  <!-- ===================================================================
-       THE MASTER INTERACTIVE DIGITAL RECIPE BOOK (BOOK STAGE)
-       =================================================================== -->
-  <main class="book-viewport-stage" id="bookStage">
+  <main id="mainContent">
 
-    <!-- The Realistic Physical Book Container -->
-    <div class="recipe-book-object" id="recipeBook">
-      
-      <!-- Outer Leather Binding Overhang & 3D Shadow -->
-      <div class="book-outer-binding"></div>
-
-      <!-- Physical 3D Stacked Paper Edge Details (Thickness of 200 Pages) -->
-      <div class="book-side-paper-stack stack-left" id="stackLeft" aria-hidden="true"></div>
-      <div class="book-side-paper-stack stack-right" id="stackRight" aria-hidden="true"></div>
-      <div class="book-bottom-paper-stack" id="stackBottom" aria-hidden="true"></div>
-
-      <!-- Red/Gold Satin Ribbon Bookmark Dangling from Spine -->
-      <div class="book-silk-ribbon" aria-hidden="true">
-        <span class="ribbon-tail"></span>
-      </div>
-      
-      <!-- ==============================================================
-           STATE A: SAMPUL DEPAN BUKU (HARDCOVER VIEW)
-           ============================================================== -->
-      <div class="book-hardcover" id="bookCoverView">
-        <div class="cover-leather-hinge" aria-hidden="true"></div>
-        <div class="cover-inner-emboss">
-          <div class="cover-gold-filigree">
-            
-            <div class="cover-crest-container">
-              <div class="cover-crest-emblem">
-                <img src="assets/images/mango-logo.svg" alt="Mango Seal" class="cover-crest-img" width="80" height="80">
-              </div>
-              <span class="cover-sub-badge">EDISI GASTRONOMI NUSANTARA & DUNIA</span>
-            </div>
-
-            <h1 class="cover-main-title">BUKU RESEP MANGGA</h1>
-            <p class="cover-book-subtitle">The Complete Mango Gastronomy Compendium</p>
-
-            <div class="cover-divider-flourish">
-              <span class="flourish-line"></span>
-              <span class="flourish-diamond">◆</span>
-              <span class="flourish-line"></span>
-            </div>
-
-            <p class="cover-book-summary">
-              Ensiklopedia 200 Mahakarya Kuliner Mangga Indonesia & Dunia. Mulai dari kelezatan warisan Sambal Pencit & Masakan Tradisional, Segarnya Minuman Kafe & Street Food Asia, hingga Kelembutan Pastry & Dessert Internasional.
-            </p>
-
-            <div class="cover-specs-row">
-              <div class="cover-spec-item">
-                <strong>200</strong>
-                <span>Resep Otentik</span>
-              </div>
-              <div class="cover-spec-sep">|</div>
-              <div class="cover-spec-item">
-                <strong>100%</strong>
-                <span>Foto Masakan Asli</span>
-              </div>
-              <div class="cover-spec-sep">|</div>
-              <div class="cover-spec-item">
-                <strong>4 Tahap</strong>
-                <span>Kematangan Buah</span>
-              </div>
-            </div>
-
-            <!-- Big Interactive Open Book Latch Button -->
-            <div class="cover-open-action">
-              <button type="button" class="btn-open-book-latch" id="btnOpenCover">
-                <span class="latch-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                  </svg>
-                </span>
-                <span class="latch-label">Buka Lembaran Buku Resep</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-            </div>
-
-            <div class="cover-quick-links">
-              <button type="button" class="cover-quick-btn" id="coverJumpTocBtn">Langsung ke Daftar Isi</button>
-              <button type="button" class="cover-quick-btn" id="coverRandomBtn">Inspirasi Resep Acak</button>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ==============================================================
-           STATE B: LEMBARAN BUKU TERBUKA (TWO-PAGE SPREAD VIEW)
-           ============================================================== -->
-      <div class="book-open-spread" id="bookSpreadView" style="display: none;">
+    <!-- World-Class Culinary Magazine Hero Section -->
+    <section class="culinary-hero-section" id="home">
+      <div class="container culinary-hero-container">
         
-        <!-- Left Book Page -->
-        <article class="book-page page-left" id="pageLeft">
-          <div class="page-content-wrapper" id="pageLeftContent">
-            <!-- Dynamically injected left page content -->
+        <!-- Left Column: Editorial Headline, Gastro Metrics & Search -->
+        <div class="hero-editorial-col">
+          <div class="hero-season-badge">
+            <span class="badge-dot"></span>
+            <span class="badge-text">EDISI MUSIM MANGGA 2026 • 200 KREASI GASTRONOMI TERUJI</span>
           </div>
-          <div class="page-corner-fold prev-corner" id="prevCornerClick" title="Balik ke Halaman Sebelumnya"></div>
-          <footer class="page-footer">
-            <span class="page-footer-title" id="pageLeftFooterTitle">Buku Resep All Manggo</span>
-            <span class="page-number" id="pageLeftNumber">1</span>
-          </footer>
-        </article>
+          
+          <h1 class="hero-editorial-headline">
+            The Art & Pleasure of <span class="highlight-mango">Mango Gastronomy</span>
+          </h1>
+          
+          <p class="hero-editorial-sub">
+            Dari racikan legendaris <em>Mango Sticky Rice Bangkok</em>, segarnya <em>Sambal Pencit Madura</em>, hingga kelembutan <em>Mango Mille Crepes Paris</em>. Ensiklopedia 200 mahakarya olahan mangga dengan takaran bahan presisi, teknik koki, dan panduan masak interaktif.
+          </p>
 
-        <!-- Center Book Spine Crease & Shadow -->
-        <div class="book-center-spine">
-          <div class="spine-line"></div>
-          <div class="spine-stitches" aria-hidden="true"></div>
-          <div class="spine-highlight"></div>
+          <!-- Culinary Smart Search Box -->
+          <div class="culinary-search-box">
+            <div class="search-box-inner">
+              <svg class="search-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="heroSearchInput" placeholder="Cari 200 resep, bahan (santan, keju), atau varietas mangga..." autocomplete="off" aria-label="Cari resep mangga">
+              <span class="search-kbd-hint"><kbd>Ctrl</kbd> + <kbd>K</kbd></span>
+              <button type="button" id="heroSearchBtn" class="search-box-btn">Cari Resep</button>
+            </div>
+          </div>
+
+          <!-- Popular Search Tags -->
+          <div class="hero-popular-row">
+            <span class="popular-label">Inspirasi Pilihan:</span>
+            <div class="popular-tags-list">
+              <button type="button" class="trend-tag-btn" data-tag="Sticky Rice">Mango Sticky Rice</button>
+              <button type="button" class="trend-tag-btn" data-tag="King Mango">King Mango Thai</button>
+              <button type="button" class="trend-tag-btn" data-tag="Sambal">Sambal Pencit</button>
+              <button type="button" class="trend-tag-btn" data-tag="Sago">Mango Sago</button>
+              <button type="button" class="trend-tag-btn" data-tag="Cheesecake">Cheesecake</button>
+              <button type="button" class="trend-tag-btn" data-tag="Crepes">Mille Crepes</button>
+            </div>
+          </div>
+
+          <!-- Gastro Compendium Metrics -->
+          <div class="hero-metrics-grid">
+            <div class="metric-pill">
+              <strong class="metric-val">200</strong>
+              <span class="metric-sub">Resep Teruji</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-pill">
+              <strong class="metric-val">100%</strong>
+              <span class="metric-sub">Foto Asli Masakan</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-pill">
+              <strong class="metric-val">8</strong>
+              <span class="metric-sub">Varietas Mangga</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-pill">
+              <strong class="metric-val">Mode Masak</strong>
+              <span class="metric-sub">Hands-Free Timer</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Right Book Page -->
-        <article class="book-page page-right" id="pageRight">
-          <div class="page-content-wrapper" id="pageRightContent">
-            <!-- Dynamically injected right page content -->
+        <!-- Right Column: Dish of the Day (Spotlight Card) -->
+        <div class="hero-spotlight-col">
+          <div class="dish-of-the-day-card" id="dishOfTheDayCard">
+            <div class="dish-badge-ribbon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Resep Pilihan Editor Hari Ini</span>
+            </div>
+            
+            <div class="dish-media-wrap">
+              <img src="https://img-global.cpcdn.com/recipes/5305bb9910d9fe78/751x532cq70/mango-sticky-rice-foto-resep-utama.jpg" alt="Mango Sticky Rice Khas Bangkok" class="dish-media-img" id="heroDishImg" onerror="this.src='assets/images/cat-asia.jpg'">
+              <div class="dish-media-scrim"></div>
+              <span class="dish-time-tag">25 Menit • 330 kkal</span>
+            </div>
+
+            <div class="dish-info-content">
+              <div class="dish-rating-row">
+                <div class="stars-wrap">
+                  <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
+                </div>
+                <span class="rating-num">4.9</span>
+                <span class="review-count">(1.480 koki teruji)</span>
+              </div>
+
+              <h2 class="dish-title" id="heroDishTitle">Khao Niew Mamuang (Mango Sticky Rice Bangkok)</h2>
+              
+              <p class="dish-quote">
+                "Harmonisasi beras ketan pulen wangi pandan dengan siraman santan kental gurih berpadu potongan mangga harum manis dingin yang lumer di lidah."
+              </p>
+
+              <div class="dish-card-actions">
+                <button type="button" class="btn-cook-now" id="heroCookNowBtn">
+                  <span>Mulai Masak Sekarang</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button type="button" class="btn-dish-save" id="heroSaveDishBtn" title="Simpan ke Koleksi">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="page-corner-fold next-corner" id="nextCornerClick" title="Balik ke Halaman Berikutnya"></div>
-          <footer class="page-footer">
-            <span class="page-number" id="pageRightNumber">2</span>
-            <span class="page-footer-title" id="pageRightFooterTitle">Ensiklopedia Olahan Mangga</span>
-          </footer>
-        </article>
+        </div>
 
       </div>
+    </section>
 
-      <!-- 3D Turning Paper Leaf Layer (Animated during Page Flip) -->
-      <div class="book-page-leaf-flipper" id="bookPageFlipper" style="display: none;" aria-hidden="true">
-        <div class="flipper-face flipper-face-front" id="flipperFrontFace"></div>
-        <div class="flipper-face flipper-face-back" id="flipperBackFace"></div>
+    <!-- Professional App View Switcher Tabs (Beranda Shelves vs Katalog Lengkap) -->
+    <div class="app-view-switcher container">
+      <div class="view-switcher-track">
+        <button type="button" class="view-switch-btn active" id="btnViewHome" data-view="home">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Beranda Rekomendasi</span>
+        </button>
+        <button type="button" class="view-switch-btn" id="btnViewCatalog" data-view="catalog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Katalog 200 Resep</span>
+          <span class="view-count-badge">200</span>
+        </button>
       </div>
+    </div>
+
+    <!-- ===================================================================
+         VIEW 1: BERANDA REKOMENDASI (CURATED SHELVES - TIDAK KELUAR SEMUA)
+         =================================================================== -->
+    <div class="app-view-container active" id="homeViewContainer">
+
+      <!-- Section: Pilihan Koki Hari Ini (Spotlight Shelf) -->
+      <section class="shelf-section container">
+        <div class="shelf-header">
+          <div class="shelf-title-wrap">
+            <h2 class="shelf-title">Pilihan Koki Teruji Hari Ini</h2>
+            <span class="shelf-subtitle">Resep mangga favorit dengan tingkat keberhasilan tertinggi</span>
+          </div>
+          <button type="button" class="shelf-action-link" onclick="window.filterByCategory('all')">
+            <span>Lihat Semua 200 Resep</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="shelf-cards-scroll" id="shelfFeatured">
+          <!-- Dynamically populated top 5 featured recipes -->
+        </div>
+      </section>
+
+      <!-- Section: Minuman Kafe & Segar Shelf -->
+      <section class="shelf-section container">
+        <div class="shelf-header">
+          <div class="shelf-title-wrap">
+            <h2 class="shelf-title">Minuman Kafe & Segar</h2>
+            <span class="shelf-subtitle">King Mango Thai, Yakult, Sago, Mojito, & Smoothie Bowl</span>
+          </div>
+          <button type="button" class="shelf-action-link" onclick="window.filterByCategory('minuman')">
+            <span>Lihat Semua 25 Minuman</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="shelf-cards-scroll" id="shelfMinuman">
+          <!-- Dynamically populated 6 drink recipes -->
+        </div>
+      </section>
+
+      <!-- Section: Sambal & Kuliner Nusantara Shelf -->
+      <section class="shelf-section container">
+        <div class="shelf-header">
+          <div class="shelf-title-wrap">
+            <h2 class="shelf-title">Sambal & Masakan Nusantara</h2>
+            <span class="shelf-subtitle">Sambal Pencit, Rujak Serut, Asinan, Gulai, hingga Ikan Bakar</span>
+          </div>
+          <button type="button" class="shelf-action-link" onclick="window.filterByCategory('nusantara')">
+            <span>Lihat Semua 50 Resep Nusantara</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="shelf-cards-scroll" id="shelfNusantara">
+          <!-- Dynamically populated 6 nusantara recipes -->
+        </div>
+      </section>
+
+      <!-- Section: Kuliner Khas Asia Shelf -->
+      <section class="shelf-section container">
+        <div class="shelf-header">
+          <div class="shelf-title-wrap">
+            <h2 class="shelf-title">Street Food & Kuliner Khas Asia</h2>
+            <span class="shelf-subtitle">Khao Niew Mamuang (Sticky Rice), Mango Float, Kulfi, & Som Tum</span>
+          </div>
+          <button type="button" class="shelf-action-link" onclick="window.filterByCategory('asia')">
+            <span>Lihat Semua 30 Resep Asia</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="shelf-cards-scroll" id="shelfAsia">
+          <!-- Dynamically populated 6 asian recipes -->
+        </div>
+      </section>
+
+      <!-- Section: Pastry & Dessert Mewah Shelf -->
+      <section class="shelf-section container">
+        <div class="shelf-header">
+          <div class="shelf-title-wrap">
+            <h2 class="shelf-title">Pastry, Bakery & Dessert Mewah</h2>
+            <span class="shelf-subtitle">Cheesecake, Panna Cotta, Tartlet, Mille Crepes, & Sorbet</span>
+          </div>
+          <button type="button" class="shelf-action-link" onclick="window.filterByCategory('pastry')">
+            <span>Lihat Semua 50 Pastry</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="shelf-cards-scroll" id="shelfPastry">
+          <!-- Dynamically populated 6 pastry recipes -->
+        </div>
+      </section>
+
+      <!-- Section: Olahan Simpel & Kilat Shelf -->
+      <section class="shelf-section container">
+        <div class="shelf-header">
+          <div class="shelf-title-wrap">
+            <h2 class="shelf-title">Olahan Simpel & Cepat</h2>
+            <span class="shelf-subtitle">Praktis tanpa ribet, siap dalam hitungan menit untuk keluarga</span>
+          </div>
+          <button type="button" class="shelf-action-link" onclick="window.filterByCategory('simpel')">
+            <span>Lihat Semua 25 Resep Simpel</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="shelf-cards-scroll" id="shelfSimpel">
+          <!-- Dynamically populated 6 simple recipes -->
+        </div>
+      </section>
 
     </div>
+
+    <!-- ===================================================================
+         VIEW 2: KATALOG 200 RESEP (FULL SEARCH, FILTERS & GRID)
+         =================================================================== -->
+    <div class="app-view-container" id="catalogViewContainer">
+
+      <!-- Category Tabs Navigation (Clean Cookpad Sticky Tabs) -->
+      <section class="category-nav-section" id="kategori">
+        <div class="container">
+          <div class="category-scroll-container">
+            <button type="button" class="cat-pill active" data-category="all" id="cat-all">
+              <span class="cat-name">Semua Resep</span>
+              <span class="cat-count" id="count-all">200</span>
+            </button>
+            <button type="button" class="cat-pill" data-category="simpel" id="cat-simpel">
+              <span class="cat-name">Simpel & Kilat</span>
+              <span class="cat-count" id="count-simpel">25</span>
+            </button>
+            <button type="button" class="cat-pill" data-category="minuman" id="cat-minuman">
+              <span class="cat-name">Minuman Kafe</span>
+              <span class="cat-count" id="count-minuman">25</span>
+            </button>
+            <button type="button" class="cat-pill" data-category="nusantara" id="cat-nusantara">
+              <span class="cat-name">Nusantara & Sambal</span>
+              <span class="cat-count" id="count-nusantara">50</span>
+            </button>
+            <button type="button" class="cat-pill" data-category="asia" id="cat-asia">
+              <span class="cat-name">Kuliner Asia</span>
+              <span class="cat-count" id="count-asia">30</span>
+            </button>
+            <button type="button" class="cat-pill" data-category="barat" id="cat-barat">
+              <span class="cat-name">Western & Latin</span>
+              <span class="cat-count" id="count-barat">20</span>
+            </button>
+            <button type="button" class="cat-pill" data-category="pastry" id="cat-pastry">
+              <span class="cat-name">Pastry & Dessert</span>
+              <span class="cat-count" id="count-pastry">50</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter & Sort Toolbar (Clean Text, No Emoji Badges) -->
+      <section class="filter-controls-section">
+        <div class="container filter-container">
+          <div class="filter-status-info">
+            <h2 class="active-category-title" id="activeCategoryHeading">Semua Resep Olahan Mangga</h2>
+            <span class="results-count-text" id="resultsCountText">Menampilkan 200 resep teruji</span>
+          </div>
+
+          <div class="filter-options-group">
+            <!-- Difficulty Filter -->
+            <div class="select-wrapper">
+              <select id="difficultyFilter" class="filter-select" aria-label="Filter Tingkat Kesulitan">
+                <option value="all">Semua Kesulitan</option>
+                <option value="Mudah">Mudah</option>
+                <option value="Sedang">Sedang</option>
+                <option value="Ahli">Tingkat Ahli</option>
+              </select>
+            </div>
+
+            <!-- Time Filter -->
+            <div class="select-wrapper">
+              <select id="timeFilter" class="filter-select" aria-label="Filter Waktu Memasak">
+                <option value="all">Semua Durasi</option>
+                <option value="quick">Kilat (< 15 menit)</option>
+                <option value="medium">Sedang (15 - 30 menit)</option>
+                <option value="long">Santai (> 30 menit)</option>
+              </select>
+            </div>
+
+            <!-- Sort Select -->
+            <div class="select-wrapper">
+              <select id="sortSelect" class="filter-select" aria-label="Urutan Resep">
+                <option value="default">Rekomendasi</option>
+                <option value="time-asc">Waktu Tercepat</option>
+                <option value="name-asc">Nama A - Z</option>
+                <option value="name-desc">Nama Z - A</option>
+                <option value="calories-asc">Kalori Terendah</option>
+              </select>
+            </div>
+
+            <!-- Reset Filter Button -->
+            <button type="button" class="btn-reset-filters" id="resetFiltersBtn" style="display: none;" title="Reset Filter">
+              <span>Reset Filter</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recipe Feed Section (Cookpad Clean Cards Grid) -->
+      <section class="recipes-grid-section">
+        <div class="container">
+          <div class="recipe-grid" id="recipeGrid">
+            <!-- 200 authentic Cookpad recipe cards injected dynamically with unique photos -->
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon-clean">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <h3 class="empty-title">Resep Tidak Ditemukan</h3>
+            <p class="empty-desc">Tidak ada resep yang sesuai dengan kata kunci atau filter yang Anda pilih. Coba gunakan kata kunci populer seperti <em>"Thai"</em>, <em>"Puding"</em>, <em>"Sambal"</em>, atau <em>"Sago"</em>.</p>
+            <button type="button" class="btn btn-primary" id="emptyResetBtn">Tampilkan Semua 200 Resep</button>
+          </div>
+
+          <!-- Pagination / Load More -->
+          <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+            <button type="button" class="btn btn-load-more" id="loadMoreBtn">
+              <span>Muat Lebih Banyak Resep</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Educational Guide Spotlight (Varietas Mangga) -->
+    <section class="spotlight-section">
+      <div class="container spotlight-container">
+        <div class="spotlight-image">
+          <img src="assets/images/mango-showcase.jpg" alt="Showcase Dessert Mangga" class="showcase-img" loading="lazy">
+        </div>
+        <div class="spotlight-content">
+          <span class="spotlight-tag">Tips Dapur Mangga</span>
+          <h2 class="spotlight-title">Kenali Jenis Mangga Terbaik Untuk Masakan Anda</h2>
+          <p class="spotlight-desc">
+            Kunci kelezatan olahan mangga terletak pada kecocokan varietas mangga. Gunakan <strong>Harum Manis</strong> untuk jus dan dessert lembut, <strong>Gedong Gincu</strong> untuk aroma wangi minuman tropis, serta <strong>Mangga Mengkal / Indramayu</strong> untuk sambal, rujak, dan asinan yang renyah berderak.
+          </p>
+          <button type="button" class="btn btn-primary" id="spotlightGuideBtn">
+            <span>Buka Panduan 8 Varietas Mangga</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- ===================================================================
-       BOOK BOTTOM FLOATING DOCK (SINGLE CLEAN NAVIGATOR, NO SLIDER/BLOAT)
-       =================================================================== -->
-  <nav class="book-bottom-dock" id="bookBottomDock" aria-label="Navigasi Buku">
-    <div class="dock-inner container">
+  <!-- Recipe Detail Modal (Cookpad Recipe View) -->
+  <div class="modal-overlay" id="recipeModalOverlay" aria-hidden="true" role="dialog" aria-labelledby="modalRecipeTitle">
+    <div class="modal-window">
       
-      <!-- Prev Page Button -->
-      <button type="button" class="dock-nav-btn prev-book-btn" id="dockPrevBtn" title="Halaman Sebelumnya">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        <span class="dock-btn-label">Sebelumnya</span>
-      </button>
-
-      <!-- Center Active Page Badge (Elegant Classic Book Indicator) -->
-      <div class="dock-page-badge" id="dockPageBadge">
-        <span class="dock-ornament-leaf">❦</span>
-        <span class="dock-label-spread" id="dockSpreadLabel">Sampul Depan</span>
-        <span class="dock-ornament-leaf">❦</span>
+      <!-- Top Cover Image Frame -->
+      <div class="modal-cover-frame">
+        <img src="assets/images/cat-minuman.jpg" alt="Cover Foto Resep" class="modal-cover-img" id="modalCoverImage">
+        <div class="modal-cover-overlay"></div>
+        <div class="modal-cover-badges">
+          <span class="modal-badge-cat" id="modalCategoryBadge">Olahan Simpel</span>
+          <span class="modal-difficulty" id="modalDifficulty">Mudah</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Tutup Detail Resep">&times;</button>
       </div>
 
-      <!-- Quick Jump Button: Daftar Isi -->
-      <button type="button" class="dock-quick-pill" id="dockQuickTocBtn" title="Buka Daftar Isi">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-        <span>Daftar Isi</span>
-      </button>
+      <!-- Modal Body -->
+      <div class="modal-body" id="modalBody">
+        
+        <!-- Author Profile Bar -->
+        <div class="cookpad-author-row">
+          <div class="cookpad-author-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="cookpad-author-info">
+            <div class="cookpad-author-name">Dapur Mangga <span class="cookpad-verified-badge">Resep Teruji</span></div>
+            <div class="cookpad-recipe-date">Ensiklopedia 200 Olahan Mangga Indonesia</div>
+          </div>
+          <div class="cookpad-top-actions">
+            <button type="button" class="btn-cook-mode-launch" id="btnLaunchCookMode" title="Buka Mode Memasak Langkah demi Langkah (Hands-Free)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M6 13.8V4a2 2 0 1 1 4 0v9.8a4 4 0 1 1-4 0z"></path>
+                <circle cx="8" cy="18" r="4"></circle>
+              </svg>
+              <span>Mode Memasak</span>
+            </button>
+            <button type="button" class="btn-cookpad-fav" id="modalFavoriteBtn" title="Simpan ke Favorit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span class="util-text">Simpan</span>
+            </button>
+          </div>
+        </div>
 
-      <!-- Next Page Button -->
-      <button type="button" class="dock-nav-btn next-book-btn" id="dockNextBtn" title="Halaman Berikutnya">
-        <span class="dock-btn-label">Berikutnya</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
+        <!-- Recipe Title & Description -->
+        <div class="modal-title-wrapper">
+          <h2 class="modal-title" id="modalRecipeTitle">Nama Resep Mangga</h2>
+          <div class="modal-story-card">
+            <p class="modal-summary" id="modalSummary">Deskripsi lengkap kelezatan dan karakteristik resep.</p>
+          </div>
+        </div>
 
+        <!-- Meta Quick Specs (Clean Cookpad Spec Cards) -->
+        <div class="recipe-quick-specs">
+          <div class="spec-card">
+            <svg class="spec-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div class="spec-info">
+              <span class="spec-label">Persiapan</span>
+              <strong id="modalPrepTime">10 m</strong>
+            </div>
+          </div>
+          <div class="spec-card">
+            <svg class="spec-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <div class="spec-info">
+              <span class="spec-label">Memasak</span>
+              <strong id="modalCookTime">15 m</strong>
+            </div>
+          </div>
+          <div class="spec-card">
+            <svg class="spec-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10M12 20V4M6 20v-6"></path>
+            </svg>
+            <div class="spec-info">
+              <span class="spec-label">Kalori</span>
+              <strong id="modalCalories">180 kkal</strong>
+            </div>
+          </div>
+          <div class="spec-card">
+            <svg class="spec-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 3a9 9 0 0 1 9 9"></path>
+            </svg>
+            <div class="spec-info">
+              <span class="spec-label">Pilihan Mangga</span>
+              <strong id="modalMangoType">Harum Manis</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredients Section with Serving Scaler -->
+        <div class="recipe-section-box">
+          <div class="section-box-header">
+            <div class="section-title-wrap">
+              <h3 class="section-box-title">Bahan-Bahan</h3>
+              <span class="section-box-subtitle">Porsi dapat disesuaikan otomatis:</span>
+            </div>
+            
+            <div class="servings-scaler-control">
+              <span class="scaler-label">Porsi:</span>
+              <div class="scaler-btn-group">
+                <button type="button" class="scaler-btn" data-multiplier="0.5">0.5x</button>
+                <button type="button" class="scaler-btn active" data-multiplier="1">1x</button>
+                <button type="button" class="scaler-btn" data-multiplier="2">2x</button>
+                <button type="button" class="scaler-btn" data-multiplier="3">3x</button>
+              </div>
+              <span class="current-servings-text" id="modalServingsDisplay">2 Porsi</span>
+            </div>
+          </div>
+
+          <div class="shopping-batch-action">
+            <button type="button" class="btn btn-sm btn-outline" id="modalAddAllIngBtn">
+              + Masukkan Semua Bahan ke Daftar Belanja
+            </button>
+          </div>
+
+          <ul class="ingredients-list" id="modalIngredientsList">
+            <!-- Dynamic Ingredients injected here -->
+          </ul>
+        </div>
+
+        <!-- Cooking Instructions -->
+        <div class="recipe-section-box">
+          <div class="section-box-header">
+            <div class="section-title-wrap">
+              <h3 class="section-box-title">Langkah-Langkah Pembuatan</h3>
+              <span class="checklist-hint">Centang langkah yang sudah selesai:</span>
+            </div>
+          </div>
+          <ol class="cooking-steps-list" id="modalStepsList">
+            <!-- Dynamic cooking steps injected here -->
+          </ol>
+        </div>
+
+        <!-- Kitchen Timer Widget -->
+        <div class="kitchen-timer-widget" id="kitchenTimerWidget">
+          <div class="timer-header">
+            <div class="timer-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <strong>Timer Dapur Cookpad</strong>
+            </div>
+            <div class="timer-quick-preset">
+              <button type="button" class="timer-preset-btn" data-sec="180">+3 Menit</button>
+              <button type="button" class="timer-preset-btn" data-sec="300">+5 Menit</button>
+              <button type="button" class="timer-preset-btn" data-sec="900">+15 Menit</button>
+            </div>
+          </div>
+          <div class="timer-display-bar">
+            <span class="timer-time" id="timerDisplay">00:00</span>
+            <div class="timer-buttons">
+              <button type="button" class="btn btn-sm btn-primary" id="timerStartBtn">Mulai Timer</button>
+              <button type="button" class="btn btn-sm btn-outline" id="timerResetBtn">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chef's Tips -->
+        <div class="chef-tips-box" id="modalChefTipsBox">
+          <div class="tips-content">
+            <strong class="tips-heading">Tips Dapur Koki:</strong>
+            <p class="tips-text" id="modalChefTipsText">Pilih mangga matang pohon untuk hasil rasa terbaik.</p>
+          </div>
+        </div>
+
+        <!-- Tags List -->
+        <div class="modal-tags-container" id="modalTagsContainer">
+          <!-- Dynamic tags injected here -->
+        </div>
+
+        <!-- Related Recipes -->
+        <div class="modal-related-container" id="modalRelatedContainer">
+          <h4 class="related-heading">Resep Terkait:</h4>
+          <div class="related-cards-grid" id="modalRelatedCardsGrid">
+            <!-- Dynamic related cards injected here -->
+          </div>
+        </div>
+
+      </div>
     </div>
-  </nav>
+  </div>
 
-  <!-- ===================================================================
-       DRAWER 1: TABLE OF CONTENTS (DAFTAR ISI LENGKAP 200 RESEP)
-       =================================================================== -->
-  <div class="book-drawer-overlay" id="tocDrawerOverlay" aria-hidden="true" role="dialog" aria-labelledby="tocDrawerTitle">
-    <div class="book-drawer-window">
-      <div class="drawer-header">
-        <div class="drawer-title-wrap">
-          <h2 class="drawer-title" id="tocDrawerTitle">Daftar Isi 200 Resep Mangga</h2>
-          <span class="drawer-subtitle">Klik judul resep apa pun untuk langsung membuka halamannya di buku</span>
-        </div>
-        <button type="button" class="drawer-close-btn" id="closeTocDrawerBtn" aria-label="Tutup Daftar Isi">&times;</button>
+  <!-- Favorites Drawer / Modal -->
+  <div class="modal-overlay" id="favoritesModalOverlay" aria-hidden="true" role="dialog">
+    <div class="modal-window modal-medium">
+      <div class="modal-header">
+        <h2 class="modal-title">Resep Tersimpan Saya</h2>
+        <button type="button" class="modal-close-btn" id="closeFavoritesModalBtn">&times;</button>
       </div>
-
-      <!-- Drawer Search & Category Tabs -->
-      <div class="drawer-toolbar">
-        <input type="text" id="tocSearchInput" class="drawer-search-input" placeholder="Cari judul resep, bahan, atau varietas mangga...">
-        <div class="drawer-cat-tabs">
-          <button type="button" class="drawer-cat-pill active" data-cat="all">Semua (200)</button>
-          <button type="button" class="drawer-cat-pill" data-cat="minuman">Minuman (25)</button>
-          <button type="button" class="drawer-cat-pill" data-cat="nusantara">Nusantara (50)</button>
-          <button type="button" class="drawer-cat-pill" data-cat="asia">Asia (30)</button>
-          <button type="button" class="drawer-cat-pill" data-cat="pastry">Pastry (50)</button>
-          <button type="button" class="drawer-cat-pill" data-cat="simpel">Simpel (25)</button>
-          <button type="button" class="drawer-cat-pill" data-cat="barat">Western (20)</button>
-        </div>
-      </div>
-
-      <!-- Scrollable Table of Contents Grid -->
-      <div class="drawer-body">
-        <div class="toc-items-container" id="tocListContainer">
-          <!-- Dynamically populated 200 table of contents links -->
+      <div class="modal-body">
+        <div id="favoritesListContainer">
+          <!-- Dynamic Favorites Cards -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===================================================================
-       DRAWER 2: RESEP DITANDAI (BOOKMARKED RECIPES)
-       =================================================================== -->
-  <div class="book-drawer-overlay" id="bookmarksDrawerOverlay" aria-hidden="true" role="dialog">
-    <div class="book-drawer-window drawer-medium">
-      <div class="drawer-header">
-        <div class="drawer-title-wrap">
-          <h2 class="drawer-title">Resep Ditandai (Bookmarks)</h2>
-          <span class="drawer-subtitle">Koleksi resep favorit yang Anda tandai dengan pita pembatas buku</span>
-        </div>
-        <button type="button" class="drawer-close-btn" id="closeBookmarksDrawerBtn">&times;</button>
+  <!-- Shopping List Drawer / Modal -->
+  <div class="modal-overlay" id="shoppingModalOverlay" aria-hidden="true" role="dialog">
+    <div class="modal-window modal-medium">
+      <div class="modal-header">
+        <h2 class="modal-title">Daftar Belanja Bahan</h2>
+        <button type="button" class="modal-close-btn" id="closeShoppingModalBtn">&times;</button>
       </div>
-      <div class="drawer-body">
-        <div id="bookmarksListContainer">
-          <!-- Dynamic Bookmarked recipes -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================
-       DRAWER 3: DAFTAR BELANJA BAHAN (SHOPPING LIST)
-       =================================================================== -->
-  <div class="book-drawer-overlay" id="shoppingDrawerOverlay" aria-hidden="true" role="dialog">
-    <div class="book-drawer-window drawer-medium">
-      <div class="drawer-header">
-        <div class="drawer-title-wrap">
-          <h2 class="drawer-title">Daftar Belanja Bahan</h2>
-          <span class="drawer-subtitle">Bahan-bahan yang disimpan dari buku resep untuk dibeli di pasar</span>
-        </div>
-        <button type="button" class="drawer-close-btn" id="closeShoppingDrawerBtn">&times;</button>
-      </div>
-      <div class="drawer-body">
+      <div class="modal-body">
         <div class="shopping-actions-toolbar">
-          <button type="button" class="btn-dock-action btn-primary" id="shareShoppingWhatsappBtn">
+          <button type="button" class="btn btn-sm btn-primary" id="shareShoppingWhatsappBtn">
             <span>Kirim ke WhatsApp</span>
           </button>
-          <button type="button" class="btn-dock-action btn-outline" id="clearShoppingListBtn">
+          <button type="button" class="btn btn-sm btn-outline" id="clearShoppingListBtn">
             <span>Kosongkan Daftar</span>
           </button>
         </div>
@@ -398,6 +752,130 @@
       </div>
     </div>
   </div>
+
+  <!-- Kamus Varietas Mangga Modal -->
+  <div class="modal-overlay" id="mangoGuideModalOverlay" aria-hidden="true" role="dialog">
+    <div class="modal-window modal-large">
+      <div class="modal-header">
+        <h2 class="modal-title">Panduan 8 Varietas Mangga</h2>
+        <button type="button" class="modal-close-btn" id="closeMangoGuideModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="guide-intro">
+          Setiap jenis mangga memiliki karakter rasa, aroma, serat, dan kadar air yang unik. Pilih varietas mangga yang tepat untuk hidangan Anda:
+        </p>
+        <div class="mango-varieties-grid" id="mangoVarietiesGrid">
+          <!-- Dynamic Mango Varieties Cards -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Random Recipe Modal -->
+  <div class="modal-overlay" id="randomRecipeModalOverlay" aria-hidden="true" role="dialog">
+    <div class="modal-window modal-medium text-center">
+      <div class="modal-header">
+        <h2 class="modal-title">Inspirasi Mangga Hari Ini</h2>
+        <button type="button" class="modal-close-btn" id="closeRandomModalBtn">&times;</button>
+      </div>
+      <div class="modal-body random-modal-body">
+        <h3 class="random-result-title" id="randomResultTitle">Memilih Resep...</h3>
+        <p class="random-result-desc" id="randomResultDesc">Sedang mengocok 200 koleksi resep lezat untukmu...</p>
+        <div class="random-action-buttons">
+          <button type="button" class="btn btn-primary" id="openRandomRecipeDetailBtn">Buka Resep Ini Sekarang</button>
+          <button type="button" class="btn btn-secondary" id="rollAgainBtn">Kocok Ulang</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar (Cookpad App Feel) -->
+  <nav class="mobile-bottom-nav" aria-label="Navigasi Bawah Ponsel">
+    <a href="#home" class="mobile-nav-item active" id="mobNavHome">
+      <svg class="mob-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="mob-label">Beranda</span>
+    </a>
+    <a href="#kategori" class="mobile-nav-item" id="mobNavCat">
+      <svg class="mob-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span class="mob-label">Katalog</span>
+    </a>
+    <button type="button" class="mobile-nav-item" id="mobNavRandom">
+      <svg class="mob-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+        <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"></circle>
+        <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+      </svg>
+      <span class="mob-label">Acak</span>
+    </button>
+    <button type="button" class="mobile-nav-item" id="mobNavFav">
+      <svg class="mob-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span class="mob-label">Tersimpan</span>
+      <span class="mob-badge" id="mobFavBadge">0</span>
+    </button>
+    <button type="button" class="mobile-nav-item" id="mobNavShop">
+      <svg class="mob-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span class="mob-label">Belanja</span>
+      <span class="mob-badge" id="mobShopBadge">0</span>
+    </button>
+  </nav>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo-row">
+          <img src="assets/images/mango-logo.svg" alt="Logo" width="40" height="40" class="footer-logo">
+          <span class="footer-brand-title">Resep All Manggo</span>
+        </div>
+        <p class="footer-text">
+          Ensiklopedia 200 resep olahan mangga terlengkap di Indonesia bergaya Cookpad. Didedikasikan untuk pecinta kuliner tropis, pembuat kue rumahan, dan barista kafe di seluruh Nusantara.
+        </p>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Kategori Masakan</h4>
+        <ul class="footer-link-list">
+          <li><a href="#kategori" onclick="window.filterByCategory('simpel')">Simpel & Kilat (25)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('minuman')">Minuman Kafe (25)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('nusantara')">Nusantara & Sambal (50)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('asia')">Kuliner Asia (30)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('barat')">Western & Latin (20)</a></li>
+          <li><a href="#kategori" onclick="window.filterByCategory('pastry')">Pastry & Dessert (50)</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Fitur Pintar Dapur</h4>
+        <ul class="footer-link-list">
+          <li><a href="#" id="footerMangoGuideLink">Panduan 8 Varietas Mangga</a></li>
+          <li><a href="#" id="footerRandomLink">Inspirasi Resep Acak</a></li>
+          <li><a href="#" id="footerShoppingLink">Daftar Belanja Bahan</a></li>
+          <li><a href="#" id="footerFavoritesLink">Resep Tersimpan Saya</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span>© 2026 Resep All Manggo. Terinspirasi oleh kesederhanaan Cookpad Indonesia.</span>
+        <span>200 Resep Teruji & Lengkap</span>
+      </div>
+    </div>
+  </footer>
 
   <!-- ===================================================================
        HANDS-FREE KITCHEN COOK MODE (THE ENGINEER + CHEF MASTERPIECE)
@@ -417,7 +895,7 @@
             <span class="wakelock-dot"></span>
             <span class="wakelock-text">Layar Selalu Aktif</span>
           </div>
-          <button type="button" class="cook-mode-close-btn" id="closeCookModeBtn" title="Kembali ke Buku Resep">
+          <button type="button" class="cook-mode-close-btn" id="closeCookModeBtn" title="Keluar dari Mode Memasak">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             <span>Tutup</span>
           </button>
@@ -464,8 +942,8 @@
               <span class="timer-status-hint">Timer Sedang Berjalan...</span>
             </div>
             <div class="active-timer-controls">
-              <button type="button" class="btn-dock-action btn-outline btn-sm" id="btnStepTimerPause">Jeda</button>
-              <button type="button" class="btn-dock-action btn-outline btn-sm" id="btnStepTimerReset">Batal</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btnStepTimerPause">Jeda</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btnStepTimerReset">Batal</button>
             </div>
           </div>
 
@@ -482,7 +960,7 @@
         <div class="cook-ingredients-drawer-toggle">
           <button type="button" class="btn-check-ingredients" id="btnToggleCookIngredients">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-            <span>Cek Bahan Resep</span>
+            <span>Cek Bahan</span>
           </button>
         </div>
 
@@ -506,25 +984,11 @@
     </div>
   </div>
 
-  <!-- Lightbox Fullscreen Food Poster Modal -->
-  <div class="poster-lightbox-overlay" id="posterLightboxOverlay" aria-hidden="true" onclick="window.closePosterLightbox(event)">
-    <div class="poster-lightbox-dialog" onclick="event.stopPropagation()">
-      <button type="button" class="poster-lightbox-close" onclick="window.closePosterLightbox()" title="Tutup">&times;</button>
-      <div class="poster-lightbox-image-wrap">
-        <img id="lightboxPosterImg" src="" alt="Poster Masakan" class="lightbox-poster-photo">
-      </div>
-      <div class="poster-lightbox-caption">
-        <h3 id="lightboxPosterTitle" class="lightbox-title">Judul Masakan</h3>
-        <span class="lightbox-sub">Foto Masakan Asli • Ensiklopedia Olahan Mangga</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification Container -->
+  <!-- Toast Container -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-  <!-- Scripts -->
-  <script src="js/recipes-data.js?v=4.0"></script>
-  <script src="js/app.js?v=4.0"></script>
+  <!-- JavaScript Modules -->
+  <script src="js/recipes-data.js?v=3.2"></script>
+  <script src="js/app.js?v=3.2"></script>
 </body>
 </html>

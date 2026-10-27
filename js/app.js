@@ -1,6 +1,6 @@
 /**
- * RESEP ALL MANGGO - Interactive Digital Recipe Book & Gastronomy Engine
- * Concept: Authentic 3D Digital Cookbook & Restaurant Menu Experience
+ * RESEP ALL MANGGO - Cookpad-Style Application Script
+ * Interactive culinary encyclopedia for 200 mango recipes with Cookpad UX.
  */
 
 (function () {
@@ -22,15 +22,7 @@
     'pastry': 'pastry'
   };
 
-  const CATEGORY_LABELS = {
-    'simpel': 'Olahan Simpel & Kilat',
-    'minuman': 'Minuman Kafe & Segar',
-    'nusantara': 'Sambal & Nusantara',
-    'asia': 'Street Food & Kuliner Asia',
-    'barat': 'Western & Latin',
-    'pastry': 'Pastry & Dessert Mewah'
-  };
-
+  // High-Resolution Food Photography Category Images
   const CATEGORY_IMAGES = {
     'minuman': 'assets/images/cat-minuman.jpg',
     'nusantara': 'assets/images/cat-nusantara.jpg',
@@ -53,17 +45,19 @@
     return 'simpel';
   }
 
-  function normalizeRecipe(r, index) {
+  function normalizeRecipe(r) {
     const catKey = r.categoryKey || getCategoryKey(r.category);
     return {
-      index: index,
-      id: r.id || `recipe-${index}`,
+      id: r.id,
       title: r.title || r.name || 'Resep Olahan Mangga',
-      desc: r.desc || r.summary || 'Resep lezat olahan mangga dengan takaran presisi dan bahan segar.',
+      name: r.title || r.name || 'Resep Olahan Mangga',
+      desc: r.desc || r.summary || '',
+      summary: r.desc || r.summary || '',
       category: r.category || 'Olahan Simpel & Harian',
       categoryKey: catKey,
-      categoryLabel: CATEGORY_LABELS[catKey] || 'Olahan Mangga',
       image: r.image || CATEGORY_IMAGES[catKey] || 'assets/images/cat-minuman.jpg',
+      icon: r.icon || r.emoji || '',
+      emoji: r.icon || r.emoji || '',
       prepTime: r.prepTime || '10 menit',
       cookTime: r.cookTime || '15 menit',
       totalMinutes: typeof r.totalMinutes === 'number' ? r.totalMinutes : 15,
@@ -72,33 +66,36 @@
       calories: r.calories || '165 kkal',
       mangoType: r.mangoType || 'Harum Manis Matang',
       tips: r.tips || r.chefTips || 'Pilih mangga berkualitas matang pohon untuk hasil rasa terbaik.',
+      chefTips: r.tips || r.chefTips || 'Pilih mangga berkualitas matang pohon untuk hasil rasa terbaik.',
+      tags: Array.isArray(r.tags) ? r.tags : [],
       ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
-      steps: Array.isArray(r.steps) ? r.steps : [],
-      // Book page numbers (Cover is 0; Guide is 1-2; TOC is 3-4; Recipes start at page 5)
-      pageLeft: (index * 2) + 5,
-      pageRight: (index * 2) + 6,
-      spreadIndex: index + 3 // 0 = Cover, 1 = Guide, 2 = TOC, 3..202 = Recipes
+      steps: Array.isArray(r.steps) ? r.steps : []
     };
   }
 
   // Application State
   const state = {
     allRecipes: [],
-    currentSpread: 0, // 0 = Cover, 1 = Guide, 2 = TOC, 3..202 = Recipes
-    totalSpreads: 203,
-    currentMultiplier: 1,
+    filteredRecipes: [],
+    displayedCount: 24,
+    currentCategory: 'all',
+    searchQuery: '',
+    difficultyFilter: 'all',
+    timeFilter: 'all',
+    sortBy: 'default',
+    currentRecipe: null,
+    portionMultiplier: 1,
+    checkedIngredients: new Set(),
     checkedSteps: new Set(),
-    bookmarks: JSON.parse(localStorage.getItem('mango_book_bookmarks') || '[]'),
-    shoppingList: JSON.parse(localStorage.getItem('mango_book_shopping') || '[]'),
-    soundEnabled: localStorage.getItem('mango_sound') !== 'false',
-    theme: localStorage.getItem('mango_theme') || 'light',
+    favorites: JSON.parse(localStorage.getItem('mango_favorites') || '[]'),
+    shoppingList: JSON.parse(localStorage.getItem('mango_shopping_list') || '[]'),
+    theme: localStorage.getItem('mango_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     timer: {
       interval: null,
       remainingSeconds: 0,
       isRunning: false
     },
     cookMode: {
-      currentRecipe: null,
       currentStepIdx: 0,
       timerInterval: null,
       remainingSeconds: 0,
@@ -107,1081 +104,830 @@
     }
   };
 
-  // DOM Elements Cache
-  const DOM = {};
-
-  function initDOMElements() {
-    DOM.recipeBook = document.getElementById('recipeBook');
-    DOM.bookCoverView = document.getElementById('bookCoverView');
-    DOM.bookSpreadView = document.getElementById('bookSpreadView');
-    DOM.pageLeftContent = document.getElementById('pageLeftContent');
-    DOM.pageRightContent = document.getElementById('pageRightContent');
-    DOM.pageLeftNumber = document.getElementById('pageLeftNumber');
-    DOM.pageRightNumber = document.getElementById('pageRightNumber');
-    DOM.pageLeftFooterTitle = document.getElementById('pageLeftFooterTitle');
-    DOM.pageRightFooterTitle = document.getElementById('pageRightFooterTitle');
-
-    // 3D Paper Leaf Flipper
-    DOM.bookPageFlipper = document.getElementById('bookPageFlipper');
-    DOM.flipperFrontFace = document.getElementById('flipperFrontFace');
-    DOM.flipperBackFace = document.getElementById('flipperBackFace');
-
-    // Controls
-    DOM.btnOpenCover = document.getElementById('btnOpenCover');
-    DOM.brandCoverBtn = document.getElementById('brandCoverBtn');
-    DOM.coverJumpTocBtn = document.getElementById('coverJumpTocBtn');
-    DOM.coverRandomBtn = document.getElementById('coverRandomBtn');
-
-    DOM.prevCornerClick = document.getElementById('prevCornerClick');
-    DOM.nextCornerClick = document.getElementById('nextCornerClick');
-
-    DOM.dockPrevBtn = document.getElementById('dockPrevBtn');
-    DOM.dockNextBtn = document.getElementById('dockNextBtn');
-    DOM.dockSpreadLabel = document.getElementById('dockSpreadLabel');
-    DOM.dockQuickTocBtn = document.getElementById('dockQuickTocBtn');
-
-    // Search
-    DOM.globalBookSearch = document.getElementById('globalBookSearch');
-    DOM.clearSearchBtn = document.getElementById('clearSearchBtn');
-    DOM.searchQuickResults = document.getElementById('searchQuickResults');
-    DOM.mobileBookSearch = document.getElementById('mobileBookSearch');
-    DOM.mobileClearSearchBtn = document.getElementById('mobileClearSearchBtn');
-
-    // Drawers
-    DOM.btnToggleToc = document.getElementById('btnToggleToc');
-    DOM.tocDrawerOverlay = document.getElementById('tocDrawerOverlay');
-    DOM.closeTocDrawerBtn = document.getElementById('closeTocDrawerBtn');
-    DOM.tocListContainer = document.getElementById('tocListContainer');
-    DOM.tocSearchInput = document.getElementById('tocSearchInput');
-
-    DOM.btnToggleBookmarks = document.getElementById('btnToggleBookmarks');
-    DOM.bookmarksDrawerOverlay = document.getElementById('bookmarksDrawerOverlay');
-    DOM.closeBookmarksDrawerBtn = document.getElementById('closeBookmarksDrawerBtn');
-    DOM.bookmarksListContainer = document.getElementById('bookmarksListContainer');
-    DOM.bookmarkCountBadge = document.getElementById('bookmarkCountBadge');
-
-    DOM.btnToggleShopping = document.getElementById('btnToggleShopping');
-    DOM.shoppingDrawerOverlay = document.getElementById('shoppingDrawerOverlay');
-    DOM.closeShoppingDrawerBtn = document.getElementById('closeShoppingDrawerBtn');
-    DOM.shoppingItemsList = document.getElementById('shoppingItemsList');
-    DOM.shoppingCountBadge = document.getElementById('shoppingCountBadge');
-    DOM.shareShoppingWhatsappBtn = document.getElementById('shareShoppingWhatsappBtn');
-    DOM.clearShoppingListBtn = document.getElementById('clearShoppingListBtn');
-
-    // Audio & Theme
-    DOM.btnToggleSound = document.getElementById('btnToggleSound');
-    DOM.btnToggleTheme = document.getElementById('btnToggleTheme');
-    DOM.toastContainer = document.getElementById('toastContainer');
-
-    // Cook Mode
-    DOM.cookModeOverlay = document.getElementById('cookModeOverlay');
-    DOM.closeCookModeBtn = document.getElementById('closeCookModeBtn');
-    DOM.cookModeDishTitle = document.getElementById('cookModeDishTitle');
-    DOM.cookProgressFill = document.getElementById('cookProgressFill');
-    DOM.cookStepCounter = document.getElementById('cookStepCounter');
-    DOM.cookStepInstruction = document.getElementById('cookStepInstruction');
-    DOM.cookPrevStepBtn = document.getElementById('cookPrevStepBtn');
-    DOM.cookNextStepBtn = document.getElementById('cookNextStepBtn');
-    DOM.btnSpeakStep = document.getElementById('btnSpeakStep');
-    DOM.speakBtnText = document.getElementById('speakBtnText');
-    DOM.btnStepTimer = document.getElementById('btnStepTimer');
-    DOM.stepTimerBtnText = document.getElementById('stepTimerBtnText');
-    DOM.stepActiveTimerCard = document.getElementById('stepActiveTimerCard');
-    DOM.stepTimerDisplay = document.getElementById('stepTimerDisplay');
-    DOM.btnStepTimerPause = document.getElementById('btnStepTimerPause');
-    DOM.btnStepTimerReset = document.getElementById('btnStepTimerReset');
-    DOM.wakeLockStatus = document.getElementById('wakeLockStatus');
-    DOM.btnToggleCookIngredients = document.getElementById('btnToggleCookIngredients');
-    DOM.cookIngredientsSheet = document.getElementById('cookIngredientsSheet');
-    DOM.closeCookIngredientsSheet = document.getElementById('closeCookIngredientsSheet');
-    DOM.cookSheetIngredientsList = document.getElementById('cookSheetIngredientsList');
-  }
-
-  // ===================================================================
-  // SYNTHESIZED PAPER FLIP AUDIO (WEB AUDIO API - ZERO EXTERNAL ASSETS)
-  // ===================================================================
-  let audioCtx = null;
-  function playPageFlipSound() {
-    if (!state.soundEnabled) return;
-    try {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-
-      const dur = 0.14;
-      const bufferSize = audioCtx.sampleRate * dur;
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-
-      // Generate soft pinkish white noise for paper rustle
-      let b0 = 0, b1 = 0, b2 = 0;
-      for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        b0 = 0.99886 * b0 + white * 0.0555179;
-        b1 = 0.99332 * b1 + white * 0.0750759;
-        b2 = 0.96900 * b2 + white * 0.1538520;
-        data[i] = (b0 + b1 + b2) * 0.18;
-      }
-
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buffer;
-
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.value = 850;
-      filter.Q.value = 1.2;
-
-      const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.35, audioCtx.currentTime + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      noise.start();
-    } catch (e) {
-      // AudioContext unavailable or blocked
+  // Kamus Mangga Knowledge Database
+  const MANGO_VARIETIES = [
+    {
+      name: 'Harum Manis',
+      origin: 'Probolinggo, Jawa Timur',
+      sweetness: 'Sangat Manis (16-18° Brix)',
+      texture: 'Daging tebal, sangat lembut, nyaris tanpa serat, aroma wangi legit khas tropis.',
+      bestFor: 'Jus kental, Panna Cotta, Mango Sticky Rice, Cheesecake, Smoothie Bowl.'
+    },
+    {
+      name: 'Gedong Gincu',
+      origin: 'Cirebon & Majalengka',
+      sweetness: 'Manis Segar (14-16° Brix)',
+      texture: 'Kulit merah keemasan memikat, serat halus kenyal, rasa manis asam segar eksotis.',
+      bestFor: 'Mocktail kafe, Mango Mojito, Saus Asam Manis Gurame, Sorbet, Es Lilin.'
+    },
+    {
+      name: 'Manalagi',
+      origin: 'Situbondo, Jawa Timur',
+      sweetness: 'Manis Gurih (15-17° Brix)',
+      texture: 'Daging padat, renyah saat mengkal, rasa manis terasa kuat walau masih agak hijau.',
+      bestFor: 'Rujak Buah Serut, Asinan Mangga, Setup Kayu Manis, Topping Oatmeal.'
+    },
+    {
+      name: 'Indramayu (Cengkir)',
+      origin: 'Indramayu, Jawa Barat',
+      sweetness: 'Asam Segar Renyah (11-13° Brix)',
+      texture: 'Sangat tebal, renyah keras berderak (crunchy), kadar air sedang, serat minimal.',
+      bestFor: 'Sambal Pencit, Sambal Matah, Acar Mangga, Rujak Cuka, Keripik Oven.'
+    },
+    {
+      name: 'Golek',
+      origin: 'Pasuruan & Probolinggo',
+      sweetness: 'Manis Berair (13-15° Brix)',
+      texture: 'Bentuk lonjong panjang, tidak berserat, berair banyak dan manis legit saat matang.',
+      bestFor: 'Puding Susu, Selai Roti Homemade, Es Campur, Lapis Tepung Beras.'
+    },
+    {
+      name: 'Nam Dok Mai',
+      origin: 'Thailand',
+      sweetness: 'Sangat Manis Legit (17-19° Brix)',
+      texture: 'Biji sangat tipis, daging kuning emas berkilau, tekstur silky meleleh di lidah.',
+      bestFor: 'Khao Niew Mamuang (Mango Sticky Rice), Mango Pillow Crepes, Mango Tart.'
+    },
+    {
+      name: 'Alphonso',
+      origin: 'India (Ratnagiri)',
+      sweetness: 'Super Legit (18-20° Brix)',
+      texture: 'Dikenal sebagai "Raja Mangga Dunia". Daging oranye pekat, aroma saffron alami.',
+      bestFor: 'Aamras dengan Poori, Mango Kulfi, Mango Lassi Kafe, Mango Shrikhand.'
+    },
+    {
+      name: 'Carabao (Manila Mango)',
+      origin: 'Filipina',
+      sweetness: 'Super Manis (Guinness World Records)',
+      texture: 'Tercatat sebagai salah satu mangga termanis di dunia, aroma tropis tajam segar.',
+      bestFor: 'Mango Float (Crema de Mangga), Mango Sago, Mango Pomelo Sago, Bingsu.'
     }
-  }
+  ];
 
-  function playChimeSound() {
-    if (!state.soundEnabled) return;
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+  // DOM Elements Cache
+  const DOM = {
+    html: document.documentElement,
+    themeToggleBtn: document.getElementById('themeToggleBtn'),
+    searchInput: document.getElementById('searchInput'),
+    clearSearchBtn: document.getElementById('clearSearchBtn'),
+    heroSearchInput: document.getElementById('heroSearchInput'),
+    heroSearchBtn: document.getElementById('heroSearchBtn'),
+    mobileSearchInput: document.getElementById('mobileSearchInput'),
+    mobileClearSearchBtn: document.getElementById('mobileClearSearchBtn'),
+    categoryPills: document.querySelectorAll('.cat-pill'),
+    activeCategoryHeading: document.getElementById('activeCategoryHeading'),
+    resultsCountText: document.getElementById('resultsCountText'),
+    difficultyFilter: document.getElementById('difficultyFilter'),
+    timeFilter: document.getElementById('timeFilter'),
+    sortSelect: document.getElementById('sortSelect'),
+    resetFiltersBtn: document.getElementById('resetFiltersBtn'),
+    recipeGrid: document.getElementById('recipeGrid'),
+    emptyState: document.getElementById('emptyState'),
+    emptyResetBtn: document.getElementById('emptyResetBtn'),
+    loadMoreContainer: document.getElementById('loadMoreContainer'),
+    loadMoreBtn: document.getElementById('loadMoreBtn'),
+    
+    // App View Switcher & Shelves
+    btnViewHome: document.getElementById('btnViewHome'),
+    btnViewCatalog: document.getElementById('btnViewCatalog'),
+    homeViewContainer: document.getElementById('homeViewContainer'),
+    catalogViewContainer: document.getElementById('catalogViewContainer'),
+    
+    // Action Badges & Buttons
+    favoritesCountBadge: document.getElementById('favoritesCountBadge'),
+    shoppingCountBadge: document.getElementById('shoppingCountBadge'),
+    mobFavBadge: document.getElementById('mobFavBadge'),
+    mobShopBadge: document.getElementById('mobShopBadge'),
+    openFavoritesBtn: document.getElementById('openFavoritesBtn'),
+    openShoppingListBtn: document.getElementById('openShoppingListBtn'),
+    openMangoGuideBtn: document.getElementById('openMangoGuideBtn'),
+    spotlightGuideBtn: document.getElementById('spotlightGuideBtn'),
+    footerMangoGuideLink: document.getElementById('footerMangoGuideLink'),
+    footerRandomLink: document.getElementById('footerRandomLink'),
+    footerShoppingLink: document.getElementById('footerShoppingLink'),
+    footerFavoritesLink: document.getElementById('footerFavoritesLink'),
+    randomRecipeBtn: document.getElementById('randomRecipeBtn'),
+    heroRandomBtn: document.getElementById('heroRandomBtn'),
+    exploreAllBtn: document.getElementById('exploreAllBtn'),
+    
+    // Hero Spotlight
+    heroCookNowBtn: document.getElementById('heroCookNowBtn'),
+    heroSaveDishBtn: document.getElementById('heroSaveDishBtn'),
+    heroDishTitle: document.getElementById('heroDishTitle'),
+    heroDishImg: document.getElementById('heroDishImg'),
+    
+    // Recipe Detail Modal Elements
+    recipeModalOverlay: document.getElementById('recipeModalOverlay'),
+    modalCoverImage: document.getElementById('modalCoverImage'),
+    modalCloseBtn: document.getElementById('modalCloseBtn'),
+    modalCategoryBadge: document.getElementById('modalCategoryBadge'),
+    modalDifficulty: document.getElementById('modalDifficulty'),
+    modalRecipeTitle: document.getElementById('modalRecipeTitle'),
+    modalSummary: document.getElementById('modalSummary'),
+    modalPrepTime: document.getElementById('modalPrepTime'),
+    modalCookTime: document.getElementById('modalCookTime'),
+    modalCalories: document.getElementById('modalCalories'),
+    modalMangoType: document.getElementById('modalMangoType'),
+    modalServingsDisplay: document.getElementById('modalServingsDisplay'),
+    modalIngredientsList: document.getElementById('modalIngredientsList'),
+    modalStepsList: document.getElementById('modalStepsList'),
+    modalChefTipsText: document.getElementById('modalChefTipsText'),
+    modalTagsContainer: document.getElementById('modalTagsContainer'),
+    modalFavoriteBtn: document.getElementById('modalFavoriteBtn'),
+    btnLaunchCookMode: document.getElementById('btnLaunchCookMode'),
+    modalAddShoppingBtn: document.getElementById('modalAddShoppingBtn'),
+    modalAddAllIngBtn: document.getElementById('modalAddAllIngBtn'),
+    modalShareBtn: document.getElementById('modalShareBtn'),
+    modalPrintBtn: document.getElementById('modalPrintBtn'),
+    scalerBtns: document.querySelectorAll('.scaler-btn'),
+    modalRelatedCardsGrid: document.getElementById('modalRelatedCardsGrid'),
+    
+    // Hands-Free Kitchen Cook Mode Elements
+    cookModeOverlay: document.getElementById('cookModeOverlay'),
+    closeCookModeBtn: document.getElementById('closeCookModeBtn'),
+    cookModeDishTitle: document.getElementById('cookModeDishTitle'),
+    cookStepCounter: document.getElementById('cookStepCounter'),
+    cookStepInstruction: document.getElementById('cookStepInstruction'),
+    cookProgressFill: document.getElementById('cookProgressFill'),
+    cookPrevStepBtn: document.getElementById('cookPrevStepBtn'),
+    cookNextStepBtn: document.getElementById('cookNextStepBtn'),
+    btnSpeakStep: document.getElementById('btnSpeakStep'),
+    speakBtnText: document.getElementById('speakBtnText'),
+    btnStepTimer: document.getElementById('btnStepTimer'),
+    stepTimerBtnText: document.getElementById('stepTimerBtnText'),
+    stepActiveTimerCard: document.getElementById('stepActiveTimerCard'),
+    stepTimerDisplay: document.getElementById('stepTimerDisplay'),
+    btnStepTimerPause: document.getElementById('btnStepTimerPause'),
+    btnStepTimerReset: document.getElementById('btnStepTimerReset'),
+    wakeLockStatus: document.getElementById('wakeLockStatus'),
+    btnToggleCookIngredients: document.getElementById('btnToggleCookIngredients'),
+    closeCookIngredientsSheet: document.getElementById('closeCookIngredientsSheet'),
+    cookIngredientsSheet: document.getElementById('cookIngredientsSheet'),
+    cookSheetIngredientsList: document.getElementById('cookSheetIngredientsList'),
+    
+    // Timer Widget
+    kitchenTimerWidget: document.getElementById('kitchenTimerWidget'),
+    timerDisplay: document.getElementById('timerDisplay'),
+    timerStartBtn: document.getElementById('timerStartBtn'),
+    timerResetBtn: document.getElementById('timerResetBtn'),
+    timerPresetBtns: document.querySelectorAll('.timer-preset-btn'),
 
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+    // Favorites Drawer
+    favoritesModalOverlay: document.getElementById('favoritesModalOverlay'),
+    closeFavoritesModalBtn: document.getElementById('closeFavoritesModalBtn'),
+    favoritesListContainer: document.getElementById('favoritesListContainer'),
 
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+    // Shopping List Drawer
+    shoppingModalOverlay: document.getElementById('shoppingModalOverlay'),
+    closeShoppingModalBtn: document.getElementById('closeShoppingModalBtn'),
+    shoppingItemsList: document.getElementById('shoppingItemsList'),
+    shareShoppingWhatsappBtn: document.getElementById('shareShoppingWhatsappBtn'),
+    clearShoppingListBtn: document.getElementById('clearShoppingListBtn'),
 
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.85);
-    } catch (e) {}
+    // Kamus Mangga Modal
+    mangoGuideModalOverlay: document.getElementById('mangoGuideModalOverlay'),
+    closeMangoGuideModalBtn: document.getElementById('closeMangoGuideModalBtn'),
+    mangoVarietiesGrid: document.getElementById('mangoVarietiesGrid'),
+
+    // Random Modal
+    randomRecipeModalOverlay: document.getElementById('randomRecipeModalOverlay'),
+    closeRandomModalBtn: document.getElementById('closeRandomModalBtn'),
+    randomDiceIcon: document.getElementById('randomDiceIcon'),
+    randomResultTitle: document.getElementById('randomResultTitle'),
+    randomResultDesc: document.getElementById('randomResultDesc'),
+    openRandomRecipeDetailBtn: document.getElementById('openRandomRecipeDetailBtn'),
+    rollAgainBtn: document.getElementById('rollAgainBtn'),
+
+    // Mobile Bottom Nav
+    mobNavHome: document.getElementById('mobNavHome'),
+    mobNavCat: document.getElementById('mobNavCat'),
+    mobNavRandom: document.getElementById('mobNavRandom'),
+    mobNavFav: document.getElementById('mobNavFav'),
+    mobNavShop: document.getElementById('mobNavShop'),
+
+    // Toast Container
+    toastContainer: document.getElementById('toastContainer')
+  };
+
+  function on(el, evt, handler) {
+    if (el) el.addEventListener(evt, handler);
   }
 
   // ===================================================================
-  // INITIALIZATION & RECIPES LOADING
+  // INITIALIZATION
   // ===================================================================
   function init() {
-    initDOMElements();
     applyTheme(state.theme);
-    updateSoundUI();
-    updateBadgeCounts();
+    loadRecipeData();
+    setupEventListeners();
+    updateBadges();
+    populateMangoGuide();
+  }
 
-    if (window.MANGO_RECIPES && Array.isArray(window.MANGO_RECIPES)) {
+  function applyTheme(theme) {
+    state.theme = theme;
+    if (DOM.html) DOM.html.setAttribute('data-theme', theme);
+    localStorage.setItem('mango_theme', theme);
+  }
+
+  function loadRecipeData() {
+    if (window.MANGO_RECIPES && Array.isArray(window.MANGO_RECIPES) && window.MANGO_RECIPES.length > 0) {
       state.allRecipes = window.MANGO_RECIPES.map(normalizeRecipe);
-      finalizeSetup();
+      finalizeLoadedRecipes();
     } else {
       fetch('data/recipes.json')
         .then(res => res.json())
         .then(data => {
           state.allRecipes = data.map(normalizeRecipe);
-          finalizeSetup();
+          finalizeLoadedRecipes();
         })
         .catch(err => {
-          console.error('Gagal memuat resep:', err);
-          showToast('Gagal memuat data resep mangga.');
+          console.error('Gagal memuat recipes.json:', err);
+          showToast('Gagal memuat data resep. Pastikan koneksi atau file lokal aktif.');
         });
     }
   }
 
-  function finalizeSetup() {
-    state.totalSpreads = state.allRecipes.length + 3; // Cover(0) + Guide(1) + TOC(2) + 200 Recipes
-    populateTableOfContentsDrawer();
-    setupEventListeners();
-    goToSpread(0, false); // Start at Cover
+  function finalizeLoadedRecipes() {
+    updateCategoryCounts();
+    populateHomeShelves();
+    applyFilters();
   }
 
-  // ===================================================================
-  // 3D SPREAD NAVIGATION & BOOK FLIP ENGINE
-  // ===================================================================
-  function goToSpread(spreadIdx, withSound = true, direction = null) {
-    if (spreadIdx < 0) spreadIdx = 0;
-    if (spreadIdx >= state.totalSpreads) spreadIdx = state.totalSpreads - 1;
-    if (spreadIdx === state.currentSpread && DOM.bookSpreadView.classList.contains('is-open')) return;
-    if (state.isFlipping) return;
+  // App View Switcher (Beranda Shelves vs Katalog 200 Resep)
+  function switchAppView(viewName) {
+    const isHome = viewName === 'home';
+    if (DOM.btnViewHome) DOM.btnViewHome.classList.toggle('active', isHome);
+    if (DOM.btnViewCatalog) DOM.btnViewCatalog.classList.toggle('active', !isHome);
+    if (DOM.homeViewContainer) DOM.homeViewContainer.classList.toggle('active', isHome);
+    if (DOM.catalogViewContainer) DOM.catalogViewContainer.classList.toggle('active', !isHome);
+  }
+  window.switchAppView = switchAppView;
 
-    const oldSpread = state.currentSpread;
-    const isNext = direction ? (direction === 'next') : (spreadIdx > oldSpread);
+  // Populate Curated Feed Shelves (Structured & Elegant, No Overwhelming Dump)
+  function populateHomeShelves() {
+    if (!state.allRecipes || state.allRecipes.length === 0) return;
 
-    // Case 1: Opening Cover: 0 -> >=1 (Accelerated 0.32s)
-    if (oldSpread === 0 && spreadIdx > 0) {
-      state.isFlipping = true;
-      if (withSound) playPageFlipSound();
-      
-      DOM.bookCoverView.classList.remove('swing-close');
-      DOM.bookCoverView.classList.add('swing-open');
-
-      setTimeout(() => {
-        if (DOM.recipeBook) DOM.recipeBook.classList.add('is-book-open');
-        DOM.bookSpreadView.classList.add('is-open');
-        DOM.bookSpreadView.style.display = '';
-        renderSpreadContent(spreadIdx);
-        state.currentSpread = spreadIdx;
-        updateDockControls();
-      }, 120);
-
-      setTimeout(() => {
-        DOM.bookCoverView.style.display = 'none';
-        DOM.bookCoverView.classList.remove('swing-open');
-        state.isFlipping = false;
-      }, 320);
-      return;
-    }
-
-    // Case 2: Closing Book to Cover: >=1 -> 0 (Accelerated 0.28s)
-    if (oldSpread > 0 && spreadIdx === 0) {
-      state.isFlipping = true;
-      if (withSound) playPageFlipSound();
-
-      DOM.bookCoverView.style.display = 'flex';
-      DOM.bookCoverView.classList.remove('swing-open');
-      DOM.bookCoverView.classList.add('swing-close');
-
-      setTimeout(() => {
-        if (DOM.recipeBook) DOM.recipeBook.classList.remove('is-book-open');
-        DOM.bookSpreadView.classList.remove('is-open');
-        DOM.bookSpreadView.style.display = 'none';
-        state.currentSpread = 0;
-        updateDockControls();
-      }, 120);
-
-      setTimeout(() => {
-        DOM.bookCoverView.classList.remove('swing-close');
-        state.isFlipping = false;
-      }, 280);
-      return;
-    }
-
-    // Ensure is-book-open is on if spreadIdx >= 1
-    if (spreadIdx > 0 && DOM.recipeBook) {
-      DOM.recipeBook.classList.add('is-book-open');
-    } else if (spreadIdx === 0 && DOM.recipeBook) {
-      DOM.recipeBook.classList.remove('is-book-open');
-    }
-
-    // Case 3: Flipping Between Spreads (>=1 -> >=1) (Accelerated 60fps 0.26s)
-    state.currentMultiplier = 1;
-    state.checkedSteps.clear();
-
-    const isMobile = window.innerWidth <= 860;
-
-    if (isMobile) {
-      state.isFlipping = true;
-      if (withSound) playPageFlipSound();
-
-      const curlClass = isNext ? 'mobile-page-curl-next' : 'mobile-page-curl-prev';
-      DOM.bookSpreadView.classList.remove('mobile-page-curl-next', 'mobile-page-curl-prev');
-      void DOM.bookSpreadView.offsetWidth; // trigger reflow
-      DOM.bookSpreadView.classList.add(curlClass);
-
-      setTimeout(() => {
-        renderSpreadContent(spreadIdx);
-        state.currentSpread = spreadIdx;
-        updateDockControls();
-      }, 60);
-
-      setTimeout(() => {
-        DOM.bookSpreadView.classList.remove(curlClass);
-        state.isFlipping = false;
-      }, 220);
+    // 1. Featured Top Picks: 6 standout recipes
+    const featuredKeywords = ['King Mango Thai', 'Sticky Rice', 'Sambal Pencit', 'Mango Sago', 'Cheesecake', 'Puding Mangga Silky', 'Crepes'];
+    let featured = state.allRecipes.filter(r => featuredKeywords.some(kw => r.title.toLowerCase().includes(kw.toLowerCase())));
+    if (featured.length < 6) {
+      featured = state.allRecipes.slice(0, 6);
     } else {
-      // Desktop 3D Leaf Flip (Hardware-accelerated parchment sweep without heavy DOM cloning)
-      if (DOM.bookPageFlipper) {
-        state.isFlipping = true;
-        if (withSound) playPageFlipSound();
-
-        const flipClass = isNext ? 'flip-leaf-next' : 'flip-leaf-prev';
-        DOM.bookPageFlipper.className = `book-page-leaf-flipper ${flipClass}`;
-        DOM.bookPageFlipper.style.display = 'block';
-
-        // Update underlying page almost immediately
-        setTimeout(() => {
-          renderSpreadContent(spreadIdx);
-          state.currentSpread = spreadIdx;
-          updateDockControls();
-        }, 50);
-
-        setTimeout(() => {
-          DOM.bookPageFlipper.style.display = 'none';
-          DOM.bookPageFlipper.className = 'book-page-leaf-flipper';
-          state.isFlipping = false;
-        }, 260);
-      } else {
-        if (withSound) playPageFlipSound();
-        renderSpreadContent(spreadIdx);
-        state.currentSpread = spreadIdx;
-        updateDockControls();
-      }
+      featured = featured.slice(0, 6);
     }
+    renderShelf('shelfFeatured', featured);
 
-    // Scroll book into view smoothly if needed
-    const bookStage = document.getElementById('bookStage');
-    if (bookStage && window.scrollY > 150) {
-      bookStage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // 2. Minuman Kafe & Segar: 6 drinks
+    const drinks = state.allRecipes.filter(r => r.categoryKey === 'minuman').slice(0, 6);
+    renderShelf('shelfMinuman', drinks);
+
+    // 3. Sambal & Nusantara: 6 dishes
+    const nusantara = state.allRecipes.filter(r => r.categoryKey === 'nusantara').slice(0, 6);
+    renderShelf('shelfNusantara', nusantara);
+
+    // 4. Street Food & Khas Asia: 6 dishes
+    const asia = state.allRecipes.filter(r => r.categoryKey === 'asia').slice(0, 6);
+    renderShelf('shelfAsia', asia);
+
+    // 5. Pastry & Dessert: 6 dishes
+    const pastry = state.allRecipes.filter(r => r.categoryKey === 'pastry').slice(0, 6);
+    renderShelf('shelfPastry', pastry);
+
+    // 6. Simpel & Cepat: 6 dishes
+    const simpel = state.allRecipes.filter(r => r.categoryKey === 'simpel').slice(0, 6);
+    renderShelf('shelfSimpel', simpel);
   }
 
-  function renderSpreadContent(spreadIdx) {
-    if (spreadIdx === 1) {
-      renderMaturityGuideSpread();
-      if (DOM.dockSpreadLabel) DOM.dockSpreadLabel.textContent = 'Halaman 1 - 2: Panduan Kematangan & Prolog';
-    } else if (spreadIdx === 2) {
-      renderTableOfContentsSpread();
-      if (DOM.dockSpreadLabel) DOM.dockSpreadLabel.textContent = 'Halaman 3 - 4: Daftar Isi 200 Resep';
-    } else {
-      const recipeIdx = spreadIdx - 3;
-      const recipe = state.allRecipes[recipeIdx];
-      if (recipe) {
-        renderRecipeSpread(recipe);
-        if (DOM.dockSpreadLabel) {
-          DOM.dockSpreadLabel.textContent = `Halaman ${recipe.pageLeft} - ${recipe.pageRight}: ${recipe.title}`;
-        }
-      }
-    }
+  function renderShelf(containerId, recipes) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    recipes.forEach(recipe => {
+      const card = createRecipeCardElement(recipe);
+      fragment.appendChild(card);
+    });
+    container.appendChild(fragment);
   }
 
-  function updateDockControls() {
-    if (DOM.dockPrevBtn) DOM.dockPrevBtn.disabled = state.currentSpread === 0;
-    if (DOM.dockNextBtn) DOM.dockNextBtn.disabled = state.currentSpread === state.totalSpreads - 1;
-    if (state.currentSpread === 0 && DOM.dockSpreadLabel) {
-      DOM.dockSpreadLabel.textContent = 'Sampul Depan Buku';
-    }
-  }
-
-  function nextSpread() {
-    if (state.currentSpread < state.totalSpreads - 1) {
-      goToSpread(state.currentSpread + 1, true, 'next');
-    }
-  }
-
-  function prevSpread() {
-    if (state.currentSpread > 0) {
-      goToSpread(state.currentSpread - 1, true, 'prev');
-    }
-  }
-
-  function jumpToRecipe(recipeIdOrIndex) {
-    let recipe;
-    if (typeof recipeIdOrIndex === 'number') {
-      recipe = state.allRecipes[recipeIdOrIndex];
-    } else {
-      recipe = state.allRecipes.find(r => r.id === recipeIdOrIndex);
-    }
-    if (recipe) {
-      closeAllDrawers();
-      goToSpread(recipe.spreadIndex, true, recipe.spreadIndex > state.currentSpread ? 'next' : 'prev');
-    }
-  }
-
-  // ===================================================================
-  // SPREAD 1: MANGO MATURITY SPECTRUM & OVERVIEW (HALAMAN 1 & 2)
-  // ===================================================================
-  function renderMaturityGuideSpread() {
-    // Left Page: Maturity Spectrum Guide
-    DOM.pageLeftNumber.textContent = '1';
-    DOM.pageLeftFooterTitle.textContent = 'Panduan Gastronomi Mangga';
-
-    DOM.pageLeftContent.innerHTML = `
-      <div class="spread-header-banner">
-        <span class="spread-pre-title">BAB PENDAHULUAN • HALAMAN 1</span>
-        <h2 class="spread-main-title">Spektrum Kematangan & Rasa Mangga</h2>
-      </div>
-
-      <p class="spread-lead-text">
-        Kunci kesempurnaan olahan mangga bermula dari memilih fase kematangan yang presisi. Setiap tingkat kematangan memiliki kadar pektin, tingkat keasaman, serat, dan profil aroma unik untuk tujuan kuliner tertentu:
-      </p>
-
-      <div class="maturity-grid">
-        <div class="maturity-card tier-mentah">
-          <div class="maturity-card-header">
-            <h3 class="maturity-name">1. Mangga Mentah / Muda</h3>
-            <span class="maturity-tag">Tart & Ultra-Crisp</span>
-          </div>
-          <p class="maturity-profile">Daging buah putih kehijauan, tekstur berderak renyah, kadar pektin tinggi dengan keasaman menyegarkan lidah.</p>
-          <div class="maturity-best-for"><strong>Olahan Terbaik:</strong> Sambal Pencit Madura, Rujak Serut, Asinan Betawi, Gulai Ikan Asam Pedas, & Manisan Kering.</div>
-        </div>
-
-        <div class="maturity-card tier-mengkal">
-          <div class="maturity-card-header">
-            <h3 class="maturity-name">2. Mangga Mengkal / Half-Ripe</h3>
-            <span class="maturity-tag">Crunchy & Semi-Sweet</span>
-          </div>
-          <p class="maturity-profile">Warna mulai kekuningan, tekstur masih padat kokoh namun mulai memancarkan aroma manis tropis lembut.</p>
-          <div class="maturity-best-for"><strong>Olahan Terbaik:</strong> Som Tum Thai (Salad Mangga Bangkok), Mango Chutney India, Acar Mangga Segar, & Tumisan Pedas.</div>
-        </div>
-
-        <div class="maturity-card tier-matang">
-          <div class="maturity-card-header">
-            <h3 class="maturity-name">3. Mangga Matang Sempurna</h3>
-            <span class="maturity-tag">Sweet & Velvety</span>
-          </div>
-          <p class="maturity-profile">Warna kuning keemasan, aroma harum semerbak, daging buah pulen, lembut lumer di mulut tanpa serat kasar.</p>
-          <div class="maturity-best-for"><strong>Olahan Terbaik:</strong> Khao Niew Mamuang (Mango Sticky Rice), King Mango Thai, Mango Sago, Mille Crepes, Tartlet, & Cheesecake.</div>
-        </div>
-
-        <div class="maturity-card tier-overripe">
-          <div class="maturity-card-header">
-            <h3 class="maturity-name">4. Mangga Sangat Matang</h3>
-            <span class="maturity-tag">Juicy & Sweet Elixir</span>
-          </div>
-          <p class="maturity-profile">Sangat lembut berair, manis pekat alami berkonsentrasi tinggi. Sangat mudah dilumatkan tanpa perlu gula tambahan.</p>
-          <div class="maturity-best-for"><strong>Olahan Terbaik:</strong> Puree Mangga, Selai Rumahan (Jam), Sirup Mocktail & Mojito, Es Krim Sorbet, & Saus Vla Dessert.</div>
-        </div>
-      </div>
-    `;
-
-    // Right Page: Book Overview & Recipe Chapters
-    DOM.pageRightNumber.textContent = '2';
-    DOM.pageRightFooterTitle.textContent = 'Kisi-Kisi 200 Resep';
-
-    DOM.pageRightContent.innerHTML = `
-      <div class="spread-header-banner">
-        <span class="spread-pre-title">PANDUAN PEMBACA • HALAMAN 2</span>
-        <h2 class="spread-main-title">Kisi-Kisi Ensiklopedia 200 Resep</h2>
-      </div>
-
-      <div class="book-overview-box">
-        <h3 class="overview-heading">Tentang Buku Resep Ini</h3>
-        <p class="overview-desc">
-          Buku ini menghimpun 200 resep teruji dari dapur komunitas Cookpad Indonesia. Dirancang layaknya buku menu restoran bintang lima, setiap resep disajikan dalam dua halaman terbuka yang menyandingkan visual hidangan, takaran gram presisi, fitur kalkulator porsi, dan timer dapur interaktif.
-        </p>
-      </div>
-
-      <div class="chapters-list">
-        <div class="chapter-item">
-          <span class="chapter-num">I</span>
-          <div>
-            <div class="chapter-title">Minuman Kafe & Segar (25 Resep)</div>
-            <div class="chapter-desc">King Mango Thai, Yakult Blizz, Mango Mojito, Smoothie Bowl, Es Serut Mangga.</div>
-          </div>
-        </div>
-
-        <div class="chapter-item">
-          <span class="chapter-num">II</span>
-          <div>
-            <div class="chapter-title">Sambal & Masakan Nusantara (50 Resep)</div>
-            <div class="chapter-desc">Sambal Pencit Jawa Timur, Gulai Ikan Mangga, Ikan Bakar Saus Mangga, Rujak Serut.</div>
-          </div>
-        </div>
-
-        <div class="chapter-item">
-          <span class="chapter-num">III</span>
-          <div>
-            <div class="chapter-title">Street Food & Autentik Asia (30 Resep)</div>
-            <div class="chapter-desc">Khao Niew Mamuang Bangkok, Mango Float Filipina, Som Tum, Kulfi Mangga India.</div>
-          </div>
-        </div>
-
-        <div class="chapter-item">
-          <span class="chapter-num">IV</span>
-          <div>
-            <div class="chapter-title">Pastry, Bakery & Dessert Mewah (50 Resep)</div>
-            <div class="chapter-desc">Mango Cheesecake, Mille Crepes Paris, Panna Cotta, Tartlet, Sorbet & Souffle.</div>
-          </div>
-        </div>
-
-        <div class="chapter-item">
-          <span class="chapter-num">V</span>
-          <div>
-            <div class="chapter-title">Olahan Kilat & Western (45 Resep)</div>
-            <div class="chapter-desc">Salsa Mangga Meksiko, Chutney, Puding Kilat & Santapan Praktis Harian.</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="text-align: right; margin-top: 10px;">
-        <button type="button" class="btn-dock-action btn-primary" onclick="window.goToSpread(2)">
-          <span>Buka Daftar Isi (Halaman 3) &rarr;</span>
-        </button>
-      </div>
-    `;
-  }
-
-  // ===================================================================
-  // SPREAD 2: TABLE OF CONTENTS (HALAMAN 3 & 4)
-  // ===================================================================
-  function renderTableOfContentsSpread() {
-    DOM.pageLeftNumber.textContent = '3';
-    DOM.pageLeftFooterTitle.textContent = 'Daftar Isi Bagian 1';
-    DOM.pageRightNumber.textContent = '4';
-    DOM.pageRightFooterTitle.textContent = 'Daftar Isi Bagian 2';
-
-    // Split top 100 on left, next 100 on right (or categorized view)
-    const recipesHalf1 = state.allRecipes.slice(0, 15);
-    const recipesHalf2 = state.allRecipes.slice(15, 30);
-
-    const renderList = (list) => {
-      return list.map(r => `
-        <div class="toc-entry-row" onclick="window.jumpToRecipe('${r.id}')" title="Buka ${escapeHTML(r.title)} (Hal. ${r.pageLeft})">
-          <span class="toc-entry-title">${escapeHTML(r.title)}</span>
-          <span class="toc-entry-dots"></span>
-          <span class="toc-entry-page">Hal. ${r.pageLeft}</span>
-        </div>
-      `).join('');
+  function updateCategoryCounts() {
+    const counts = {
+      all: state.allRecipes.length,
+      simpel: 0,
+      minuman: 0,
+      nusantara: 0,
+      asia: 0,
+      barat: 0,
+      pastry: 0
     };
 
-    DOM.pageLeftContent.innerHTML = `
-      <div class="spread-header-banner">
-        <span class="spread-pre-title">DAFTAR ISI RESEP • HALAMAN 3</span>
-        <h2 class="spread-main-title">Koleksi Menu Pilihan</h2>
-      </div>
-      <p class="spread-lead-text">Klik judul resep mana pun untuk langsung membalik halaman buku ke resep tersebut:</p>
-      
-      <div class="toc-page-columns">
-        ${renderList(recipesHalf1)}
-      </div>
-    `;
-
-    DOM.pageRightContent.innerHTML = `
-      <div class="spread-header-banner">
-        <span class="spread-pre-title">DAFTAR ISI RESEP • HALAMAN 4</span>
-        <h2 class="spread-main-title">Eksplorasi Kuliner Lengkap</h2>
-      </div>
-
-      <div class="toc-page-columns">
-        ${renderList(recipesHalf2)}
-      </div>
-
-      <div style="background: var(--page-bg-accent); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--page-border); margin-top: 18px; text-align: center;">
-        <p style="font-size: 0.82rem; color: var(--text-ink-body); margin-bottom: 8px;">
-          Ingin melihat daftar lengkap 200 resep dengan filter bab & pencarian instan?
-        </p>
-        <button type="button" class="btn-dock-action btn-primary" onclick="window.openTocDrawer()">
-          <span>Buka Panel 200 Daftar Isi &rarr;</span>
-        </button>
-      </div>
-    `;
-  }
-
-  // ===================================================================
-  // SPREAD 3+: RECIPE SPREAD (MICHELIN MENU & FLIPHTML5 GOURMET POSTER STYLE)
-  // ===================================================================
-  function renderRecipeSpread(recipe) {
-    state.cookMode.currentRecipe = recipe;
-    const isBookmarked = state.bookmarks.includes(recipe.id);
-
-    // Left Page: Gastronomy Editorial Showcase (Un-cropped Food Poster + Specs)
-    DOM.pageLeftNumber.textContent = String(recipe.pageLeft);
-    DOM.pageLeftFooterTitle.textContent = `${recipe.categoryLabel} • Resep Teruji`;
-
-    DOM.pageLeftContent.innerHTML = `
-      <div class="recipe-page-left">
-        <div class="recipe-meta-top">
-          <span class="recipe-chapter-badge">${recipe.categoryLabel}</span>
-          <span class="recipe-leaf-decor">❦</span>
-        </div>
-
-        <h2 class="recipe-poster-title">${escapeHTML(recipe.title)}</h2>
-
-        <!-- The Hero Culinary Food Poster (Never Cropped, Ambient Glow Backdrop) -->
-        <div class="recipe-food-poster" onclick="window.openPosterLightbox('${escapeHTML(recipe.image)}', '${escapeHTML(recipe.title)}')" title="Klik untuk melihat poster resolusi penuh">
-          <div class="poster-ambient-backdrop" style="background-image: url('${recipe.image}');"></div>
-          <div class="poster-editorial-overlay"></div>
-          <img src="${recipe.image}" alt="${escapeHTML(recipe.title)}" class="poster-main-photo" onerror="this.src='${CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-minuman.jpg'}'" loading="lazy">
-          
-          <div class="poster-floating-top">
-            <span class="poster-badge-variety">${escapeHTML(recipe.mangoType)}</span>
-            <span class="poster-badge-zoom" title="Perbesar Poster HD">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-              HD
-            </span>
-          </div>
-
-          <div class="poster-floating-bottom">
-            <span class="poster-pill-stat">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              ${recipe.totalMinutes} Menit • ${recipe.difficulty}
-            </span>
-            <span class="poster-pill-verified">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-              Resep Teruji
-            </span>
-          </div>
-
-          <div class="poster-corner top-l"></div>
-          <div class="poster-corner top-r"></div>
-          <div class="poster-corner btm-l"></div>
-          <div class="poster-corner btm-r"></div>
-        </div>
-
-        <p class="recipe-tasting-quote"><span class="book-drop-cap">${recipe.desc.charAt(0)}</span>${escapeHTML(recipe.desc.slice(1))}</p>
-
-        <div class="book-specs-row">
-          <div class="book-spec-cell">
-            <span class="spec-cell-label">Persiapan</span>
-            <strong class="spec-cell-val">${recipe.prepTime}</strong>
-          </div>
-          <div class="book-spec-cell">
-            <span class="spec-cell-label">Memasak</span>
-            <strong class="spec-cell-val">${recipe.cookTime}</strong>
-          </div>
-          <div class="book-spec-cell">
-            <span class="spec-cell-label">Kalori</span>
-            <strong class="spec-cell-val">${recipe.calories}</strong>
-          </div>
-          <div class="book-spec-cell">
-            <span class="spec-cell-label">Kematangan</span>
-            <strong class="spec-cell-val">${recipe.mangoType}</strong>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Right Page: The Culinary Workshop (Ingredients + Scaler + Steps + Timers + Chef Tips + Actions)
-    DOM.pageRightNumber.textContent = String(recipe.pageRight);
-    DOM.pageRightFooterTitle.textContent = `Panduan Dapur & Eksekusi Resep`;
-
-    // Calculate Ingredients based on multiplier
-    const ingredientsHTML = recipe.ingredients.map(ing => {
-      let displayAmount = ing.amount;
-      if (typeof ing.amount === 'number') {
-        const scaled = ing.amount * state.currentMultiplier;
-        displayAmount = (Math.round(scaled * 10) / 10).toString();
-      }
-      return `
-        <label class="ingredient-row">
-          <input type="checkbox" class="ing-check-input" onchange="window.toggleIngCheck(this)">
-          <span class="ing-measure">${displayAmount} ${ing.unit || ''}</span>
-          <span class="ing-name">${escapeHTML(ing.name)}</span>
-          ${ing.notes ? `<span class="ing-notes">(${escapeHTML(ing.notes)})</span>` : ''}
-        </label>
-      `;
-    }).join('');
-
-    // Render Steps with timer buttons
-    const stepsHTML = recipe.steps.map((step, idx) => {
-      const match = step.match(/(\d+)\s*(?:menit|mnt)/i);
-      let timerBtn = '';
-      if (match && match[1]) {
-        const mins = parseInt(match[1], 10);
-        timerBtn = `
-          <button type="button" class="step-timer-badge-btn" onclick="window.startTimerPreset(${mins})">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            Pasang Timer ${mins} Menit
-          </button>
-        `;
-      }
-      return `
-        <div class="book-step-item">
-          <span class="book-step-badge">${idx + 1}</span>
-          <div class="book-step-text">
-            <p>${escapeHTML(step)}</p>
-            ${timerBtn}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    DOM.pageRightContent.innerHTML = `
-      <div class="recipe-page-right">
-        <!-- Section 1: Ingredients with Servings Scaler -->
-        <div class="book-ingredients-box">
-          <div class="ingredients-box-header">
-            <h3 class="box-section-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
-              Bahan & Takaran Presisi
-            </h3>
-            <div class="servings-stepper">
-              <span style="font-size: 0.72rem; color: var(--text-ink-muted); margin-right: 4px;">Porsi:</span>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 0.5 ? 'active' : ''}" onclick="window.setScale(0.5)">0.5x</button>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 1 ? 'active' : ''}" onclick="window.setScale(1)">1x</button>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 2 ? 'active' : ''}" onclick="window.setScale(2)">2x</button>
-              <button type="button" class="step-multiplier-btn ${state.currentMultiplier === 3 ? 'active' : ''}" onclick="window.setScale(3)">3x</button>
-            </div>
-          </div>
-          <div class="book-ingredients-grid">
-            ${ingredientsHTML}
-          </div>
-        </div>
-
-        <!-- Section 2: Cooking Steps with Timers -->
-        <div class="cooking-steps-section">
-          <div class="cooking-steps-header">
-            <h3 class="box-section-title">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              Langkah-Langkah Pembuatan
-            </h3>
-          </div>
-          <div class="book-steps-list">
-            ${stepsHTML}
-          </div>
-        </div>
-
-        <!-- Section 3: Chef Secret Tips -->
-        <div class="book-chef-tips-box">
-          <div class="tips-header-row">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            <strong>Tips Rahasia Koki</strong>
-          </div>
-          <p class="tips-body-text">${escapeHTML(recipe.tips)}</p>
-        </div>
-
-        <!-- Section 4: Action Buttons -->
-        <div class="book-recipe-actions">
-          <button type="button" class="btn-book-action btn-cook-handsfree" onclick="window.launchCookMode()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Mode Memasak Hands-Free</span>
-          </button>
-
-          <button type="button" class="btn-book-action btn-bookmark-recipe ${isBookmarked ? 'is-bookmarked' : ''}" onclick="window.toggleBookmarkCurrent()" title="${isBookmarked ? 'Lepas tanda buku' : 'Tandai resep ini'}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isBookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-            <span>${isBookmarked ? 'Ditandai' : 'Tandai'}</span>
-          </button>
-
-          <button type="button" class="btn-book-action btn-add-shopping" onclick="window.addCurrentRecipeToShopping()" title="Masukkan bahan ke daftar belanja">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
-            <span>Beli Bahan</span>
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  // Window helper functions for inline clicks
-  window.goToSpread = goToSpread;
-  window.jumpToRecipe = jumpToRecipe;
-  window.setScale = function (multiplier) {
-    state.currentMultiplier = multiplier;
-    const recipeIdx = state.currentSpread - 3;
-    if (recipeIdx >= 0 && state.allRecipes[recipeIdx]) {
-      renderRecipeSpread(state.allRecipes[recipeIdx]);
-    }
-  };
-
-  window.toggleIngCheck = function (checkbox) {
-    const row = checkbox.closest('.ingredient-row');
-    if (row) {
-      if (checkbox.checked) row.classList.add('is-checked');
-      else row.classList.remove('is-checked');
-    }
-  };
-
-  window.openPosterLightbox = function (imgSrc, title) {
-    const overlay = document.getElementById('posterLightboxOverlay');
-    const img = document.getElementById('lightboxPosterImg');
-    const titleEl = document.getElementById('lightboxPosterTitle');
-    if (overlay && img && titleEl) {
-      img.src = imgSrc;
-      titleEl.textContent = title;
-      overlay.classList.add('is-active');
-    }
-  };
-
-  window.closePosterLightbox = function (e) {
-    if (e && e.target && e.target.classList && !e.target.classList.contains('poster-lightbox-overlay') && !e.target.classList.contains('poster-lightbox-close')) {
-      return;
-    }
-    const overlay = document.getElementById('posterLightboxOverlay');
-    if (overlay) overlay.classList.remove('is-active');
-  };
-
-  // ===================================================================
-  // TABLE OF CONTENTS DRAWER (200 RECIPES LIST)
-  // ===================================================================
-  function populateTableOfContentsDrawer(filterCategory = 'all', searchQuery = '') {
-    if (!DOM.tocListContainer) return;
-    DOM.tocListContainer.innerHTML = '';
-
-    let list = state.allRecipes;
-    if (filterCategory !== 'all') {
-      list = list.filter(r => r.categoryKey === filterCategory);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(r => r.title.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q));
-    }
-
-    if (list.length === 0) {
-      DOM.tocListContainer.innerHTML = `
-        <div style="grid-column: span 2; padding: 30px; text-align: center; color: var(--text-ink-muted);">
-          Resep tidak ditemukan di daftar isi.
-        </div>
-      `;
-      return;
-    }
-
-    list.forEach(r => {
-      const item = document.createElement('div');
-      item.className = 'toc-entry-row';
-      item.innerHTML = `
-        <span class="toc-entry-title">${escapeHTML(r.title)}</span>
-        <span class="toc-entry-dots"></span>
-        <span class="toc-entry-page">Hal. ${r.pageLeft}</span>
-      `;
-      item.addEventListener('click', () => {
-        closeAllDrawers();
-        goToSpread(r.spreadIndex);
-      });
-      DOM.tocListContainer.appendChild(item);
-    });
-  }
-
-  function openTocDrawer() {
-    closeAllDrawers();
-    if (DOM.tocDrawerOverlay) {
-      DOM.tocDrawerOverlay.classList.add('is-open');
-      DOM.tocDrawerOverlay.setAttribute('aria-hidden', 'false');
-    }
-  }
-  window.openTocDrawer = openTocDrawer;
-
-  // ===================================================================
-  // BOOKMARK / FAVORITES SYSTEM
-  // ===================================================================
-  function toggleBookmark(recipeId) {
-    const idx = state.bookmarks.indexOf(recipeId);
-    if (idx > -1) {
-      state.bookmarks.splice(idx, 1);
-      showToast('Tanda buku dilepas.');
-    } else {
-      state.bookmarks.push(recipeId);
-      showToast('Resep ditandai dengan pembatas buku.');
-    }
-    localStorage.setItem('mango_book_bookmarks', JSON.stringify(state.bookmarks));
-    updateBadgeCounts();
-
-    // Re-render current spread if looking at recipe
-    const currentRecipeIdx = state.currentSpread - 3;
-    if (currentRecipeIdx >= 0 && state.allRecipes[currentRecipeIdx]) {
-      renderRecipeSpread(state.allRecipes[currentRecipeIdx]);
-    }
-  }
-
-  window.toggleBookmarkCurrent = function () {
-    const recipeIdx = state.currentSpread - 3;
-    if (recipeIdx >= 0 && state.allRecipes[recipeIdx]) {
-      toggleBookmark(state.allRecipes[recipeIdx].id);
-    }
-  };
-
-  function openBookmarksDrawer() {
-    closeAllDrawers();
-    if (!DOM.bookmarksListContainer) return;
-    DOM.bookmarksListContainer.innerHTML = '';
-
-    if (state.bookmarks.length === 0) {
-      DOM.bookmarksListContainer.innerHTML = `
-        <div style="padding: 40px 20px; text-align: center; color: var(--text-ink-muted);">
-          <p style="font-size: 0.95rem; margin-bottom: 6px;">Belum ada resep yang ditandai.</p>
-          <small>Gunakan tombol 'Tandai' pada halaman resep mana pun untuk menyimpannya.</small>
-        </div>
-      `;
-    } else {
-      state.bookmarks.forEach(id => {
-        const r = state.allRecipes.find(item => item.id === id);
-        if (!r) return;
-        const row = document.createElement('div');
-        row.className = 'toc-entry-row';
-        row.innerHTML = `
-          <span class="toc-entry-title">${escapeHTML(r.title)}</span>
-          <span class="toc-entry-dots"></span>
-          <span class="toc-entry-page">Hal. ${r.pageLeft}</span>
-        `;
-        row.addEventListener('click', () => {
-          closeAllDrawers();
-          goToSpread(r.spreadIndex);
-        });
-        DOM.bookmarksListContainer.appendChild(row);
-      });
-    }
-
-    if (DOM.bookmarksDrawerOverlay) {
-      DOM.bookmarksDrawerOverlay.classList.add('is-open');
-      DOM.bookmarksDrawerOverlay.setAttribute('aria-hidden', 'false');
-    }
-  }
-
-  // ===================================================================
-  // SHOPPING LIST SYSTEM
-  // ===================================================================
-  window.addCurrentRecipeToShopping = function () {
-    const recipeIdx = state.currentSpread - 3;
-    if (recipeIdx < 0 || !state.allRecipes[recipeIdx]) return;
-    const r = state.allRecipes[recipeIdx];
-
-    r.ingredients.forEach(ing => {
-      let displayAmount = ing.amount;
-      if (typeof ing.amount === 'number') {
-        const scaled = ing.amount * state.currentMultiplier;
-        displayAmount = (Math.round(scaled * 10) / 10).toString();
-      }
-      const text = `${displayAmount} ${ing.unit || ''} ${ing.name} (${r.title})`;
-      if (!state.shoppingList.some(item => item.text === text)) {
-        state.shoppingList.push({ text: text, checked: false });
+    state.allRecipes.forEach(r => {
+      const key = r.categoryKey;
+      if (counts.hasOwnProperty(key)) {
+        counts[key]++;
       }
     });
 
-    localStorage.setItem('mango_book_shopping', JSON.stringify(state.shoppingList));
-    updateBadgeCounts();
-    showToast('Bahan resep ditambahkan ke Daftar Belanja!');
-  };
+    for (const [cat, count] of Object.entries(counts)) {
+      const countEl = document.getElementById(`count-${cat}`);
+      if (countEl) countEl.textContent = count;
+    }
+  }
 
-  function openShoppingDrawer() {
-    closeAllDrawers();
-    if (!DOM.shoppingItemsList) return;
-    DOM.shoppingItemsList.innerHTML = '';
+  // ===================================================================
+  // FILTERING, SEARCHING & SORTING (COOKPAD STYLE)
+  // ===================================================================
+  function applyFilters() {
+    let result = [...state.allRecipes];
 
-    if (state.shoppingList.length === 0) {
-      DOM.shoppingItemsList.innerHTML = `
-        <li style="padding: 30px; text-align: center; color: var(--text-ink-muted);">
-          Daftar belanja masih kosong. Klik 'Beli Bahan' di halaman resep untuk mencatatnya.
-        </li>
-      `;
-    } else {
-      state.shoppingList.forEach((item, idx) => {
-        const li = document.createElement('li');
-        li.style.cssText = 'display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--page-border);font-size:0.86rem;';
-        li.innerHTML = `
-          <input type="checkbox" id="shopItem-${idx}" ${item.checked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--mango-primary);cursor:pointer;">
-          <label for="shopItem-${idx}" style="flex:1;cursor:pointer;${item.checked ? 'text-decoration:line-through;color:var(--text-ink-light);' : ''}">${escapeHTML(item.text)}</label>
-          <button type="button" style="background:transparent;border:none;color:var(--text-ink-muted);font-size:1.2rem;cursor:pointer;">&times;</button>
-        `;
+    // Category filter
+    if (state.currentCategory !== 'all') {
+      result = result.filter(r => r.categoryKey === state.currentCategory);
+    }
 
-        const checkbox = li.querySelector('input');
-        checkbox.addEventListener('change', () => {
-          item.checked = checkbox.checked;
-          localStorage.setItem('mango_book_shopping', JSON.stringify(state.shoppingList));
-          openShoppingDrawer();
-        });
 
-        const delBtn = li.querySelector('button');
-        delBtn.addEventListener('click', () => {
-          state.shoppingList.splice(idx, 1);
-          localStorage.setItem('mango_book_shopping', JSON.stringify(state.shoppingList));
-          updateBadgeCounts();
-          openShoppingDrawer();
-        });
-
-        DOM.shoppingItemsList.appendChild(li);
+    // Search Query
+    if (state.searchQuery.trim() !== '') {
+      const q = state.searchQuery.toLowerCase().trim();
+      result = result.filter(r => {
+        const inTitle = r.title && r.title.toLowerCase().includes(q);
+        const inDesc = r.desc && r.desc.toLowerCase().includes(q);
+        const inMango = r.mangoType && r.mangoType.toLowerCase().includes(q);
+        const inTags = r.tags && r.tags.some(t => t.toLowerCase().includes(q));
+        const inIng = r.ingredients && r.ingredients.some(i => i.name.toLowerCase().includes(q));
+        return inTitle || inDesc || inMango || inTags || inIng;
       });
     }
 
-    if (DOM.shoppingDrawerOverlay) {
-      DOM.shoppingDrawerOverlay.classList.add('is-open');
-      DOM.shoppingDrawerOverlay.setAttribute('aria-hidden', 'false');
+    // Difficulty
+    if (state.difficultyFilter !== 'all') {
+      result = result.filter(r => r.difficulty === state.difficultyFilter);
     }
+
+    // Time Filter
+    if (state.timeFilter === 'quick') {
+      result = result.filter(r => r.totalMinutes <= 15);
+    } else if (state.timeFilter === 'medium') {
+      result = result.filter(r => r.totalMinutes > 15 && r.totalMinutes <= 30);
+    } else if (state.timeFilter === 'long') {
+      result = result.filter(r => r.totalMinutes > 30);
+    }
+
+    // Sort By
+    if (state.sortBy === 'time-asc') {
+      result.sort((a, b) => a.totalMinutes - b.totalMinutes);
+    } else if (state.sortBy === 'name-asc') {
+      result.sort((a, b) => a.title.localeCompare(b.title, 'id'));
+    } else if (state.sortBy === 'name-desc') {
+      result.sort((a, b) => b.title.localeCompare(a.title, 'id'));
+    } else if (state.sortBy === 'calories-asc') {
+      result.sort((a, b) => parseInt(a.calories, 10) - parseInt(b.calories, 10));
+    }
+
+    state.filteredRecipes = result;
+    state.displayedCount = 24; // Reset pagination batch
+
+    updateFilterUI();
+    renderRecipeGrid();
   }
 
-  function shareShoppingViaWhatsApp() {
-    if (state.shoppingList.length === 0) {
-      showToast('Daftar belanja masih kosong.');
+  function updateFilterUI() {
+    const categoryNames = {
+      all: 'Semua Resep Olahan Mangga',
+      simpel: 'Resep Simpel & Kilat',
+      minuman: 'Minuman Kafe & Segar',
+      nusantara: 'Resep Daerah & Nusantara',
+      asia: 'Kuliner Khas Asia',
+      barat: 'Western & Latin Mango',
+      pastry: 'Pastry & Dessert Mewah'
+    };
+    if (DOM.activeCategoryHeading) {
+      DOM.activeCategoryHeading.textContent = categoryNames[state.currentCategory] || 'Koleksi Resep Olahan Mangga';
+    }
+    if (DOM.resultsCountText) {
+      DOM.resultsCountText.textContent = `Menampilkan ${state.filteredRecipes.length} dari ${state.allRecipes.length} resep teruji`;
+    }
+
+    // Clear search buttons
+    const hasSearch = state.searchQuery.trim().length > 0;
+    if (DOM.clearSearchBtn) DOM.clearSearchBtn.style.display = hasSearch ? 'flex' : 'none';
+    if (DOM.mobileClearSearchBtn) DOM.mobileClearSearchBtn.style.display = hasSearch ? 'flex' : 'none';
+
+    // Reset button visibility
+    const isFiltered = state.currentCategory !== 'all' || hasSearch || state.difficultyFilter !== 'all' || state.timeFilter !== 'all' || state.sortBy !== 'default';
+    if (DOM.resetFiltersBtn) DOM.resetFiltersBtn.style.display = isFiltered ? 'inline-flex' : 'none';
+  }
+
+  // Global helper for shelf action links and footer category navigation
+  window.filterByCategory = function (category) {
+    switchAppView('catalog');
+    state.currentCategory = category;
+    if (DOM.categoryPills) {
+      DOM.categoryPills.forEach(pill => {
+        pill.classList.toggle('active', pill.getAttribute('data-category') === category);
+      });
+    }
+    applyFilters();
+    const catEl = document.getElementById('kategori');
+    if (catEl) {
+      catEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // ===================================================================
+  // COOKPAD RECIPE GRID RENDERING
+  // ===================================================================
+  function renderRecipeGrid() {
+    if (!DOM.recipeGrid) return;
+    DOM.recipeGrid.innerHTML = '';
+
+    if (state.filteredRecipes.length === 0) {
+      if (DOM.emptyState) DOM.emptyState.style.display = 'block';
+      if (DOM.loadMoreContainer) DOM.loadMoreContainer.style.display = 'none';
       return;
     }
-    let text = '*DAFTAR BELANJA RESEP ALL MANGGO*\n\n';
-    state.shoppingList.forEach((item, idx) => {
-      text += `${idx + 1}. ${item.checked ? '[v] ' : '[ ] '} ${item.text}\n`;
+
+    if (DOM.emptyState) DOM.emptyState.style.display = 'none';
+
+    const slice = state.filteredRecipes.slice(0, state.displayedCount);
+
+    const fragment = document.createDocumentFragment();
+    slice.forEach(recipe => {
+      const card = createRecipeCardElement(recipe);
+      fragment.appendChild(card);
     });
-    text += '\n_Dibuat dengan Buku Resep All Manggo_';
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
-  }
 
-  function clearShoppingList() {
-    if (confirm('Yakin ingin mengosongkan seluruh daftar belanja?')) {
-      state.shoppingList = [];
-      localStorage.setItem('mango_book_shopping', JSON.stringify(state.shoppingList));
-      updateBadgeCounts();
-      openShoppingDrawer();
-      showToast('Daftar belanja telah dikosongkan.');
-    }
-  }
+    DOM.recipeGrid.appendChild(fragment);
 
-  function updateBadgeCounts() {
-    const bCount = state.bookmarks.length;
-    if (DOM.bookmarkCountBadge) DOM.bookmarkCountBadge.textContent = bCount;
-
-    const sCount = state.shoppingList.length;
-    if (DOM.shoppingCountBadge) DOM.shoppingCountBadge.textContent = sCount;
-  }
-
-  function closeAllDrawers() {
-    if (DOM.tocDrawerOverlay) DOM.tocDrawerOverlay.classList.remove('is-open');
-    if (DOM.bookmarksDrawerOverlay) DOM.bookmarksDrawerOverlay.classList.remove('is-open');
-    if (DOM.shoppingDrawerOverlay) DOM.shoppingDrawerOverlay.classList.remove('is-open');
-    if (DOM.searchQuickResults) DOM.searchQuickResults.style.display = 'none';
-  }
-
-  // ===================================================================
-  // KITCHEN TIMER ON RECIPE PAGE
-  // ===================================================================
-  window.startTimerPreset = function (minutes) {
-    if (state.timer.interval) clearInterval(state.timer.interval);
-    state.timer.remainingSeconds = minutes * 60;
-    state.timer.isRunning = true;
-    playPageFlipSound();
-    showToast(`Timer dapur ${minutes} menit dimulai!`);
-
-    state.timer.interval = setInterval(() => {
-      if (state.timer.remainingSeconds > 0) {
-        state.timer.remainingSeconds--;
+    // Show or hide Load More button
+    if (DOM.loadMoreContainer) {
+      if (state.displayedCount < state.filteredRecipes.length) {
+        DOM.loadMoreContainer.style.display = 'flex';
+        if (DOM.loadMoreBtn) {
+          DOM.loadMoreBtn.innerHTML = `<span>Muat Lebih Banyak (${state.filteredRecipes.length - state.displayedCount} resep tersisa)</span>`;
+        }
       } else {
-        clearInterval(state.timer.interval);
-        state.timer.isRunning = false;
-        playChimeSound();
-        showToast('Waktu memasak langkah ini telah selesai!');
+        DOM.loadMoreContainer.style.display = 'none';
       }
-    }, 1000);
-  };
+    }
+  }
+
+  // Create Authentic Cookpad Recipe Card
+  function createRecipeCardElement(recipe) {
+    const card = document.createElement('article');
+    card.className = 'recipe-card';
+    card.setAttribute('data-id', recipe.id);
+
+    const isFav = state.favorites.includes(recipe.id);
+    const photoUrl = recipe.image || CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-minuman.jpg';
+
+    // Extract top 3-4 ingredients for Cookpad's signature ingredients snippet
+    let ingPreview = '';
+    if (recipe.ingredients && recipe.ingredients.length > 0) {
+      ingPreview = recipe.ingredients.slice(0, 4).map(i => i.name).join(' • ');
+    } else {
+      ingPreview = 'Mangga • Bahan pelengkap dapur';
+    }
+
+    card.innerHTML = `
+      <div class="card-thumb-frame">
+        <img src="${photoUrl}" alt="${escapeHTML(recipe.title)}" class="card-thumb-img" loading="lazy" onerror="this.src='assets/images/cat-minuman.jpg'">
+        <span class="card-cat-badge">${escapeHTML(recipe.category)}</span>
+        <button type="button" class="card-fav-btn ${isFav ? 'is-favorite' : ''}" data-id="${recipe.id}" aria-label="Simpan Favorit" title="${isFav ? 'Hapus dari Tersimpan' : 'Simpan Resep'}">
+          <svg class="fav-svg" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+        <span class="card-time-badge">${recipe.totalMinutes} mnt</span>
+      </div>
+      <div class="card-content">
+        <div class="card-author-header">
+          <span class="card-author-avatar-circle">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
+          <span class="card-author-name">Dapur Mangga</span>
+          <span class="card-author-dot">•</span>
+          <span class="card-star-rating" title="Rating 4.9 dari 5">★ 4.9</span>
+          <span class="card-author-dot">•</span>
+          <span class="card-tested-tag">Teruji</span>
+        </div>
+        <h3 class="card-title">${escapeHTML(recipe.title)}</h3>
+        <div class="card-ing-snippet" title="${escapeHTML(ingPreview)}">
+          <span class="card-ing-text">${escapeHTML(ingPreview)}</span>
+        </div>
+        <div class="card-footer">
+          <span class="card-diff-tag">${escapeHTML(recipe.difficulty)}</span>
+          <span class="card-cal-tag">${escapeHTML(recipe.calories)}</span>
+        </div>
+      </div>
+    `;
+
+    // Click handler for card
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.card-fav-btn')) {
+        e.stopPropagation();
+        toggleFavorite(recipe.id);
+        const favBtn = card.querySelector('.card-fav-btn');
+        const nowFav = state.favorites.includes(recipe.id);
+        favBtn.classList.toggle('is-favorite', nowFav);
+        const favSvg = favBtn.querySelector('.fav-svg');
+        if (favSvg) favSvg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
+        return;
+      }
+      openRecipeModal(recipe);
+    });
+
+    return card;
+  }
 
   // ===================================================================
-  // HANDS-FREE COOK MODE OVERLAY
+  // COOKPAD RECIPE DETAIL MODAL
   // ===================================================================
-  window.launchCookMode = async function () {
-    const r = state.cookMode.currentRecipe;
-    if (!r) return;
+  function openRecipeModal(recipe) {
+    state.currentRecipe = recipe;
+    state.portionMultiplier = 1;
+    state.checkedIngredients.clear();
+    state.checkedSteps.clear();
 
+    const photoUrl = recipe.image || CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-minuman.jpg';
+
+    if (DOM.modalCoverImage) {
+      DOM.modalCoverImage.src = photoUrl;
+      DOM.modalCoverImage.alt = recipe.title;
+    }
+    if (DOM.modalCategoryBadge) DOM.modalCategoryBadge.textContent = recipe.category;
+    if (DOM.modalDifficulty) DOM.modalDifficulty.textContent = recipe.difficulty;
+    if (DOM.modalRecipeTitle) DOM.modalRecipeTitle.textContent = recipe.title;
+    if (DOM.modalSummary) DOM.modalSummary.textContent = recipe.desc;
+
+    if (DOM.modalPrepTime) DOM.modalPrepTime.textContent = recipe.prepTime;
+    if (DOM.modalCookTime) DOM.modalCookTime.textContent = recipe.cookTime;
+    if (DOM.modalCalories) DOM.modalCalories.textContent = recipe.calories;
+    if (DOM.modalMangoType) DOM.modalMangoType.textContent = recipe.mangoType || 'Harum Manis Matang';
+
+    // Scaler Buttons reset
+    if (DOM.scalerBtns) {
+      DOM.scalerBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-multiplier') === '1');
+      });
+    }
+
+    renderModalIngredients();
+    renderModalSteps();
+    renderRelatedRecipes(recipe);
+    updateModalFavoriteBtnState();
+
+    // Chef tips & Tags
+    if (DOM.modalChefTipsText) DOM.modalChefTipsText.textContent = recipe.tips || 'Pilih mangga berkualitas matang pohon untuk hasil rasa terbaik.';
+    
+    if (DOM.modalTagsContainer) {
+      DOM.modalTagsContainer.innerHTML = '';
+      if (recipe.tags && Array.isArray(recipe.tags)) {
+        recipe.tags.forEach(tag => {
+          const tagSpan = document.createElement('span');
+          tagSpan.className = 'tag-pill';
+          tagSpan.textContent = tag;
+          DOM.modalTagsContainer.appendChild(tagSpan);
+        });
+      }
+    }
+
+    renderRelatedRecipes(recipe);
+    updateModalFavoriteBtnState();
+    resetKitchenTimer();
+
+    if (DOM.recipeModalOverlay) {
+      DOM.recipeModalOverlay.classList.add('is-open');
+      DOM.recipeModalOverlay.setAttribute('aria-hidden', 'false');
+    }
+    document.body.style.overflow = 'hidden';
+
+    // Reset scroll of modal body to top
+    const modalBody = document.getElementById('modalBody');
+    if (modalBody) modalBody.scrollTop = 0;
+  }
+
+  function closeRecipeModal() {
+    if (DOM.recipeModalOverlay) {
+      DOM.recipeModalOverlay.classList.remove('is-open');
+      DOM.recipeModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+    state.currentRecipe = null;
+    resetKitchenTimer();
+  }
+
+  function renderModalIngredients() {
+    if (!state.currentRecipe || !DOM.modalIngredientsList) return;
+
+    const recipe = state.currentRecipe;
+    const mult = state.portionMultiplier;
+    const baseServings = recipe.servings || 2;
+    const scaledServings = Math.round(baseServings * mult);
+    if (DOM.modalServingsDisplay) DOM.modalServingsDisplay.textContent = `(${scaledServings} Porsi)`;
+
+    DOM.modalIngredientsList.innerHTML = '';
+
+    recipe.ingredients.forEach((ing, index) => {
+      const li = document.createElement('li');
+      li.className = 'ingredient-item';
+      if (state.checkedIngredients.has(index)) {
+        li.classList.add('is-checked');
+      }
+
+      let scaledAmount = '';
+      if (typeof ing.amount === 'number') {
+        const val = ing.amount * mult;
+        scaledAmount = formatAmount(val) + (ing.unit ? ' ' + ing.unit : '');
+      } else if (typeof ing.amount === 'string' && !isNaN(parseFloat(ing.amount))) {
+        const val = parseFloat(ing.amount) * mult;
+        scaledAmount = formatAmount(val) + (ing.unit ? ' ' + ing.unit : '');
+      } else {
+        scaledAmount = (ing.amount || '') + (ing.unit ? ' ' + ing.unit : '');
+      }
+
+      const notes = ing.notes ? ` <span class="ing-notes">(${escapeHTML(ing.notes)})</span>` : '';
+
+      li.innerHTML = `
+        <span class="custom-checkbox">${state.checkedIngredients.has(index) ? '✓' : ''}</span>
+        <span class="ingredient-text">
+          <strong class="ingredient-amount">${scaledAmount}</strong> ${escapeHTML(ing.name)}${notes}
+        </span>
+      `;
+
+      li.addEventListener('click', () => {
+        if (state.checkedIngredients.has(index)) {
+          state.checkedIngredients.delete(index);
+          li.classList.remove('is-checked');
+          li.querySelector('.custom-checkbox').textContent = '';
+        } else {
+          state.checkedIngredients.add(index);
+          li.classList.add('is-checked');
+          li.querySelector('.custom-checkbox').textContent = '✓';
+        }
+      });
+
+      DOM.modalIngredientsList.appendChild(li);
+    });
+  }
+
+  function renderModalSteps() {
+    if (!state.currentRecipe || !DOM.modalStepsList) return;
+
+    const steps = state.currentRecipe.steps || [];
+    DOM.modalStepsList.innerHTML = '';
+
+    steps.forEach((step, index) => {
+      const li = document.createElement('li');
+      li.className = 'step-item';
+      if (state.checkedSteps.has(index)) {
+        li.classList.add('is-checked');
+      }
+
+      // Check if step mentions minutes
+      const match = step.match(/(\d+)\s*(?:-|–)?\s*(\d+)?\s*menit/i);
+      let timerBtnHTML = '';
+      if (match) {
+        const mins = parseInt(match[1], 10);
+        if (mins > 0 && mins <= 120) {
+          timerBtnHTML = `
+            <button type="button" class="btn-step-timer" data-sec="${mins * 60}" title="Mulai timer otomatis">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:inline-block;vertical-align:-1px;margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Pasang Timer ${mins} Menit
+            </button>
+          `;
+        }
+      }
+
+      li.innerHTML = `
+        <span class="step-number">${state.checkedSteps.has(index) ? '✓' : (index + 1)}</span>
+        <div class="step-content-wrap">
+          <p class="step-text">${escapeHTML(step)}</p>
+          ${timerBtnHTML}
+        </div>
+      `;
+
+      // Step text click toggles completion
+      const stepText = li.querySelector('.step-text');
+      const stepNumber = li.querySelector('.step-number');
+
+      const toggleCheck = () => {
+        if (state.checkedSteps.has(index)) {
+          state.checkedSteps.delete(index);
+          li.classList.remove('is-checked');
+          stepNumber.textContent = index + 1;
+        } else {
+          state.checkedSteps.add(index);
+          li.classList.add('is-checked');
+          stepNumber.textContent = '✓';
+        }
+      };
+
+      stepText.addEventListener('click', toggleCheck);
+      stepNumber.addEventListener('click', toggleCheck);
+
+      // Step timer button trigger
+      const stepTimerBtn = li.querySelector('.btn-step-timer');
+      if (stepTimerBtn) {
+        stepTimerBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sec = parseInt(stepTimerBtn.getAttribute('data-sec'), 10);
+          state.timer.remainingSeconds = sec;
+          startKitchenTimer();
+          showToast(`Timer dapur ${Math.round(sec / 60)} menit dimulai!`);
+          const timerEl = document.getElementById('kitchenTimerWidget');
+          if (timerEl) timerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      }
+
+      DOM.modalStepsList.appendChild(li);
+    });
+  }
+
+  // Render Cookpad Related Recipes
+  function renderRelatedRecipes(currentRecipe) {
+    if (!DOM.modalRelatedCardsGrid) return;
+    DOM.modalRelatedCardsGrid.innerHTML = '';
+
+    const sameCat = state.allRecipes.filter(r => r.id !== currentRecipe.id && r.categoryKey === currentRecipe.categoryKey);
+    const relatedList = (sameCat.length >= 3 ? sameCat : state.allRecipes.filter(r => r.id !== currentRecipe.id)).slice(0, 3);
+
+    relatedList.forEach(rel => {
+      const card = document.createElement('div');
+      card.className = 'modal-related-card';
+      const photo = rel.image || CATEGORY_IMAGES[rel.categoryKey] || 'assets/images/cat-minuman.jpg';
+      card.innerHTML = `
+        <div class="rel-thumb">
+          <img src="${photo}" alt="${escapeHTML(rel.title)}" loading="lazy" onerror="this.src='assets/images/cat-minuman.jpg'">
+          <span class="rel-time">${rel.totalMinutes} mnt</span>
+        </div>
+        <div class="rel-info">
+          <div class="rel-title">${escapeHTML(rel.title)}</div>
+          <div class="rel-meta">${escapeHTML(rel.difficulty)} • ${escapeHTML(rel.calories)}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        openRecipeModal(rel);
+      });
+      DOM.modalRelatedCardsGrid.appendChild(card);
+    });
+  }
+
+  function formatAmount(num) {
+    if (num % 1 === 0) return num.toString();
+    if (Math.abs(num - 0.5) < 0.05) return '½';
+    if (Math.abs(num - 0.25) < 0.05) return '¼';
+    if (Math.abs(num - 0.75) < 0.05) return '¾';
+    return Number(num.toFixed(1)).toString();
+  }
+
+  function updateModalFavoriteBtnState() {
+    if (!state.currentRecipe || !DOM.modalFavoriteBtn) return;
+    const isFav = state.favorites.includes(state.currentRecipe.id);
+    DOM.modalFavoriteBtn.classList.toggle('is-active', isFav);
+    const svg = DOM.modalFavoriteBtn.querySelector('svg');
+    if (svg) svg.setAttribute('fill', isFav ? 'currentColor' : 'none');
+    const textEl = DOM.modalFavoriteBtn.querySelector('.util-text');
+    if (textEl) textEl.textContent = isFav ? 'Tersimpan' : 'Simpan';
+  }
+
+  // ===================================================================
+  // HANDS-FREE KITCHEN COOK MODE (THE ENGINEER + CHEF MASTERPIECE)
+  // ===================================================================
+  async function openCookMode(recipe) {
+    if (!recipe && state.currentRecipe) recipe = state.currentRecipe;
+    if (!recipe) return;
+
+    state.currentRecipe = recipe;
     state.cookMode.currentStepIdx = 0;
-    if (DOM.cookModeDishTitle) DOM.cookModeDishTitle.textContent = r.title;
 
+    if (DOM.cookModeDishTitle) DOM.cookModeDishTitle.textContent = recipe.title;
+
+    // Request screen wake lock so display never sleeps while cooking in the kitchen
     if ('wakeLock' in navigator) {
       try {
         state.cookMode.wakeLock = await navigator.wakeLock.request('screen');
-        if (DOM.wakeLockStatus) DOM.wakeLockStatus.style.display = 'inline-flex';
-      } catch (err) {}
+        if (DOM.wakeLockStatus) {
+          DOM.wakeLockStatus.style.display = 'inline-flex';
+          const txt = DOM.wakeLockStatus.querySelector('.wakelock-text');
+          if (txt) txt.textContent = 'Layar Selalu Aktif';
+        }
+      } catch (err) {
+        console.warn('Wake Lock request error:', err);
+      }
     }
 
-    renderCookModeStep();
+    renderCurrentCookStep();
     populateCookIngredientsSheet();
 
     if (DOM.cookModeOverlay) {
       DOM.cookModeOverlay.classList.add('is-active');
       DOM.cookModeOverlay.setAttribute('aria-hidden', 'false');
     }
-  };
-
-  function renderCookModeStep() {
-    const r = state.cookMode.currentRecipe;
-    if (!r || !r.steps) return;
-
-    const total = r.steps.length;
-    const idx = state.cookMode.currentStepIdx;
-
-    if (DOM.cookStepCounter) DOM.cookStepCounter.textContent = `Langkah ${idx + 1} dari ${total}`;
-    if (DOM.cookProgressFill) DOM.cookProgressFill.style.width = `${((idx + 1) / total) * 100}%`;
-    if (DOM.cookStepInstruction) DOM.cookStepInstruction.textContent = r.steps[idx];
-
-    if (DOM.cookPrevStepBtn) {
-      DOM.cookPrevStepBtn.disabled = idx === 0;
-      DOM.cookPrevStepBtn.style.opacity = idx === 0 ? '0.4' : '1';
-    }
-    if (DOM.cookNextStepBtn) {
-      DOM.cookNextStepBtn.innerHTML = idx === total - 1
-        ? `<span>Selesai Memasak</span>`
-        : `<span>Langkah Berikutnya</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
-    }
+    document.body.style.overflow = 'hidden';
   }
 
   function closeCookMode() {
@@ -1192,113 +938,609 @@
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-    if (state.cookMode.timerInterval) {
-      clearInterval(state.cookMode.timerInterval);
-    }
+    resetStepTimer();
+
     if (DOM.cookModeOverlay) {
       DOM.cookModeOverlay.classList.remove('is-active');
       DOM.cookModeOverlay.setAttribute('aria-hidden', 'true');
     }
+    if (DOM.cookIngredientsSheet) {
+      DOM.cookIngredientsSheet.classList.remove('is-open');
+    }
+    // If recipe modal is still open, keep overflow hidden, else restore
+    if (!DOM.recipeModalOverlay || !DOM.recipeModalOverlay.classList.contains('is-open')) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  function renderCurrentCookStep() {
+    const recipe = state.currentRecipe;
+    if (!recipe || !recipe.steps || recipe.steps.length === 0) return;
+
+    const totalSteps = recipe.steps.length;
+    const idx = state.cookMode.currentStepIdx;
+    const stepText = recipe.steps[idx] || '';
+
+    if (DOM.cookStepCounter) {
+      DOM.cookStepCounter.textContent = `Langkah ${idx + 1} dari ${totalSteps}`;
+    }
+
+    if (DOM.cookStepInstruction) {
+      DOM.cookStepInstruction.textContent = stepText;
+    }
+
+    if (DOM.cookProgressFill) {
+      const pct = Math.round(((idx + 1) / totalSteps) * 100);
+      DOM.cookProgressFill.style.width = `${pct}%`;
+    }
+
+    if (DOM.cookPrevStepBtn) {
+      DOM.cookPrevStepBtn.disabled = idx === 0;
+      DOM.cookPrevStepBtn.style.opacity = idx === 0 ? '0.4' : '1';
+    }
+
+    if (DOM.cookNextStepBtn) {
+      if (idx === totalSteps - 1) {
+        DOM.cookNextStepBtn.innerHTML = `<span>Selesai Memasak</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      } else {
+        DOM.cookNextStepBtn.innerHTML = `<span>Langkah Berikutnya</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+      }
+    }
+
+    // Auto-detect minutes in step text (e.g. "15 menit", "20 menit", "5 menit")
+    const match = stepText.match(/(\d+)\s*(?:menit|mnt)/i);
+    if (match && match[1]) {
+      const detectedMin = parseInt(match[1], 10);
+      if (DOM.stepTimerBtnText) DOM.stepTimerBtnText.textContent = `Timer ${detectedMin} Mnt`;
+      if (DOM.btnStepTimer) {
+        DOM.btnStepTimer.setAttribute('data-min', detectedMin);
+        DOM.btnStepTimer.style.borderColor = 'var(--mango-500)';
+      }
+    } else {
+      if (DOM.stepTimerBtnText) DOM.stepTimerBtnText.textContent = `Timer Dapur`;
+      if (DOM.btnStepTimer) {
+        DOM.btnStepTimer.setAttribute('data-min', '5');
+        DOM.btnStepTimer.style.borderColor = 'var(--border-subtle)';
+      }
+    }
+  }
+
+  function nextCookStep() {
+    const recipe = state.currentRecipe;
+    if (!recipe || !recipe.steps) return;
+    if (state.cookMode.currentStepIdx < recipe.steps.length - 1) {
+      state.cookMode.currentStepIdx++;
+      renderCurrentCookStep();
+    } else {
+      showToast('Selamat! Hidangan mangga Anda telah selesai dimasak dengan sempurna.');
+      closeCookMode();
+    }
+  }
+
+  function prevCookStep() {
+    if (state.cookMode.currentStepIdx > 0) {
+      state.cookMode.currentStepIdx--;
+      renderCurrentCookStep();
+    }
+  }
+
+  function speakCurrentStep() {
+    if (!('speechSynthesis' in window)) {
+      showToast('Fitur suara bacakan belum didukung browser ini.');
+      return;
+    }
+    const recipe = state.currentRecipe;
+    if (!recipe || !recipe.steps) return;
+    const stepText = recipe.steps[state.cookMode.currentStepIdx] || '';
+
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(stepText);
+    utter.lang = 'id-ID';
+    utter.rate = 0.95;
+
+    if (DOM.speakBtnText) DOM.speakBtnText.textContent = 'Membacakan...';
+    utter.onend = () => {
+      if (DOM.speakBtnText) DOM.speakBtnText.textContent = 'Bacakan';
+    };
+    utter.onerror = () => {
+      if (DOM.speakBtnText) DOM.speakBtnText.textContent = 'Bacakan';
+    };
+    window.speechSynthesis.speak(utter);
+  }
+
+  function startStepTimer(minutes) {
+    resetStepTimer();
+    const duration = (minutes || 5) * 60;
+    state.cookMode.remainingSeconds = duration;
+    state.cookMode.isRunning = true;
+
+    if (DOM.stepActiveTimerCard) DOM.stepActiveTimerCard.style.display = 'flex';
+    updateStepTimerDisplay();
+
+    state.cookMode.timerInterval = setInterval(() => {
+      if (state.cookMode.remainingSeconds > 0) {
+        state.cookMode.remainingSeconds--;
+        updateStepTimerDisplay();
+      } else {
+        resetStepTimer();
+        showToast('Waktu memasak langkah ini telah habis!');
+        if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+      }
+    }, 1000);
+  }
+
+  function updateStepTimerDisplay() {
+    const sec = state.cookMode.remainingSeconds;
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    const str = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    if (DOM.stepTimerDisplay) DOM.stepTimerDisplay.textContent = str;
+  }
+
+  function pauseStepTimer() {
+    if (state.cookMode.isRunning) {
+      clearInterval(state.cookMode.timerInterval);
+      state.cookMode.isRunning = false;
+      if (DOM.btnStepTimerPause) DOM.btnStepTimerPause.textContent = 'Lanjut';
+    } else {
+      state.cookMode.isRunning = true;
+      if (DOM.btnStepTimerPause) DOM.btnStepTimerPause.textContent = 'Jeda';
+      state.cookMode.timerInterval = setInterval(() => {
+        if (state.cookMode.remainingSeconds > 0) {
+          state.cookMode.remainingSeconds--;
+          updateStepTimerDisplay();
+        } else {
+          resetStepTimer();
+          showToast('Waktu memasak telah habis!');
+        }
+      }, 1000);
+    }
+  }
+
+  function resetStepTimer() {
+    if (state.cookMode.timerInterval) {
+      clearInterval(state.cookMode.timerInterval);
+      state.cookMode.timerInterval = null;
+    }
+    state.cookMode.isRunning = false;
+    state.cookMode.remainingSeconds = 0;
+    if (DOM.stepActiveTimerCard) DOM.stepActiveTimerCard.style.display = 'none';
+    if (DOM.btnStepTimerPause) DOM.btnStepTimerPause.textContent = 'Jeda';
   }
 
   function populateCookIngredientsSheet() {
-    if (!state.cookMode.currentRecipe || !DOM.cookSheetIngredientsList) return;
+    if (!state.currentRecipe || !DOM.cookSheetIngredientsList) return;
+    const ingList = state.currentRecipe.ingredients || [];
     DOM.cookSheetIngredientsList.innerHTML = '';
-    state.cookMode.currentRecipe.ingredients.forEach((ing, i) => {
+    ingList.forEach((ing, i) => {
       const li = document.createElement('li');
-      li.style.cssText = 'display:flex;align-items:center;gap:10px;font-size:0.9rem;padding:6px 0;border-bottom:1px solid var(--page-border);';
+      li.style.cssText = 'display:flex;align-items:center;gap:10px;font-size:0.9rem;padding:6px 0;border-bottom:1px solid var(--border-subtle);';
       li.innerHTML = `
-        <input type="checkbox" id="cIng-${i}" style="width:18px;height:18px;accent-color:var(--mango-primary);cursor:pointer;">
-        <label for="cIng-${i}" style="flex:1;cursor:pointer;"><strong>${ing.amount || ''} ${ing.unit || ''}</strong> ${escapeHTML(ing.name)}</label>
+        <input type="checkbox" id="cookIng-${i}" style="width:18px;height:18px;accent-color:var(--mango-500);cursor:pointer;">
+        <label for="cookIng-${i}" style="cursor:pointer;flex:1;"><strong>${ing.amount || ''} ${ing.unit || ''}</strong> ${escapeHTML(ing.name)} ${ing.notes ? `<small style="color:var(--text-muted)">(${escapeHTML(ing.notes)})</small>` : ''}</label>
       `;
       DOM.cookSheetIngredientsList.appendChild(li);
     });
   }
 
   // ===================================================================
-  // SEARCH SYSTEM (AUTOCOMPLETE & QUICK JUMP)
+  // KITCHEN TIMER & WEB AUDIO CHIME
   // ===================================================================
-  function handleSearchInput(query) {
-    if (!query || query.trim().length === 0) {
-      if (DOM.searchQuickResults) DOM.searchQuickResults.style.display = 'none';
-      if (DOM.clearSearchBtn) DOM.clearSearchBtn.style.display = 'none';
-      return;
+  function startKitchenTimer() {
+    if (state.timer.remainingSeconds <= 0) {
+      const cookMins = state.currentRecipe ? (state.currentRecipe.totalMinutes || 5) : 5;
+      state.timer.remainingSeconds = cookMins * 60;
     }
 
-    if (DOM.clearSearchBtn) DOM.clearSearchBtn.style.display = 'block';
-    const q = query.toLowerCase().trim();
-    const matches = state.allRecipes.filter(r => r.title.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q)).slice(0, 8);
+    if (state.timer.isRunning) {
+      clearInterval(state.timer.interval);
+      state.timer.isRunning = false;
+      if (DOM.timerStartBtn) {
+        DOM.timerStartBtn.textContent = 'Lanjutkan';
+        DOM.timerStartBtn.classList.remove('btn-secondary');
+        DOM.timerStartBtn.classList.add('btn-primary');
+      }
+    } else {
+      state.timer.isRunning = true;
+      if (DOM.timerStartBtn) {
+        DOM.timerStartBtn.textContent = 'Jeda';
+        DOM.timerStartBtn.classList.remove('btn-primary');
+        DOM.timerStartBtn.classList.add('btn-secondary');
+      }
 
-    if (!DOM.searchQuickResults) return;
-    DOM.searchQuickResults.innerHTML = '';
+      state.timer.interval = setInterval(() => {
+        if (state.timer.remainingSeconds > 0) {
+          state.timer.remainingSeconds--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(state.timer.interval);
+          state.timer.isRunning = false;
+          if (DOM.timerStartBtn) DOM.timerStartBtn.textContent = 'Mulai Timer';
+          playChimeSound();
+          showToast('Waktu memasak telah selesai! Hidangan siap disajikan.');
+        }
+      }, 1000);
+    }
+    updateTimerDisplay();
+  }
 
-    if (matches.length === 0) {
-      DOM.searchQuickResults.innerHTML = `
-        <div style="padding: 12px; text-align: center; color: var(--book-gold); font-size: 0.82rem;">
-          Resep tidak ditemukan. Coba kata kunci lain.
+  function resetKitchenTimer() {
+    clearInterval(state.timer.interval);
+    state.timer.isRunning = false;
+    state.timer.remainingSeconds = 0;
+    if (DOM.timerStartBtn) {
+      DOM.timerStartBtn.textContent = 'Mulai Timer';
+      DOM.timerStartBtn.classList.remove('btn-secondary');
+      DOM.timerStartBtn.classList.add('btn-primary');
+    }
+    updateTimerDisplay();
+  }
+
+  function updateTimerDisplay() {
+    if (!DOM.timerDisplay) return;
+    const mins = Math.floor(state.timer.remainingSeconds / 60);
+    const secs = state.timer.remainingSeconds % 60;
+    DOM.timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function playChimeSound() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      const playTone = (freq, time, duration) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.3, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(time);
+        osc.stop(time + duration);
+      };
+
+      const now = ctx.currentTime;
+      playTone(587.33, now, 0.4);       // D5
+      playTone(739.99, now + 0.2, 0.4); // F#5
+      playTone(880.00, now + 0.4, 0.8); // A5
+    } catch (e) {
+      console.warn('Web Audio chime blocked:', e);
+    }
+  }
+
+  // ===================================================================
+  // FAVORITES SYSTEM (COOKPAD BOOKMARKS)
+  // ===================================================================
+  function toggleFavorite(recipeId) {
+    const idx = state.favorites.indexOf(recipeId);
+    if (idx > -1) {
+      state.favorites.splice(idx, 1);
+      showToast('Dihapus dari Resep Tersimpan');
+    } else {
+      state.favorites.push(recipeId);
+      showToast('Disimpan ke Resep Tersimpan');
+    }
+    localStorage.setItem('mango_favorites', JSON.stringify(state.favorites));
+    updateBadges();
+  }
+
+  function updateBadges() {
+    const favCount = state.favorites.length;
+    if (DOM.favoritesCountBadge) DOM.favoritesCountBadge.textContent = favCount;
+    if (DOM.mobFavBadge) DOM.mobFavBadge.textContent = favCount;
+
+    const shopCount = state.shoppingList.length;
+    if (DOM.shoppingCountBadge) DOM.shoppingCountBadge.textContent = shopCount;
+    if (DOM.mobShopBadge) DOM.mobShopBadge.textContent = shopCount;
+  }
+
+  function openFavoritesModal() {
+    if (!DOM.favoritesListContainer) return;
+    DOM.favoritesListContainer.innerHTML = '';
+
+    if (state.favorites.length === 0) {
+      DOM.favoritesListContainer.innerHTML = `
+        <div class="empty-state" style="padding: 30px 10px;">
+          <div class="empty-icon-clean">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h4 class="empty-title">Belum Ada Resep Tersimpan</h4>
+          <p class="empty-desc">Klik tombol simpan pada resep olahan mangga apa pun untuk menyimpannya ke daftar ini.</p>
         </div>
       `;
     } else {
-      matches.forEach(r => {
+      const grid = document.createElement('div');
+      grid.className = 'favorites-list-grid';
+
+      state.favorites.forEach(id => {
+        const recipe = state.allRecipes.find(r => r.id === id);
+        if (!recipe) return;
+
         const row = document.createElement('div');
-        row.className = 'search-result-row';
+        row.className = 'fav-item-row';
+        const photo = CATEGORY_IMAGES[recipe.categoryKey] || 'assets/images/cat-simpel.jpg';
         row.innerHTML = `
-          <img src="${r.image}" class="search-result-thumb" alt="${escapeHTML(r.title)}">
-          <div class="search-result-info">
-            <div class="search-result-title">${escapeHTML(r.title)}</div>
-            <div class="search-result-meta">${r.categoryLabel} • ${r.totalMinutes} mnt</div>
+          <div class="fav-item-info">
+            <img src="${photo}" alt="${escapeHTML(recipe.title)}" class="fav-item-thumb">
+            <div>
+              <div class="fav-item-title">${escapeHTML(recipe.title)}</div>
+              <div class="fav-item-meta">${recipe.totalMinutes} mnt • ${recipe.difficulty}</div>
+            </div>
           </div>
-          <span class="search-result-page-badge">Hal. ${r.pageLeft}</span>
+          <button type="button" class="shopping-delete-btn" title="Hapus dari Favorit">&times;</button>
         `;
-        row.addEventListener('click', () => {
-          DOM.searchQuickResults.style.display = 'none';
-          if (DOM.globalBookSearch) DOM.globalBookSearch.value = '';
-          goToSpread(r.spreadIndex);
+
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.shopping-delete-btn')) {
+            e.stopPropagation();
+            toggleFavorite(recipe.id);
+            openFavoritesModal();
+            renderRecipeGrid();
+            return;
+          }
+          closeFavoritesModal();
+          openRecipeModal(recipe);
         });
-        DOM.searchQuickResults.appendChild(row);
+
+        grid.appendChild(row);
+      });
+
+      DOM.favoritesListContainer.appendChild(grid);
+    }
+
+    if (DOM.favoritesModalOverlay) {
+      DOM.favoritesModalOverlay.classList.add('is-open');
+      DOM.favoritesModalOverlay.setAttribute('aria-hidden', 'false');
+    }
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFavoritesModal() {
+    if (DOM.favoritesModalOverlay) {
+      DOM.favoritesModalOverlay.classList.remove('is-open');
+      DOM.favoritesModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+  }
+
+  // ===================================================================
+  // SHOPPING LIST SYSTEM
+  // ===================================================================
+  function addCurrentRecipeToShoppingList() {
+    if (!state.currentRecipe) return;
+
+    const mult = state.portionMultiplier;
+    let addedCount = 0;
+
+    state.currentRecipe.ingredients.forEach(ing => {
+      let scaledAmount = '';
+      if (typeof ing.amount === 'number') {
+        scaledAmount = formatAmount(ing.amount * mult) + (ing.unit ? ' ' + ing.unit : '');
+      } else if (typeof ing.amount === 'string' && !isNaN(parseFloat(ing.amount))) {
+        scaledAmount = formatAmount(parseFloat(ing.amount) * mult) + (ing.unit ? ' ' + ing.unit : '');
+      } else {
+        scaledAmount = (ing.amount || '') + (ing.unit ? ' ' + ing.unit : '');
+      }
+
+      const itemText = `${scaledAmount} ${ing.name} (untuk ${state.currentRecipe.title})`.trim();
+      
+      if (!state.shoppingList.some(item => item.text === itemText)) {
+        state.shoppingList.push({
+          id: 'shop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          text: itemText,
+          checked: false
+        });
+        addedCount++;
+      }
+    });
+
+    localStorage.setItem('mango_shopping_list', JSON.stringify(state.shoppingList));
+    updateBadges();
+    showToast(`🛒 ${addedCount} bahan berhasil dimasukkan ke Daftar Belanja!`);
+  }
+
+  function openShoppingListModal() {
+    if (!DOM.shoppingItemsList) return;
+    DOM.shoppingItemsList.innerHTML = '';
+
+    if (state.shoppingList.length === 0) {
+      DOM.shoppingItemsList.innerHTML = `
+        <div class="empty-state" style="padding: 30px 10px;">
+          <div class="empty-icon">🛒</div>
+          <h4 class="empty-title">Daftar Belanja Masih Kosong</h4>
+          <p class="empty-desc">Buka resep pilihan Anda lalu klik tombol "+ Masukkan ke Belanja" untuk mencatat kebutuhan bahan masakan secara otomatis.</p>
+        </div>
+      `;
+    } else {
+      state.shoppingList.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'shopping-item-row';
+        li.innerHTML = `
+          <div class="shopping-item-left" style="cursor: pointer;">
+            <span class="custom-checkbox">${item.checked ? '✓' : ''}</span>
+            <span style="${item.checked ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHTML(item.text)}</span>
+          </div>
+          <button type="button" class="shopping-delete-btn" title="Hapus item">&times;</button>
+        `;
+
+        li.querySelector('.shopping-item-left').addEventListener('click', () => {
+          item.checked = !item.checked;
+          localStorage.setItem('mango_shopping_list', JSON.stringify(state.shoppingList));
+          openShoppingListModal();
+        });
+
+        li.querySelector('.shopping-delete-btn').addEventListener('click', () => {
+          state.shoppingList = state.shoppingList.filter(i => i.id !== item.id);
+          localStorage.setItem('mango_shopping_list', JSON.stringify(state.shoppingList));
+          updateBadges();
+          openShoppingListModal();
+        });
+
+        DOM.shoppingItemsList.appendChild(li);
       });
     }
 
-    DOM.searchQuickResults.style.display = 'block';
+    if (DOM.shoppingModalOverlay) {
+      DOM.shoppingModalOverlay.classList.add('is-open');
+      DOM.shoppingModalOverlay.setAttribute('aria-hidden', 'false');
+    }
+    document.body.style.overflow = 'hidden';
   }
 
-  // ===================================================================
-  // THEME & SOUND CONTROLS
-  // ===================================================================
-  function applyTheme(themeName) {
-    state.theme = themeName;
-    document.documentElement.setAttribute('data-theme', themeName);
-    localStorage.setItem('mango_theme', themeName);
+  function closeShoppingListModal() {
+    if (DOM.shoppingModalOverlay) {
+      DOM.shoppingModalOverlay.classList.remove('is-open');
+      DOM.shoppingModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+  }
 
-    const sunSvg = document.querySelector('.sun-svg');
-    const moonSvg = document.querySelector('.moon-svg');
-    if (sunSvg && moonSvg) {
-      sunSvg.style.display = themeName === 'dark' ? 'block' : 'none';
-      moonSvg.style.display = themeName === 'dark' ? 'none' : 'block';
+  function shareShoppingViaWhatsApp() {
+    if (state.shoppingList.length === 0) {
+      showToast('Daftar belanja masih kosong.');
+      return;
+    }
+
+    let text = '*DAFTAR BELANJA RESEP ALL MANGGO*\n\n';
+    state.shoppingList.forEach((item, idx) => {
+      text += `${idx + 1}. ${item.checked ? '[v] ' : '[ ] '} ${item.text}\n`;
+    });
+    text += '\n_Dibuat dengan web Resep All Manggo_';
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  }
+
+  function clearShoppingList() {
+    if (confirm('Yakin ingin mengosongkan seluruh daftar belanja?')) {
+      state.shoppingList = [];
+      localStorage.setItem('mango_shopping_list', JSON.stringify(state.shoppingList));
+      updateBadges();
+      openShoppingListModal();
+      showToast('Daftar belanja telah dikosongkan.');
     }
   }
 
-  function updateSoundUI() {
-    const onSvg = document.querySelector('.sound-on-svg');
-    const offSvg = document.querySelector('.sound-off-svg');
-    if (onSvg && offSvg) {
-      onSvg.style.display = state.soundEnabled ? 'block' : 'none';
-      offSvg.style.display = state.soundEnabled ? 'none' : 'block';
-    }
+  // ===================================================================
+  // KAMUS MANGGA GUIDE MODAL
+  // ===================================================================
+  function populateMangoGuide() {
+    if (!DOM.mangoVarietiesGrid) return;
+    DOM.mangoVarietiesGrid.innerHTML = '';
+    MANGO_VARIETIES.forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'variety-card';
+      card.innerHTML = `
+        <div class="variety-header">
+          <h4 class="variety-title">${v.name}</h4>
+          <span class="variety-origin">${v.origin}</span>
+        </div>
+        <div class="variety-sweetness">Tingkat Manis: ${v.sweetness}</div>
+        <p class="variety-desc">${v.texture}</p>
+        <div class="variety-pairing"><strong>Rekomendasi Olahan:</strong> ${v.bestFor}</div>
+      `;
+      DOM.mangoVarietiesGrid.appendChild(card);
+    });
   }
 
-  // Toast Notification
+  function openMangoGuideModal() {
+    if (DOM.mangoGuideModalOverlay) {
+      DOM.mangoGuideModalOverlay.classList.add('is-open');
+      DOM.mangoGuideModalOverlay.setAttribute('aria-hidden', 'false');
+    }
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMangoGuideModal() {
+    if (DOM.mangoGuideModalOverlay) {
+      DOM.mangoGuideModalOverlay.classList.remove('is-open');
+      DOM.mangoGuideModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+  }
+
+  // ===================================================================
+  // RANDOM RECIPE INSPIRATION
+  // ===================================================================
+  let randomPickedRecipe = null;
+
+  function openRandomRecipeModal() {
+    if (DOM.randomRecipeModalOverlay) {
+      DOM.randomRecipeModalOverlay.classList.add('is-open');
+      DOM.randomRecipeModalOverlay.setAttribute('aria-hidden', 'false');
+    }
+    document.body.style.overflow = 'hidden';
+    rollRandomRecipe();
+  }
+
+  function closeRandomRecipeModal() {
+    if (DOM.randomRecipeModalOverlay) {
+      DOM.randomRecipeModalOverlay.classList.remove('is-open');
+      DOM.randomRecipeModalOverlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+  }
+
+  function rollRandomRecipe() {
+    if (DOM.randomDiceIcon) DOM.randomDiceIcon.style.animation = 'roll 0.25s infinite alternate';
+    if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = 'Mengacak Resep...';
+    if (DOM.randomResultDesc) DOM.randomResultDesc.textContent = 'Mencari resep mangga paling pas untuk selera Anda hari ini...';
+    if (DOM.openRandomRecipeDetailBtn) DOM.openRandomRecipeDetailBtn.disabled = true;
+
+    setTimeout(() => {
+      const pool = state.allRecipes.length > 0 ? state.allRecipes : [];
+      if (pool.length === 0) return;
+
+      const randomIdx = Math.floor(Math.random() * pool.length);
+      randomPickedRecipe = pool[randomIdx];
+
+      if (DOM.randomDiceIcon) {
+        DOM.randomDiceIcon.style.animation = 'none';
+      }
+      if (DOM.randomResultTitle) DOM.randomResultTitle.textContent = randomPickedRecipe.title;
+      if (DOM.randomResultDesc) DOM.randomResultDesc.textContent = randomPickedRecipe.desc;
+      if (DOM.openRandomRecipeDetailBtn) DOM.openRandomRecipeDetailBtn.disabled = false;
+    }, 600);
+  }
+
+  // ===================================================================
+  // TOAST NOTIFICATIONS & SHARE
+  // ===================================================================
   function showToast(message) {
     if (!DOM.toastContainer) return;
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `<span>${message}</span>`;
     DOM.toastContainer.appendChild(toast);
+
     setTimeout(() => toast.classList.add('show'), 20);
+
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
-    }, 2600);
+    }, 2800);
+  }
+
+  function shareRecipe() {
+    if (!state.currentRecipe) return;
+    const shareData = {
+      title: `${state.currentRecipe.title} - Resep All Manggo`,
+      text: `Cobain resep ${state.currentRecipe.title}! ${state.currentRecipe.desc}`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`)
+        .then(() => showToast('Tautan resep disalin ke clipboard!'))
+        .catch(() => showToast('Tautan siap dibagikan!'));
+    }
   }
 
   function escapeHTML(str) {
@@ -1315,207 +1557,365 @@
   // EVENT LISTENERS SETUP
   // ===================================================================
   function setupEventListeners() {
-    // Open cover
-    if (DOM.btnOpenCover) DOM.btnOpenCover.addEventListener('click', () => goToSpread(1));
-    if (DOM.brandCoverBtn) DOM.brandCoverBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      goToSpread(0);
-    });
-    if (DOM.coverJumpTocBtn) DOM.coverJumpTocBtn.addEventListener('click', () => goToSpread(2));
-    if (DOM.coverRandomBtn) DOM.coverRandomBtn.addEventListener('click', () => {
-      const randIdx = Math.floor(Math.random() * state.allRecipes.length);
-      goToSpread(randIdx + 3);
+    // Theme Switcher
+    on(DOM.themeToggleBtn, 'click', () => {
+      const nextTheme = state.theme === 'light' ? 'dark' : 'light';
+      applyTheme(nextTheme);
+      showToast(`Mode ${nextTheme === 'light' ? 'Terang' : 'Gelap'} diaktifkan`);
     });
 
-    // Flip Corners & Dock Navigation
-    if (DOM.prevCornerClick) DOM.prevCornerClick.addEventListener('click', prevSpread);
-    if (DOM.nextCornerClick) DOM.nextCornerClick.addEventListener('click', nextSpread);
-
-    // Dock Nav Buttons
-    if (DOM.dockPrevBtn) DOM.dockPrevBtn.addEventListener('click', prevSpread);
-    if (DOM.dockNextBtn) DOM.dockNextBtn.addEventListener('click', nextSpread);
-    if (DOM.dockQuickTocBtn) DOM.dockQuickTocBtn.addEventListener('click', openTocDrawer);
-
-    // Drawers
-    if (DOM.btnToggleToc) DOM.btnToggleToc.addEventListener('click', openTocDrawer);
-    if (DOM.closeTocDrawerBtn) DOM.closeTocDrawerBtn.addEventListener('click', closeAllDrawers);
-    if (DOM.tocDrawerOverlay) DOM.tocDrawerOverlay.addEventListener('click', (e) => {
-      if (e.target === DOM.tocDrawerOverlay) closeAllDrawers();
+    // App View Switcher Buttons (Beranda Rekomendasi vs Katalog 200 Resep)
+    on(DOM.btnViewHome, 'click', () => {
+      switchAppView('home');
+      window.scrollTo({ top: 380, behavior: 'smooth' });
+    });
+    on(DOM.btnViewCatalog, 'click', () => {
+      switchAppView('catalog');
+      const catEl = document.getElementById('kategori');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
     });
 
-    if (DOM.btnToggleBookmarks) DOM.btnToggleBookmarks.addEventListener('click', openBookmarksDrawer);
-    if (DOM.closeBookmarksDrawerBtn) DOM.closeBookmarksDrawerBtn.addEventListener('click', closeAllDrawers);
-    if (DOM.bookmarksDrawerOverlay) DOM.bookmarksDrawerOverlay.addEventListener('click', (e) => {
-      if (e.target === DOM.bookmarksDrawerOverlay) closeAllDrawers();
-    });
+    // Search Inputs
+    let debounceTimer;
+    const handleSearch = (val) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        state.searchQuery = val;
+        if (val.trim().length > 0) {
+          switchAppView('catalog');
+        }
+        applyFilters();
+      }, 150);
+    };
 
-    if (DOM.btnToggleShopping) DOM.btnToggleShopping.addEventListener('click', openShoppingDrawer);
-    if (DOM.closeShoppingDrawerBtn) DOM.closeShoppingDrawerBtn.addEventListener('click', closeAllDrawers);
-    if (DOM.shoppingDrawerOverlay) DOM.shoppingDrawerOverlay.addEventListener('click', (e) => {
-      if (e.target === DOM.shoppingDrawerOverlay) closeAllDrawers();
-    });
-    if (DOM.shareShoppingWhatsappBtn) DOM.shareShoppingWhatsappBtn.addEventListener('click', shareShoppingViaWhatsApp);
-    if (DOM.clearShoppingListBtn) DOM.clearShoppingListBtn.addEventListener('click', clearShoppingList);
-
-    // Audio & Theme Toggles
-    if (DOM.btnToggleSound) {
-      DOM.btnToggleSound.addEventListener('click', () => {
-        state.soundEnabled = !state.soundEnabled;
-        localStorage.setItem('mango_sound', state.soundEnabled);
-        updateSoundUI();
-        showToast(`Suara lembaran kertas ${state.soundEnabled ? 'diaktifkan' : 'dinonaktifkan'}.`);
+    if (DOM.searchInput) {
+      DOM.searchInput.addEventListener('input', (e) => {
+        if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = e.target.value;
+        if (DOM.heroSearchInput) DOM.heroSearchInput.value = e.target.value;
+        handleSearch(e.target.value);
       });
     }
 
-    if (DOM.btnToggleTheme) {
-      DOM.btnToggleTheme.addEventListener('click', () => {
-        const next = state.theme === 'light' ? 'dark' : 'light';
-        applyTheme(next);
-        showToast(`Mode baca ${next === 'light' ? 'Ruang Baca Terang' : 'Suasana Malam'} diaktifkan.`);
+    if (DOM.heroSearchInput) {
+      DOM.heroSearchInput.addEventListener('input', (e) => {
+        if (DOM.searchInput) DOM.searchInput.value = e.target.value;
+        if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = e.target.value;
+        handleSearch(e.target.value);
       });
-    }
-
-    // Search Events
-    if (DOM.globalBookSearch) {
-      DOM.globalBookSearch.addEventListener('input', (e) => handleSearchInput(e.target.value));
-    }
-    if (DOM.clearSearchBtn) {
-      DOM.clearSearchBtn.addEventListener('click', () => {
-        if (DOM.globalBookSearch) DOM.globalBookSearch.value = '';
-        handleSearchInput('');
-      });
-    }
-
-    if (DOM.mobileBookSearch) {
-      DOM.mobileBookSearch.addEventListener('input', (e) => handleSearchInput(e.target.value));
-    }
-    if (DOM.mobileClearSearchBtn) {
-      DOM.mobileClearSearchBtn.addEventListener('click', () => {
-        if (DOM.mobileBookSearch) DOM.mobileBookSearch.value = '';
-        handleSearchInput('');
-      });
-    }
-
-    // TOC Category Filters & Search
-    document.querySelectorAll('.drawer-cat-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        document.querySelectorAll('.drawer-cat-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        const cat = pill.getAttribute('data-cat');
-        const q = DOM.tocSearchInput ? DOM.tocSearchInput.value : '';
-        populateTableOfContentsDrawer(cat, q);
-      });
-    });
-
-    if (DOM.tocSearchInput) {
-      DOM.tocSearchInput.addEventListener('input', (e) => {
-        const activePill = document.querySelector('.drawer-cat-pill.active');
-        const cat = activePill ? activePill.getAttribute('data-cat') : 'all';
-        populateTableOfContentsDrawer(cat, e.target.value);
-      });
-    }
-
-    // Cook Mode Events
-    if (DOM.closeCookModeBtn) DOM.closeCookModeBtn.addEventListener('click', closeCookMode);
-    if (DOM.cookNextStepBtn) {
-      DOM.cookNextStepBtn.addEventListener('click', () => {
-        const r = state.cookMode.currentRecipe;
-        if (!r || !r.steps) return;
-        if (state.cookMode.currentStepIdx < r.steps.length - 1) {
-          state.cookMode.currentStepIdx++;
-          renderCookModeStep();
-        } else {
-          showToast('Selamat! Hidangan mangga Anda selesai dimasak.');
-          closeCookMode();
+      DOM.heroSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          switchAppView('catalog');
+          const catEl = document.getElementById('kategori');
+          if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
         }
       });
     }
-    if (DOM.cookPrevStepBtn) {
-      DOM.cookPrevStepBtn.addEventListener('click', () => {
-        if (state.cookMode.currentStepIdx > 0) {
-          state.cookMode.currentStepIdx--;
-          renderCookModeStep();
-        }
-      });
-    }
-    if (DOM.btnSpeakStep) {
-      DOM.btnSpeakStep.addEventListener('click', () => {
-        if (!('speechSynthesis' in window)) {
-          showToast('Fitur suara bacakan belum didukung browser ini.');
-          return;
-        }
-        const r = state.cookMode.currentRecipe;
-        if (!r || !r.steps) return;
-        const text = r.steps[state.cookMode.currentStepIdx] || '';
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'id-ID';
-        if (DOM.speakBtnText) DOM.speakBtnText.textContent = 'Membacakan...';
-        utter.onend = () => { if (DOM.speakBtnText) DOM.speakBtnText.textContent = 'Bacakan'; };
-        utter.onerror = () => { if (DOM.speakBtnText) DOM.speakBtnText.textContent = 'Bacakan'; };
-        window.speechSynthesis.speak(utter);
-      });
-    }
-    if (DOM.btnToggleCookIngredients) {
-      DOM.btnToggleCookIngredients.addEventListener('click', () => {
-        if (DOM.cookIngredientsSheet) DOM.cookIngredientsSheet.classList.toggle('is-open');
-      });
-    }
-    if (DOM.closeCookIngredientsSheet) {
-      DOM.closeCookIngredientsSheet.addEventListener('click', () => {
-        if (DOM.cookIngredientsSheet) DOM.cookIngredientsSheet.classList.remove('is-open');
+
+    if (DOM.heroSearchBtn) {
+      DOM.heroSearchBtn.addEventListener('click', () => {
+        const val = DOM.heroSearchInput ? DOM.heroSearchInput.value : '';
+        if (DOM.searchInput) DOM.searchInput.value = val;
+        state.searchQuery = val;
+        switchAppView('catalog');
+        applyFilters();
+        const catEl = document.getElementById('kategori');
+        if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
       });
     }
 
-    // Keyboard Shortcuts (Arrow Left/Right to flip pages, Esc to close drawers)
-    document.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (DOM.mobileSearchInput) {
+      DOM.mobileSearchInput.addEventListener('input', (e) => {
+        if (DOM.searchInput) DOM.searchInput.value = e.target.value;
+        if (DOM.heroSearchInput) DOM.heroSearchInput.value = e.target.value;
+        handleSearch(e.target.value);
+      });
+    }
 
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        nextSpread();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        prevSpread();
-      } else if (e.key === 'Escape') {
-        closeAllDrawers();
-        closeCookMode();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        if (DOM.globalBookSearch) {
-          DOM.globalBookSearch.focus();
-          DOM.globalBookSearch.select();
-        }
+    // Clear Search Buttons
+    on(DOM.clearSearchBtn, 'click', () => {
+      if (DOM.searchInput) DOM.searchInput.value = '';
+      if (DOM.heroSearchInput) DOM.heroSearchInput.value = '';
+      if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = '';
+      state.searchQuery = '';
+      applyFilters();
+    });
+
+    on(DOM.mobileClearSearchBtn, 'click', () => {
+      if (DOM.searchInput) DOM.searchInput.value = '';
+      if (DOM.heroSearchInput) DOM.heroSearchInput.value = '';
+      if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = '';
+      state.searchQuery = '';
+      applyFilters();
+    });
+
+    // Trending Search Tag Buttons Click
+    const trendTagBtns = document.querySelectorAll('.trend-tag-btn');
+    trendTagBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tag = btn.getAttribute('data-tag');
+        if (DOM.searchInput) DOM.searchInput.value = tag;
+        if (DOM.heroSearchInput) DOM.heroSearchInput.value = tag;
+        if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = tag;
+        state.searchQuery = tag;
+        switchAppView('catalog');
+        applyFilters();
+        const catEl = document.getElementById('kategori');
+        if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Category Nav Pills
+    if (DOM.categoryPills) {
+      DOM.categoryPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          DOM.categoryPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.currentCategory = pill.getAttribute('data-category');
+          switchAppView('catalog');
+          applyFilters();
+        });
+      });
+    }
+
+    // Difficulty & Time Filters & Sort
+    on(DOM.difficultyFilter, 'change', (e) => {
+      state.difficultyFilter = e.target.value;
+      applyFilters();
+    });
+
+    on(DOM.timeFilter, 'change', (e) => {
+      state.timeFilter = e.target.value;
+      applyFilters();
+    });
+
+    on(DOM.sortSelect, 'change', (e) => {
+      state.sortBy = e.target.value;
+      applyFilters();
+    });
+
+    // Reset Filters
+    const resetAllFilters = () => {
+      state.currentCategory = 'all';
+      state.searchQuery = '';
+      state.difficultyFilter = 'all';
+      state.timeFilter = 'all';
+      state.sortBy = 'default';
+
+      if (DOM.searchInput) DOM.searchInput.value = '';
+      if (DOM.heroSearchInput) DOM.heroSearchInput.value = '';
+      if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = '';
+      if (DOM.difficultyFilter) DOM.difficultyFilter.value = 'all';
+      if (DOM.timeFilter) DOM.timeFilter.value = 'all';
+      if (DOM.sortSelect) DOM.sortSelect.value = 'default';
+
+      if (DOM.categoryPills) {
+        DOM.categoryPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-category') === 'all'));
+      }
+      applyFilters();
+    };
+
+    on(DOM.resetFiltersBtn, 'click', resetAllFilters);
+    on(DOM.emptyResetBtn, 'click', resetAllFilters);
+
+    // Load More
+    on(DOM.loadMoreBtn, 'click', () => {
+      state.displayedCount += 24;
+      renderRecipeGrid();
+    });
+
+    // CTA & Header Buttons
+    on(DOM.exploreAllBtn, 'click', () => {
+      const catEl = document.getElementById('kategori');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    on(DOM.heroRandomBtn, 'click', openRandomRecipeModal);
+    on(DOM.randomRecipeBtn, 'click', openRandomRecipeModal);
+
+    on(DOM.openFavoritesBtn, 'click', openFavoritesModal);
+    on(DOM.openShoppingListBtn, 'click', openShoppingListModal);
+
+    on(DOM.openMangoGuideBtn, 'click', openMangoGuideModal);
+    on(DOM.spotlightGuideBtn, 'click', openMangoGuideModal);
+    on(DOM.footerMangoGuideLink, 'click', (e) => { e.preventDefault(); openMangoGuideModal(); });
+    on(DOM.footerRandomLink, 'click', (e) => { e.preventDefault(); openRandomRecipeModal(); });
+    on(DOM.footerShoppingLink, 'click', (e) => { e.preventDefault(); openShoppingListModal(); });
+    on(DOM.footerFavoritesLink, 'click', (e) => { e.preventDefault(); openFavoritesModal(); });
+
+    // Recipe Detail Modal Events
+    on(DOM.modalCloseBtn, 'click', closeRecipeModal);
+    on(DOM.recipeModalOverlay, 'click', (e) => {
+      if (e.target === DOM.recipeModalOverlay) closeRecipeModal();
+    });
+
+    // Scaler Buttons
+    if (DOM.scalerBtns) {
+      DOM.scalerBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          DOM.scalerBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.portionMultiplier = parseFloat(btn.getAttribute('data-multiplier'));
+          renderModalIngredients();
+        });
+      });
+    }
+
+    // Modal Action Buttons
+    on(DOM.modalFavoriteBtn, 'click', () => {
+      if (!state.currentRecipe) return;
+      toggleFavorite(state.currentRecipe.id);
+      updateModalFavoriteBtnState();
+      renderRecipeGrid();
+    });
+
+    on(DOM.modalAddShoppingBtn, 'click', addCurrentRecipeToShoppingList);
+    on(DOM.modalAddAllIngBtn, 'click', addCurrentRecipeToShoppingList);
+    on(DOM.modalShareBtn, 'click', shareRecipe);
+    on(DOM.modalPrintBtn, 'click', () => window.print());
+
+    // Timer Widget Events
+    on(DOM.timerStartBtn, 'click', startKitchenTimer);
+    on(DOM.timerResetBtn, 'click', resetKitchenTimer);
+    if (DOM.timerPresetBtns) {
+      DOM.timerPresetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sec = parseInt(btn.getAttribute('data-sec'), 10);
+          state.timer.remainingSeconds += sec;
+          updateTimerDisplay();
+        });
+      });
+    }
+
+    // Favorites Drawer Events
+    on(DOM.closeFavoritesModalBtn, 'click', closeFavoritesModal);
+    on(DOM.favoritesModalOverlay, 'click', (e) => {
+      if (e.target === DOM.favoritesModalOverlay) closeFavoritesModal();
+    });
+
+    // Shopping List Drawer Events
+    on(DOM.closeShoppingModalBtn, 'click', closeShoppingListModal);
+    on(DOM.shoppingModalOverlay, 'click', (e) => {
+      if (e.target === DOM.shoppingModalOverlay) closeShoppingListModal();
+    });
+    on(DOM.shareShoppingWhatsappBtn, 'click', shareShoppingViaWhatsApp);
+    on(DOM.clearShoppingListBtn, 'click', clearShoppingList);
+
+    // Kamus Mangga Modal Events
+    on(DOM.closeMangoGuideModalBtn, 'click', closeMangoGuideModal);
+    on(DOM.mangoGuideModalOverlay, 'click', (e) => {
+      if (e.target === DOM.mangoGuideModalOverlay) closeMangoGuideModal();
+    });
+
+    // Random Modal Events
+    on(DOM.closeRandomModalBtn, 'click', closeRandomRecipeModal);
+    on(DOM.randomRecipeModalOverlay, 'click', (e) => {
+      if (e.target === DOM.randomRecipeModalOverlay) closeRandomRecipeModal();
+    });
+    on(DOM.rollAgainBtn, 'click', rollRandomRecipe);
+    on(DOM.openRandomRecipeDetailBtn, 'click', () => {
+      if (randomPickedRecipe) {
+        closeRandomRecipeModal();
+        openRecipeModal(randomPickedRecipe);
       }
     });
 
-    // Touch Swipe Gestures for Mobile & Tablets
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const stage = document.getElementById('bookStage');
-    if (stage) {
-      stage.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
+    // Mobile Bottom Navigation Bar Events
+    on(DOM.mobNavHome, 'click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    on(DOM.mobNavCat, 'click', (e) => {
+      e.preventDefault();
+      const catEl = document.getElementById('kategori');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+    });
+    on(DOM.mobNavRandom, 'click', openRandomRecipeModal);
+    on(DOM.mobNavFav, 'click', openFavoritesModal);
+    on(DOM.mobNavShop, 'click', openShoppingListModal);
 
-      stage.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        const diff = touchEndX - touchStartX;
-        if (Math.abs(diff) > 50) {
-          if (diff < 0) {
-            nextSpread(); // Swipe left -> Next Page
-          } else {
-            prevSpread(); // Swipe right -> Prev Page
-          }
+    // Cook Mode Events (Hands-Free Cooking Experience)
+    on(DOM.btnLaunchCookMode, 'click', () => openCookMode(state.currentRecipe));
+    on(DOM.closeCookModeBtn, 'click', closeCookMode);
+    on(DOM.cookNextStepBtn, 'click', nextCookStep);
+    on(DOM.cookPrevStepBtn, 'click', prevCookStep);
+    on(DOM.btnSpeakStep, 'click', speakCurrentStep);
+    
+    on(DOM.btnStepTimer, 'click', () => {
+      const min = parseInt(DOM.btnStepTimer.getAttribute('data-min') || '5', 10);
+      startStepTimer(min);
+      showToast(`Timer langkah ${min} menit dimulai!`);
+    });
+    on(DOM.btnStepTimerPause, 'click', pauseStepTimer);
+    on(DOM.btnStepTimerReset, 'click', resetStepTimer);
+    on(DOM.btnToggleCookIngredients, 'click', () => {
+      if (DOM.cookIngredientsSheet) DOM.cookIngredientsSheet.classList.toggle('is-open');
+    });
+    on(DOM.closeCookIngredientsSheet, 'click', () => {
+      if (DOM.cookIngredientsSheet) DOM.cookIngredientsSheet.classList.remove('is-open');
+    });
+
+    // Hero Spotlight & Dish of the Day Actions
+    on(DOM.heroCookNowBtn, 'click', () => {
+      const dish = state.allRecipes.find(r => r.title.toLowerCase().includes('sticky rice') || r.title.toLowerCase().includes('khao niew')) || state.allRecipes[0];
+      if (dish) {
+        openRecipeModal(dish);
+        openCookMode(dish);
+      }
+    });
+
+    on(DOM.heroSaveDishBtn, 'click', () => {
+      const dish = state.allRecipes.find(r => r.title.toLowerCase().includes('sticky rice') || r.title.toLowerCase().includes('khao niew')) || state.allRecipes[0];
+      if (dish) {
+        toggleFavorite(dish.id);
+        const isFav = state.favorites.includes(dish.id);
+        DOM.heroSaveDishBtn.style.color = isFav ? '#E65100' : '';
+        const svg = DOM.heroSaveDishBtn.querySelector('svg');
+        if (svg) svg.setAttribute('fill', isFav ? 'currentColor' : 'none');
+      }
+    });
+
+    // Keyboard Shortcuts (Ctrl+K to search, Cook mode navigation, Escape)
+    document.addEventListener('keydown', (e) => {
+      // Ctrl + K or Cmd + K to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const searchInput = DOM.heroSearchInput || DOM.searchInput;
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
         }
-      }, { passive: true });
-    }
+      }
+
+      // Cook mode keyboard navigation (Arrow keys)
+      if (DOM.cookModeOverlay && DOM.cookModeOverlay.classList.contains('is-active')) {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nextCookStep();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevCookStep();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeCookMode();
+        }
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        closeRecipeModal();
+        closeFavoritesModal();
+        closeShoppingListModal();
+        closeMangoGuideModal();
+        closeRandomRecipeModal();
+      }
+    });
   }
 
-  // Run on DOM Ready
+  // Execute on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
+
 })();
