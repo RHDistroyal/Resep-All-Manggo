@@ -608,6 +608,231 @@ ul, ol {
 }
 
 /* ===================================================================
+   APP VIEW SWITCHER (BERANDA SHELVES VS KATALOG 200 RESEP)
+   =================================================================== */
+.app-view-switcher {
+  padding: 22px 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.view-switcher-track {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
+  gap: 4px;
+}
+
+[data-theme="dark"] .view-switcher-track {
+  background: var(--bg-surface);
+  border-color: var(--border-card);
+}
+
+.view-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+.view-switch-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-page-subtle);
+}
+
+.view-switch-btn.active {
+  background: linear-gradient(135deg, var(--mango-500) 0%, var(--mango-600) 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(245, 124, 0, 0.35);
+}
+
+.view-switch-btn.active svg {
+  stroke: #FFFFFF;
+}
+
+.view-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+}
+
+.view-switch-btn.active .view-count-badge {
+  background: rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+}
+
+/* App View Containers */
+.app-view-container {
+  display: none;
+}
+
+.app-view-container.active {
+  display: block;
+  animation: appViewFadeIn 0.25s ease-out;
+}
+
+@keyframes appViewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================================================
+   CURATED APP SHELVES (TIDAK KELUAR SEMUA - TERSTRUKTUR & RAPI)
+   =================================================================== */
+.shelf-section {
+  margin: 34px auto 0;
+  padding-bottom: 8px;
+}
+
+.shelf-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--border-subtle);
+}
+
+.shelf-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.shelf-title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shelf-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.shelf-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--mango-700);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+[data-theme="dark"] .shelf-action-link {
+  color: var(--mango-400);
+}
+
+.shelf-action-link:hover {
+  background: var(--mango-50);
+  border-color: var(--mango-400);
+  transform: translateX(2px);
+}
+
+[data-theme="dark"] .shelf-action-link:hover {
+  background: #332314;
+}
+
+.shelf-action-link svg {
+  transition: transform var(--transition-fast);
+}
+
+.shelf-action-link:hover svg {
+  transform: translateX(3px);
+}
+
+/* Horizontal Cards Carousel */
+.shelf-cards-scroll {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px 4px 18px 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.shelf-cards-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.shelf-cards-scroll::-webkit-scrollbar-track {
+  background: var(--bg-page-subtle);
+  border-radius: var(--radius-full);
+}
+
+.shelf-cards-scroll::-webkit-scrollbar-thumb {
+  background: var(--mango-300);
+  border-radius: var(--radius-full);
+}
+
+.shelf-cards-scroll .recipe-card {
+  flex: 0 0 270px;
+  width: 270px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 640px) {
+  .shelf-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .shelf-title {
+    font-size: 1.18rem;
+  }
+  .shelf-cards-scroll {
+    gap: 12px;
+  }
+  .shelf-cards-scroll .recipe-card {
+    flex: 0 0 220px;
+    width: 220px;
+  }
+  .view-switch-btn {
+    padding: 8px 14px;
+    font-size: 0.84rem;
+  }
+}
+
+/* ===================================================================
    STICKY COOKPAD CATEGORY CAROUSEL PILLS
    =================================================================== */
 .category-nav-section {

@@ -180,6 +180,12 @@
     loadMoreContainer: document.getElementById('loadMoreContainer'),
     loadMoreBtn: document.getElementById('loadMoreBtn'),
     
+    // App View Switcher & Shelves
+    btnViewHome: document.getElementById('btnViewHome'),
+    btnViewCatalog: document.getElementById('btnViewCatalog'),
+    homeViewContainer: document.getElementById('homeViewContainer'),
+    catalogViewContainer: document.getElementById('catalogViewContainer'),
+    
     // Action Badges & Buttons
     favoritesCountBadge: document.getElementById('favoritesCountBadge'),
     shoppingCountBadge: document.getElementById('shoppingCountBadge'),
@@ -307,7 +313,65 @@
 
   function finalizeLoadedRecipes() {
     updateCategoryCounts();
+    populateHomeShelves();
     applyFilters();
+  }
+
+  // App View Switcher (Beranda Shelves vs Katalog 200 Resep)
+  function switchAppView(viewName) {
+    const isHome = viewName === 'home';
+    if (DOM.btnViewHome) DOM.btnViewHome.classList.toggle('active', isHome);
+    if (DOM.btnViewCatalog) DOM.btnViewCatalog.classList.toggle('active', !isHome);
+    if (DOM.homeViewContainer) DOM.homeViewContainer.classList.toggle('active', isHome);
+    if (DOM.catalogViewContainer) DOM.catalogViewContainer.classList.toggle('active', !isHome);
+  }
+  window.switchAppView = switchAppView;
+
+  // Populate Curated Feed Shelves (Structured & Elegant, No Overwhelming Dump)
+  function populateHomeShelves() {
+    if (!state.allRecipes || state.allRecipes.length === 0) return;
+
+    // 1. Featured Top Picks: 6 standout recipes
+    const featuredKeywords = ['King Mango Thai', 'Sticky Rice', 'Sambal Pencit', 'Mango Sago', 'Cheesecake', 'Puding Mangga Silky', 'Crepes'];
+    let featured = state.allRecipes.filter(r => featuredKeywords.some(kw => r.title.toLowerCase().includes(kw.toLowerCase())));
+    if (featured.length < 6) {
+      featured = state.allRecipes.slice(0, 6);
+    } else {
+      featured = featured.slice(0, 6);
+    }
+    renderShelf('shelfFeatured', featured);
+
+    // 2. Minuman Kafe & Segar: 6 drinks
+    const drinks = state.allRecipes.filter(r => r.categoryKey === 'minuman').slice(0, 6);
+    renderShelf('shelfMinuman', drinks);
+
+    // 3. Sambal & Nusantara: 6 dishes
+    const nusantara = state.allRecipes.filter(r => r.categoryKey === 'nusantara').slice(0, 6);
+    renderShelf('shelfNusantara', nusantara);
+
+    // 4. Street Food & Khas Asia: 6 dishes
+    const asia = state.allRecipes.filter(r => r.categoryKey === 'asia').slice(0, 6);
+    renderShelf('shelfAsia', asia);
+
+    // 5. Pastry & Dessert: 6 dishes
+    const pastry = state.allRecipes.filter(r => r.categoryKey === 'pastry').slice(0, 6);
+    renderShelf('shelfPastry', pastry);
+
+    // 6. Simpel & Cepat: 6 dishes
+    const simpel = state.allRecipes.filter(r => r.categoryKey === 'simpel').slice(0, 6);
+    renderShelf('shelfSimpel', simpel);
+  }
+
+  function renderShelf(containerId, recipes) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    recipes.forEach(recipe => {
+      const card = createRecipeCardElement(recipe);
+      fragment.appendChild(card);
+    });
+    container.appendChild(fragment);
   }
 
   function updateCategoryCounts() {
@@ -417,8 +481,9 @@
     if (DOM.resetFiltersBtn) DOM.resetFiltersBtn.style.display = isFiltered ? 'inline-flex' : 'none';
   }
 
-  // Global helper for footer links
+  // Global helper for shelf action links and footer category navigation
   window.filterByCategory = function (category) {
+    switchAppView('catalog');
     state.currentCategory = category;
     if (DOM.categoryPills) {
       DOM.categoryPills.forEach(pill => {
@@ -426,6 +491,10 @@
       });
     }
     applyFilters();
+    const catEl = document.getElementById('kategori');
+    if (catEl) {
+      catEl.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // ===================================================================
@@ -1223,12 +1292,26 @@
       showToast(`Mode ${nextTheme === 'light' ? 'Terang ☀️' : 'Gelap 🌙'} diaktifkan`);
     });
 
+    // App View Switcher Buttons (Beranda Rekomendasi vs Katalog 200 Resep)
+    on(DOM.btnViewHome, 'click', () => {
+      switchAppView('home');
+      window.scrollTo({ top: 380, behavior: 'smooth' });
+    });
+    on(DOM.btnViewCatalog, 'click', () => {
+      switchAppView('catalog');
+      const catEl = document.getElementById('kategori');
+      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+    });
+
     // Search Inputs
     let debounceTimer;
     const handleSearch = (val) => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         state.searchQuery = val;
+        if (val.trim().length > 0) {
+          switchAppView('catalog');
+        }
         applyFilters();
       }, 150);
     };
@@ -1249,6 +1332,7 @@
       });
       DOM.heroSearchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
+          switchAppView('catalog');
           const catEl = document.getElementById('kategori');
           if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
         }
@@ -1260,6 +1344,7 @@
         const val = DOM.heroSearchInput ? DOM.heroSearchInput.value : '';
         if (DOM.searchInput) DOM.searchInput.value = val;
         state.searchQuery = val;
+        switchAppView('catalog');
         applyFilters();
         const catEl = document.getElementById('kategori');
         if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
@@ -1300,6 +1385,7 @@
         if (DOM.heroSearchInput) DOM.heroSearchInput.value = tag;
         if (DOM.mobileSearchInput) DOM.mobileSearchInput.value = tag;
         state.searchQuery = tag;
+        switchAppView('catalog');
         applyFilters();
         const catEl = document.getElementById('kategori');
         if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
@@ -1313,6 +1399,7 @@
           DOM.categoryPills.forEach(p => p.classList.remove('active'));
           pill.classList.add('active');
           state.currentCategory = pill.getAttribute('data-category');
+          switchAppView('catalog');
           applyFilters();
         });
       });
