@@ -1,12 +1,12 @@
 /**
  * RESEP ALL MANGGO - Cookpad-Style Application Script
- * Interactive culinary encyclopedia for 200 mango recipes with Cookpad UX.
+ * Interactive culinary encyclopedia for 1,000 mango recipes with Cookpad UX.
  */
 
 (function () {
   'use strict';
 
-  // Category mapping helper
+  // Category mapping helper (20 Comprehensive Culinary Sections)
   const CATEGORY_MAP = {
     'Olahan Simpel & Harian': 'simpel',
     'Minuman Kekinian & Segar': 'minuman',
@@ -14,12 +14,40 @@
     'Hidangan Asia': 'asia',
     'Hidangan Barat & Latin': 'barat',
     'Pastry & Dessert Internasional': 'pastry',
+    'Eksplorasi Nusantara Lanjutan': 'nusantara-lanjutan',
+    'Khazanah Mangga Anak Benua India, Pakistan & Sri Lanka': 'anak-benua',
+    'Asia Tenggara & Asia Timur Lanjutan': 'asia-lanjutan',
+    'Kuliner Meksiko, Amerika Latin, Karibia & Afrika': 'latin-afrika',
+    'Hidangan Gurih Modern, Fusion & Fine Dining': 'fusion-finedining',
+    'Pastry, Kue, Cokelat & Dessert Kreatif Lanjutan': 'pastry-kreatif',
+    'Minuman Spesial, Fermentasi, Bumbu & Pengawetan': 'minuman-fermentasi',
+    'MPASI, Makanan Anak & Camilan Keluarga': 'mpasi-anak',
+    'Diet Sehat, Vegan, Keto, Paleo & Superfood Bowls': 'diet-sehat',
+    'Jajanan Kaki Lima Dunia & Gorengan Kreatif': 'streetfood',
+    'Masakan Rumahan & Tradisional Lintas Daerah': 'rumahan-tradisional',
+    'Artisan Gelato, Es Krim, Sorbet & Kreasi Beku': 'gelato-eskrim',
+    'Kopi, Teh, Mocktail & Barista Kreasi': 'kopi-mocktail',
+    'Molecular Gastronomy, Fermentasi Eksperimental & Zero-Waste Mangga': 'molecular-zerowaste',
     'simpel': 'simpel',
     'minuman': 'minuman',
     'nusantara': 'nusantara',
     'asia': 'asia',
     'barat': 'barat',
-    'pastry': 'pastry'
+    'pastry': 'pastry',
+    'nusantara-lanjutan': 'nusantara-lanjutan',
+    'anak-benua': 'anak-benua',
+    'asia-lanjutan': 'asia-lanjutan',
+    'latin-afrika': 'latin-afrika',
+    'fusion-finedining': 'fusion-finedining',
+    'pastry-kreatif': 'pastry-kreatif',
+    'minuman-fermentasi': 'minuman-fermentasi',
+    'mpasi-anak': 'mpasi-anak',
+    'diet-sehat': 'diet-sehat',
+    'streetfood': 'streetfood',
+    'rumahan-tradisional': 'rumahan-tradisional',
+    'gelato-eskrim': 'gelato-eskrim',
+    'kopi-mocktail': 'kopi-mocktail',
+    'molecular-zerowaste': 'molecular-zerowaste'
   };
 
   // High-Resolution Food Photography Category Images
@@ -29,19 +57,32 @@
     'asia': 'assets/images/cat-asia.jpg',
     'pastry': 'assets/images/cat-pastry.jpg',
     'simpel': 'assets/images/cat-simpel.jpg',
-    'barat': 'assets/images/cat-barat.jpg'
+    'barat': 'assets/images/cat-barat.jpg',
+    'nusantara-lanjutan': 'assets/images/cat-nusantara.jpg',
+    'anak-benua': 'assets/images/cat-asia.jpg',
+    'asia-lanjutan': 'assets/images/cat-asia.jpg',
+    'latin-afrika': 'assets/images/cat-barat.jpg',
+    'fusion-finedining': 'assets/images/cat-barat.jpg',
+    'pastry-kreatif': 'assets/images/cat-pastry.jpg',
+    'minuman-fermentasi': 'assets/images/cat-minuman.jpg',
+    'mpasi-anak': 'assets/images/cat-simpel.jpg',
+    'diet-sehat': 'assets/images/cat-simpel.jpg',
+    'streetfood': 'assets/images/cat-nusantara.jpg',
+    'rumahan-tradisional': 'assets/images/cat-nusantara.jpg',
+    'gelato-eskrim': 'assets/images/cat-pastry.jpg',
+    'kopi-mocktail': 'assets/images/cat-minuman.jpg',
+    'molecular-zerowaste': 'assets/images/cat-pastry.jpg'
   };
 
   function getCategoryKey(cat) {
     if (!cat) return 'simpel';
     if (CATEGORY_MAP[cat]) return CATEGORY_MAP[cat];
     const lower = cat.toLowerCase();
-    if (lower.includes('simpel') || lower.includes('harian') || lower.includes('kilat')) return 'simpel';
-    if (lower.includes('minum') || lower.includes('jus') || lower.includes('shake')) return 'minuman';
-    if (lower.includes('nusantara') || lower.includes('daerah') || lower.includes('sambal')) return 'nusantara';
-    if (lower.includes('asia') || lower.includes('thai') || lower.includes('filipina')) return 'asia';
-    if (lower.includes('barat') || lower.includes('latin') || lower.includes('meksiko')) return 'barat';
-    if (lower.includes('pastry') || lower.includes('bakery') || lower.includes('dessert') || lower.includes('kue')) return 'pastry';
+    for (const [name, key] of Object.entries(CATEGORY_MAP)) {
+      if (lower.includes(name.toLowerCase()) || lower.includes(key.toLowerCase())) {
+        return key;
+      }
+    }
     return 'simpel';
   }
 
@@ -354,7 +395,7 @@
     applyFilters();
   }
 
-  // App View Switcher (Beranda Shelves vs Katalog 200 Resep)
+  // App View Switcher (Beranda Shelves vs Katalog 1.000 Resep)
   function switchAppView(viewName) {
     const isHome = viewName === 'home';
     if (DOM.btnViewHome) DOM.btnViewHome.classList.toggle('active', isHome);
@@ -412,26 +453,16 @@
   }
 
   function updateCategoryCounts() {
-    const counts = {
-      all: state.allRecipes.length,
-      simpel: 0,
-      minuman: 0,
-      nusantara: 0,
-      asia: 0,
-      barat: 0,
-      pastry: 0
-    };
+    const counts = { all: state.allRecipes.length };
 
     state.allRecipes.forEach(r => {
       const key = r.categoryKey;
-      if (counts.hasOwnProperty(key)) {
-        counts[key]++;
-      }
+      counts[key] = (counts[key] || 0) + 1;
     });
 
     for (const [cat, count] of Object.entries(counts)) {
       const countEl = document.getElementById(`count-${cat}`);
-      if (countEl) countEl.textContent = count;
+      if (countEl) countEl.textContent = count.toLocaleString('id-ID');
     }
   }
 
@@ -500,7 +531,21 @@
       nusantara: 'Resep Daerah & Nusantara',
       asia: 'Kuliner Khas Asia',
       barat: 'Western & Latin Mango',
-      pastry: 'Pastry & Dessert Mewah'
+      pastry: 'Pastry & Dessert Mewah',
+      'nusantara-lanjutan': 'Eksplorasi Nusantara Lanjutan',
+      'anak-benua': 'Khazanah Anak Benua India, Pakistan & Sri Lanka',
+      'asia-lanjutan': 'Asia Tenggara & Asia Timur Lanjutan',
+      'latin-afrika': 'Meksiko, Amerika Latin, Karibia & Afrika',
+      'fusion-finedining': 'Hidangan Gurih Modern & Fine Dining',
+      'pastry-kreatif': 'Pastry, Kue, Cokelat & Dessert Kreatif',
+      'minuman-fermentasi': 'Minuman Spesial, Fermentasi & Bumbu',
+      'mpasi-anak': 'MPASI, Makanan Anak & Camilan Keluarga',
+      'diet-sehat': 'Diet Sehat, Vegan, Keto & Superfood',
+      'streetfood': 'Jajanan Kaki Lima Dunia & Gorengan Kreatif',
+      'rumahan-tradisional': 'Masakan Rumahan & Tradisional Lintas Daerah',
+      'gelato-eskrim': 'Artisan Gelato, Es Krim & Kreasi Beku',
+      'kopi-mocktail': 'Kopi, Teh, Mocktail & Barista Kreasi',
+      'molecular-zerowaste': 'Molecular Gastronomy & Zero-Waste Mangga'
     };
     if (DOM.activeCategoryHeading) {
       DOM.activeCategoryHeading.textContent = categoryNames[state.currentCategory] || 'Koleksi Resep Olahan Mangga';
@@ -1564,7 +1609,7 @@
       showToast(`Mode ${nextTheme === 'light' ? 'Terang' : 'Gelap'} diaktifkan`);
     });
 
-    // App View Switcher Buttons (Beranda Rekomendasi vs Katalog 200 Resep)
+    // App View Switcher Buttons (Beranda Rekomendasi vs Katalog 1.000 Resep)
     on(DOM.btnViewHome, 'click', () => {
       switchAppView('home');
       window.scrollTo({ top: 380, behavior: 'smooth' });
