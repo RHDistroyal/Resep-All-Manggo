@@ -462,8 +462,11 @@
     });
 
     for (const [cat, count] of Object.entries(counts)) {
+      const formatted = count.toLocaleString('id-ID');
       const countEl = document.getElementById(`count-${cat}`);
-      if (countEl) countEl.textContent = count.toLocaleString('id-ID');
+      if (countEl) countEl.textContent = formatted;
+      const fcountEl = document.getElementById(`fcount-${cat}`);
+      if (fcountEl) fcountEl.textContent = formatted;
     }
   }
 
