@@ -91,6 +91,7 @@
     return {
       id: r.id,
       title: r.title || r.name || 'Resep Olahan Mangga',
+      author: r.author || 'Dapur Kreasi',
       name: r.title || r.name || 'Resep Olahan Mangga',
       desc: r.desc || r.summary || '',
       summary: r.desc || r.summary || '',
@@ -654,7 +655,7 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </span>
-          <span class="card-author-name">Dapur Mangga</span>
+          <span class="card-author-name">${escapeHTML(recipe.author || "Dapur Kreasi")}</span>
           <span class="card-author-dot">•</span>
           <span class="card-star-rating" title="Rating 4.9 dari 5">★ 4.9</span>
           <span class="card-author-dot">•</span>
@@ -705,6 +706,10 @@
       DOM.modalCoverImage.alt = recipe.title;
     }
     if (DOM.modalCategoryBadge) DOM.modalCategoryBadge.textContent = recipe.category;
+    const modalAuthorEl = document.getElementById('modalAuthorName');
+    if (modalAuthorEl) {
+      modalAuthorEl.innerHTML = `${escapeHTML(recipe.author || 'Dapur Kreasi')} <span class="cookpad-verified-badge">Resep Teruji</span>`;
+    }
     if (DOM.modalDifficulty) DOM.modalDifficulty.textContent = recipe.difficulty;
     if (DOM.modalRecipeTitle) DOM.modalRecipeTitle.textContent = recipe.title;
     if (DOM.modalSummary) DOM.modalSummary.textContent = recipe.desc;
